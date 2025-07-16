@@ -493,6 +493,8 @@ class BlockScf(Block):
 
     def format_orca(self) -> str:
         s = f"%{self.name}\n"
+        for key, value in self._arbitrary.items():
+            s += f"    {key} {value.lower()}\n"
         for key, value in self.__dict__.items():
             if value is not None:
                 if key == "aftercoord":

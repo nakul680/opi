@@ -16,11 +16,50 @@ class Block(BaseModel, ABC):
     Each ORCA input block is defined in the module block_<block_name>.py
     Every class defined for a block is derived from this base Block class ,
     which defines attributes, methods and properties shared by all blocks.
+
+    Attributes
+    ----------
+        aftercoord (bool): Indicates whether the block is positioned after a coordinate transformation.
+
+    Private Attributes
+    ------------------
+        _name (str): Internal name identifier for the block.
+        _arbitrary (dict[str, str]): A dictionary storing arbitrary variable names as keys and the variable values as value. Both are stored as strings.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     _name: str
     aftercoord: bool = False
+    _arbitrary: dict[str,str] = {}
+
+    def add_arbitrary_attributes(self, var: dict[str, str]) -> None:
+        """
+        Add arbitrary attributes to this block.
+
+        Parameters
+        ----------
+        var: dict[str, str]
+            Dictionary storing arbitrary variable names as keys and the variable values as value
+        """
+        self._arbitrary.update(var)
+
+    def remove_arbitrary_attribute(self, name: str) -> None:
+        """
+        Remove arbitrary attribute from this block.
+
+        Parameters
+        ----------
+        name: str
+        Name of arbitrary attribute to remove
+        """
+        self._arbitrary.pop(name)
+
+    def clear_arbitrary(self) -> None:
+        """
+        Clear arbitrary attributes from this block.
+
+        """
+        self._arbitrary.clear()
 
     def format_orca(self) -> str:
         """
@@ -28,6 +67,8 @@ class Block(BaseModel, ABC):
         Returns the string representation of the respective class it is called by.
         """
         s = f"%{self.name}\n"
+        for key, value in self._arbitrary.items():
+            s += f"    {key} {value.lower()}\n"
         for key, value in self.__dict__.items():
             if value is not None:
                 if key == "aftercoord":
