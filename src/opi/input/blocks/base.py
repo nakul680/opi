@@ -19,12 +19,15 @@ class Block(BaseModel, ABC):
 
     Attributes
     ----------
-        aftercoord (bool): Indicates whether the block is positioned after a coordinate transformation.
+        aftercoord: bool
+            Indicates whether the block is positioned after a coordinate transformation.
 
     Private Attributes
     ------------------
-        _name (str): Internal name identifier for the block.
-        _arbitrary (dict[str, str]): A dictionary storing arbitrary variable names as keys and the variable values as value. Both are stored as strings.
+        _name: str
+            Internal name identifier for the block.
+        _arbitrary: dict[str, str]
+            A dictionary storing arbitrary variable names as keys and the variable values as value. Both are stored as strings.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -50,7 +53,7 @@ class Block(BaseModel, ABC):
         Parameters
         ----------
         name: str
-        Name of arbitrary attribute to remove
+            Name of arbitrary attribute to remove
         """
         self._arbitrary.pop(name)
 
@@ -60,6 +63,38 @@ class Block(BaseModel, ABC):
 
         """
         self._arbitrary.clear()
+
+    def has_arbitrary_attribute(self, name: str) -> bool:
+        """
+        Check if an arbitrary attribute with the given name exists.
+
+        Parameters
+        ----------
+        name: str
+            Name of the attribute.
+
+        Returns
+        -------
+        bool
+            True if the attribute exists, False otherwise.
+        """
+        return name in self._arbitrary
+
+    def get_arbitrary_attribute(self, name: str) -> str | None:
+        """
+        Get the value of an arbitrary attribute.
+
+        Parameters
+        ----------
+        name: str
+            Name of the attribute.
+
+        Returns
+        -------
+        str or None
+            The value of the attribute if it exists, else None.
+        """
+        return self._arbitrary.get(name)
 
     def format_orca(self) -> str:
         """
