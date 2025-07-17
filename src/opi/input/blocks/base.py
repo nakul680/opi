@@ -30,7 +30,7 @@ class Block(BaseModel, ABC):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     _name: str
     aftercoord: bool = False
-    _arbitrary: dict[str,str] = {}
+    _arbitrary: dict[str, str] = {}
 
     def add_arbitrary_attributes(self, var: dict[str, str]) -> None:
         """
