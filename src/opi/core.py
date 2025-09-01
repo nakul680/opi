@@ -198,7 +198,9 @@ class Calculator:
         self._inpfile = self.working_dir / f"{self.basename}.inp"
 
         if self._inpfile.exists() and not force:
-            raise RuntimeError(f"Input file {self._inpfile} already exists and cannot be overwritten.")
+            raise RuntimeError(
+                f"Input file {self._inpfile} already exists and cannot be overwritten."
+            )
 
         # add JSON generation to output blocks
         if self.json_via_input:
@@ -364,10 +366,11 @@ class Calculator:
         except RuntimeError:
             raise
 
-
     def create_and_run(self, force: bool = True, timeout: int = -1) -> None:
         """
-        Wrapper function to write an ORCA calculation and run it.
+        Write ORCA inp file and execute the ORCA calculation.
+
+
         Parameters
         ----------
         force: bool, default:True
@@ -376,6 +379,4 @@ class Calculator:
         Timeout in seconds to wait for ORCA process.
         """
         self.write_input(force=force)
-
         self.run(timeout=timeout)
-
