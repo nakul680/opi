@@ -363,3 +363,19 @@ class Calculator:
             runner.check_version(ignore_errors=False)
         except RuntimeError:
             raise
+
+
+    def create_and_run(self, force: bool = True, timeout: int = -1) -> None:
+        """
+        Wrapper function to write an ORCA calculation and run it.
+        Parameters
+        ----------
+        force: bool, default:True
+        Whether to overwrite the ORCA input file if it already exists.
+        timeout: int, default: -1
+        Timeout in seconds to wait for ORCA process.
+        """
+        self.write_input(force=force)
+
+        self.run(timeout=timeout)
+
