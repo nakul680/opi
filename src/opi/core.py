@@ -176,20 +176,29 @@ class Calculator:
     # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     # METHODS
     # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def write_input(self) -> None:
+    def write_input(self, force: bool = True) -> None:
         """
         Function to create the ORCA input file `.inp`.
+
+        Parameters
+        -----------
+        force : bool, default: True
+        Whether to overwrite the ORCA input file if it already exists.
 
         Raises
         ------
         RuntimeError
           * When `.inp` cannot be written.
+          * When '.inp' file already exists and force is `False`.
         ValueError
           * When the `moinp` path is given, and it is not a subpath of the working directory.
         """
 
         assert self.working_dir
         self._inpfile = self.working_dir / f"{self.basename}.inp"
+
+        if self._inpfile.exists() and not force:
+            raise RuntimeError(f"Input file {self._inpfile} already exists and cannot be overwritten.")
 
         # add JSON generation to output blocks
         if self.json_via_input:
