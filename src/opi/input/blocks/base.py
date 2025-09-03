@@ -21,12 +21,9 @@ class Block(BaseModel, ABC):
     ----------
         aftercoord: bool
             Indicates whether the block is positioned after a coordinate transformation.
-
-    Private Attributes
-    ------------------
-        _name: str
+        _name | name: str
             Internal name identifier for the block.
-        _arbitrary: dict[str, str]
+        _arbitrary | arbitrary: dict[str, str]
             A dictionary storing arbitrary variable names as keys and the variable values as value. Both are stored as strings.
     """
 
