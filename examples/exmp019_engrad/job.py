@@ -16,14 +16,17 @@ from opi.input.simple_keywords import SolvationModel
 from opi.input.simple_keywords import Solvent
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp019() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -52,3 +55,9 @@ if __name__ == "__main__":
     print(output.results_properties.geometries[0].single_point_data.finalenergy)
     print("SCF ENERGY")
     print(output.results_properties.geometries[0].energy[0].totalenergy[0][0])
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp019()

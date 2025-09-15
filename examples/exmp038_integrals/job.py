@@ -11,14 +11,17 @@ from opi.input.simple_keywords import Scf
 
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp038() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -56,4 +59,10 @@ if __name__ == "__main__":
     print(output.get_int_j(recreate_json=True))
     print("Printing Exchange matrix K")
     print(output.get_int_k(recreate_json=True))
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp038()
 

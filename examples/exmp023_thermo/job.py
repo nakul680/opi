@@ -15,14 +15,17 @@ from opi.input.simple_keywords import (
     Task,
 )
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp023() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(Scf.NOAUTOSTART, BasisSet.DEF2_TZVP, Dft.TPSS, Task.FREQ)
     calc.input.add_blocks(
         BlockFreq(temp=500, numfreq=True, quasirrho=False, pressure=1.5, partial_hess=[0, 1])
@@ -50,3 +53,9 @@ if __name__ == "__main__":
     print(output.results_properties.geometries[0].thermochemistry_energies[0].temperature)
     print("Final Gibbs free energy")
     print(output.results_properties.geometries[0].thermochemistry_energies[0].freeenergyg)
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp023()

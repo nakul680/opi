@@ -11,8 +11,10 @@ from opi.input.simple_keywords import Dft
 from opi.input.simple_keywords import Scf
 from opi.input.simple_keywords import ShellType
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp022() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -21,7 +23,8 @@ if __name__ == "__main__":
     Run a PBE0/def2-SVP energy calculation and rotate the initial guess
     """
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         ShellType.UKS,
         Scf.NOAUTOSTART,
@@ -48,3 +51,9 @@ if __name__ == "__main__":
     print(ngeoms)
     print("DFT ENERGY")
     print(output.results_properties.geometries[0].dft_energy.finalen)
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp022()

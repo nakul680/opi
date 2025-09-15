@@ -8,14 +8,15 @@ from opi.core import Calculator
 from opi.input.blocks import BlockSolvator
 from opi.input.simple_keywords.solvent import Solvent
 from opi.input.structures.structure import Structure
+from opi.output.core import Output
 
 
-if __name__ == "__main__":
+def run_exmp036() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
-
-    structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc = Calculator(basename="job", working_dir=wd)
     calc.structure = structure
     calc.structure.charge = 1
@@ -41,3 +42,9 @@ if __name__ == "__main__":
     # > Verify output works okay
     # > there is not really much output to be gained from a solvator run
     # > other than the solvator.xyz, solvator.solventbuild.xyz or a final single point energy
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp036()

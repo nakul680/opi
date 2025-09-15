@@ -9,15 +9,18 @@ from opi.input.blocks import BlockNeb
 from opi.input.simple_keywords import Sqm, Neb
 from opi.input.simple_keywords import Scf
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp039() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    shutil.copy('prod.xyz', wd / 'prod.xyz')
-    calc.structure = Structure.from_xyz("reac.xyz")
+    current_folder = Path(__file__).parent
+    shutil.copy(current_folder/'prod.xyz', wd / 'prod.xyz')
+    calc.structure = Structure.from_xyz(current_folder/"reac.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Sqm.NATIVE_GFN2_XTB,
@@ -47,5 +50,12 @@ if __name__ == "__main__":
     # > Printing energies
     for index, gbw in enumerate(output.results_properties.geometries[1:], start=1):
         print(index,output.get_final_energy(index=index))
+
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp039()
 
 

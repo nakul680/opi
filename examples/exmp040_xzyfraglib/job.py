@@ -9,14 +9,17 @@ from opi.input.blocks import BlockFrag
 from opi.input.simple_keywords import Sqm
 from opi.input.simple_keywords import Scf
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp040() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
+    current_folder = Path(__file__).parent
 
-    struc_file = "struc.xyz"
-    lib_file = "frag_lib.xyz"
+    struc_file = current_folder/"struc.xyz"
+    lib_file = current_folder/"frag_lib.xyz"
 
     shutil.copy(struc_file, wd)
     shutil.copy(lib_file, wd)
@@ -28,12 +31,12 @@ if __name__ == "__main__":
         Sqm.NATIVE_GFN2_XTB,
     )
 
-    calc.input.add_blocks(BlockFrag(printlevel=3, fragproc="extlib", xzyfraglib=lib_file))
+    calc.input.add_blocks(BlockFrag(printlevel=3, fragproc="extlib", xzyfraglib=str(lib_file)))
 
     calc.write_input()
     calc.run()
 
-    output = calc.get_output(create_gbw_json=True)
+    output = calc.get_output()
     if not output.terminated_normally():
         print(f"ORCA calculation failed, see output file: {output.get_outfile()}")
         sys.exit(1)
@@ -41,3 +44,9 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp040()

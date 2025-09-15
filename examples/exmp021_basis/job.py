@@ -8,9 +8,11 @@ from opi.core import Calculator
 from opi.input.blocks import BlockBasis, NewBasis
 from opi.input.simple_keywords import BasisSet, Dft, Scf
 from opi.input.structures import Structure
+from opi.output.core import Output
 from opi.utils.element import Element
 
-if __name__ == "__main__":
+
+def run_exmp021() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -19,7 +21,8 @@ if __name__ == "__main__":
     Run a BP86/def2-SVP energy calculation with additional diffuse function for oxygen
     """
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(Scf.NOAUTOSTART, Dft.BP86, BasisSet.DEF2_SVP)
 
     calc.input.add_blocks(
@@ -43,3 +46,4 @@ if __name__ == "__main__":
     print(ngeoms)
     print("DFT ENERGY")
     print(output.results_properties.geometries[0].dft_energy.finalen)
+    return output

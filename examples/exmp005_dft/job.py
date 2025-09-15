@@ -8,14 +8,17 @@ from opi.core import Calculator
 from opi.input.blocks import BlockMethod as BlockMethod
 from opi.input.simple_keywords import BasisSet, Dft, DispersionCorrection, Scf
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp005() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         BasisSet.DEF2_SVP,
@@ -50,3 +53,9 @@ if __name__ == "__main__":
     print(output.results_properties.geometries[0].single_point_data.finalenergy)
     print("DISPERSION CORRECTION")
     print(output.results_properties.geometries[0].vdw_correction.vdw)
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp005()

@@ -10,14 +10,17 @@ from opi.input.simple_keywords import (
     RelativisticCorrection,
 )
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp008() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Dft.BP86, RelativisticCorrection.ZORA, BasisSet.SARC_ZORA_SVP, AuxBasisSet.SARC_J
     )
@@ -33,3 +36,9 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp008()

@@ -8,8 +8,10 @@ from opi.core import Calculator
 from opi.input.blocks import BlockAutoCI
 from opi.input.simple_keywords import BasisSet, Scf
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp016() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -32,3 +34,8 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp016()

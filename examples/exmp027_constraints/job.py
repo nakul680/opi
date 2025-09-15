@@ -10,15 +10,18 @@ from opi.input.simple_keywords import Method
 from opi.input.simple_keywords import Scf
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp027() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     # > constrained optimization
     calc_bond = Calculator(basename="job", working_dir=wd)
-    calc_bond.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc_bond.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc_bond.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -32,3 +35,9 @@ if __name__ == "__main__":
     calc_bond.input.add_blocks(BlockGeom(constraints=constraints))
     calc_bond.write_input()
     calc_bond.run()
+
+    return calc_bond.get_output()
+
+
+if __name__ == "__main__":
+    run_exmp027()

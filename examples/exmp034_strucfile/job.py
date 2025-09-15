@@ -10,14 +10,17 @@ from opi.input.simple_keywords import Method
 from opi.input.simple_keywords import Scf
 from opi.input.simple_keywords import Task
 from opi.input.structures import XyzFile
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp034() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    shutil.copy('inp.xyz', wd / 'inp.xyz')
+    current_folder = Path(__file__).parent
+    shutil.copy(current_folder/'inp.xyz', wd / 'inp.xyz')
     calc.structure = XyzFile(wd / "inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
@@ -46,3 +49,9 @@ if __name__ == "__main__":
 
     print("FINAL SINGLE POINT ENERGY")
     print(output.get_final_energy())
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp034()

@@ -13,7 +13,10 @@ from opi.input.structures import Structure
 
 from ase import Atoms
 
-if __name__ == "__main__":
+from opi.output.core import Output
+
+
+def run_exmp044() -> Output:
     
     # Create a water molecule (H2O)
     # Positions in Ångström
@@ -68,3 +71,9 @@ if __name__ == "__main__":
 
     print("FINAL SINGLE POINT ENERGY")
     print(output.get_final_energy())
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp044()

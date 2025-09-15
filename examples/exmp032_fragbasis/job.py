@@ -8,15 +8,17 @@ from opi.core import Calculator
 from opi.input.blocks import BlockBasis, FragBasis, FragAuxJ, FragEcp
 from opi.input.simple_keywords import Dft, Scf, OutputControl, BasisSet, AuxBasisSet, Ecp
 from opi.input.structures import Structure
+from opi.output.core import Output
 
 
-if __name__ == "__main__":
+def run_exmp032() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         OutputControl.PRINTBASIS,Dft.BP86, Scf.NOITER, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_J
     )
@@ -40,3 +42,9 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp032()

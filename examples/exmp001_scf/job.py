@@ -17,13 +17,15 @@ from opi.input.simple_keywords import Solvent
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
 
-if __name__ == "__main__":
+
+def run_exmp001():
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__)
+    calc.structure = Structure.from_xyz(current_folder.parent/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -63,3 +65,10 @@ if __name__ == "__main__":
         output.results_properties.geometries[0].energy[0].totalenergy[0][0]
         + output.results_properties.geometries[0].vdw_correction.vdw
     )
+
+    return output
+
+
+
+if __name__ == "__main__":
+    output = run_exmp001()

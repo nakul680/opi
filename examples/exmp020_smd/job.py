@@ -8,8 +8,10 @@ from opi.core import Calculator
 from opi.input.blocks import BlockCpcm, Radius
 from opi.input.simple_keywords import Dft, Scf, SolvationModel, Solvent
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp020() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -19,7 +21,8 @@ if __name__ == "__main__":
     for the CPCM part. Also modify the radius for hydrogen. 
     """
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART, Dft.R2SCAN_3C, SolvationModel.CPCM(Solvent.WATER)
     )
@@ -53,3 +56,9 @@ if __name__ == "__main__":
     print(output.results_properties.geometries[0].solvation_details.npoints)
     print("CPCM ENERGY")
     print(output.results_properties.geometries[0].solvation_details.cpcmdielenergy)
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp020()

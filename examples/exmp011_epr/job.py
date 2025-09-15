@@ -12,9 +12,11 @@ from opi.input.blocks import (
 )
 from opi.input.simple_keywords import AuxBasisSet, BasisSet, Dft
 from opi.input.structures import Structure
+from opi.output.core import Output
 from opi.utils.element import Element
 
-if __name__ == "__main__":
+
+def run_exmp011() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -42,3 +44,8 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp011()

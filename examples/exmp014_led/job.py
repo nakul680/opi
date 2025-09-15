@@ -7,8 +7,10 @@ from pathlib import Path
 from opi.core import Calculator
 from opi.input.simple_keywords import Approximation, AuxBasisSet, BasisSet, Dlpno, Scf, Wft
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp014() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
@@ -55,3 +57,9 @@ if __name__ == "__main__":
     )
 
     new_calc.write_input()
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp014()
+

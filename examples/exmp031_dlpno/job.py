@@ -8,15 +8,18 @@ from opi.core import Calculator
 from opi.input.blocks import BlockMdci
 from opi.input.simple_keywords import AuxBasisSet, BasisSet, Dlpno, Wft
 from opi.input.structures import Structure
+from opi.output.core import Output
+
 
 # > perform a DLPNO-CCSD(T) calculation
-if __name__ == "__main__":
+def run_exmp031() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Wft.DLPNO_CCSD_T, Dlpno.TIGHTPNO, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_SVP_C
     )
@@ -35,3 +38,9 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp031()

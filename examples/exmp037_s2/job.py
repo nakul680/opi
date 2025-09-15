@@ -7,14 +7,17 @@ import sys
 from opi.core import Calculator
 from opi.input.simple_keywords import BasisSet, Dft, Scf, Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp037() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz",charge=0,multiplicity=3)
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz",charge=0,multiplicity=3)
     calc.input.add_simple_keywords(Scf.NOAUTOSTART, Dft.R2SCAN_3C, Task.OPT)
     calc.input.ncores = 4
 
@@ -57,3 +60,9 @@ if __name__ == "__main__":
             print(
                 f"{igeom})", output.get_s2(index=igeom)
             )
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp037()

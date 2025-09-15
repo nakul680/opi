@@ -7,14 +7,17 @@ import sys
 from opi.core import Calculator
 from opi.input.simple_keywords import Scf, Wft
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp002() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Wft.CCSD_T,
@@ -37,3 +40,10 @@ if __name__ == "__main__":
     print(output.results_properties.geometries[0].single_point_data.finalenergy)
     print("Correlation energy")
     print(output.results_properties.geometries[0].energy[1].correnergy[0][0])
+
+    return output
+
+
+
+if __name__ == "__main__":
+    run_exmp002()

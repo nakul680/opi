@@ -12,14 +12,17 @@ from opi.input.simple_keywords import (
     Task,
 )
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp004() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(Scf.NOAUTOSTART, BasisSet.DEF2_TZVP, Dft.TPSS, Task.FREQ)
     calc.input.ncores = 4
 
@@ -52,4 +55,9 @@ if __name__ == "__main__":
     print(output.get_entropy())
     print("G-E(el)")
     print(output.get_free_energy_delta())
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp004()
 

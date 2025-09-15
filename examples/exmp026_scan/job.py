@@ -10,15 +10,18 @@ from opi.input.simple_keywords import Method
 from opi.input.simple_keywords import Scf
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp026() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     # > Scan a bond length with a relaxed surface scan
     calc_bond = Calculator(basename="scan_bond", working_dir=wd)
-    calc_bond.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc_bond.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc_bond.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -54,7 +57,7 @@ if __name__ == "__main__":
 
     # > Scan an angle with a relaxed surface scan
     calc_angle = Calculator(basename="scan_angle", working_dir=wd)
-    calc_angle.structure = Structure.from_xyz("inp.xyz")
+    calc_angle.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc_angle.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -68,7 +71,7 @@ if __name__ == "__main__":
 
     # > Scan a dihedral with a relaxed surface scan
     calc_dihedral = Calculator(basename="scan_dihedral", working_dir=wd)
-    calc_dihedral.structure = Structure.from_xyz("inp.xyz")
+    calc_dihedral.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc_dihedral.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -79,3 +82,5 @@ if __name__ == "__main__":
     calc_dihedral.input.add_blocks(BlockGeom(scan="D 6 1 0 2 = 60, 120, 6"))
     calc_dihedral.write_input()
     calc_dihedral.run()
+
+    return output_bond

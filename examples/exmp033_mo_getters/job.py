@@ -11,14 +11,17 @@ from opi.input.simple_keywords import Scf
 from opi.input.simple_keywords import Task
 from opi.input.simple_keywords import Dft
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp033() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.structure.charge = 1
     calc.structure.multiplicity = 2
     calc.input.add_simple_keywords(
@@ -55,3 +58,9 @@ if __name__ == "__main__":
     print(f"HOMO {homo_data.index}({homo_data.channel}) energy: {homo_data.orbitalenergy:.8f} Eh")
     print(f"LUMO {lumo_data.index}({lumo_data.channel}) energy: {lumo_data.orbitalenergy:.8f} Eh")
     print(f"HOMO-LUMO gap: {output.get_hl_gap():.2f} eV")
+
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp033()

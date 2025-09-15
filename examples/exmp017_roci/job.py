@@ -8,14 +8,17 @@ from opi.core import Calculator
 from opi.input.blocks import BlockRocis
 from opi.input.simple_keywords import AuxBasisSet, BasisSet, ShellType
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
+
+def run_exmp017() -> Output:
     wd = Path("RUN")
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    current_folder = Path(__file__).parent
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.structure.charge = -1
     calc.structure.multiplicity = 2
 
@@ -49,3 +52,4 @@ if __name__ == "__main__":
 
     # > Parse JSON files
     output.parse()
+    return output
