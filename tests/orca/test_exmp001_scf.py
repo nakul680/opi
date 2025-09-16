@@ -1,6 +1,9 @@
+import pytest
+
 from examples.exmp001_scf.job import run_exmp001
 
 
+@pytest.mark.orca
 def test_exmp001_scf(cleanup_run) -> None:
     output = run_exmp001()
 

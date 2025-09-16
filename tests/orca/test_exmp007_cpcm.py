@@ -1,6 +1,9 @@
+import pytest
+
 from examples.exmp007_cpcm.job import run_exmp007
 
 
+@pytest.mark.orca
 def test_exmp007_cpcm(cleanup_run):
     output = run_exmp007()
 

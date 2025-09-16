@@ -1,6 +1,9 @@
+import pytest
+
 from examples.exmp005_dft.job import run_exmp005
 
 
+@pytest.mark.orca
 def test_exmp005_dft(cleanup_run):
     output = run_exmp005()
 

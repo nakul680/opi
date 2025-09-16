@@ -115,6 +115,12 @@ docs = [
 xfail_strict = true
 strict_markers = true
 
+[tool.pytest.ini_options]
+markers = [
+    "orca: tests that require ORCA",
+    "ase: tests that require ASE",
+]
+
 
 # ////  MYPY  ////
 [tool.mypy]
@@ -161,3 +167,5 @@ make_whitelist = false
 min_confidence = 70
 paths = ["src/"]
 #verbose = false
+
+

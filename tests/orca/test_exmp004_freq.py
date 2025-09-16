@@ -1,6 +1,9 @@
+import pytest
+
 from examples.exmp004_freq.job import run_exmp004
 
 
+@pytest.mark.orca
 def test_exmp004_freq(cleanup_run):
     output = run_exmp004()
     assert output.terminated_normally()

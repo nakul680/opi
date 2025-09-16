@@ -17,12 +17,13 @@ from opi.utils.element import Element
 
 
 def run_exmp011() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.structure.multiplicity = 2
     calc.input.add_simple_keywords(Dft.B3LYP, BasisSet.EPR_II, AuxBasisSet.AUTOAUX)
 

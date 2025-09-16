@@ -1,6 +1,9 @@
+import pytest
+
 from examples.exmp006_mp2.job import run_exmp006
 
 
+@pytest.mark.orca
 def test_exmp006_mp2(cleanup_run):
     output = run_exmp006()
 
