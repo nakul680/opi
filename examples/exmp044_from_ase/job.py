@@ -37,7 +37,8 @@ def run_exmp044() -> Output:
     # Example: assign 1 unpaired electron → doublet (S=1/2 → 2S=1)
     water.set_initial_magnetic_moments([1.0, 0.0, 0.0])
     
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 

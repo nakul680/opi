@@ -15,15 +15,15 @@ from opi.output.core import Output
 
 
 def run_exmp022() -> Output:
-    wd = Path("RUN")
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
-
     """
     Run a PBE0/def2-SVP energy calculation and rotate the initial guess
     """
-    calc = Calculator(basename="job", working_dir=wd)
     current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
+    shutil.rmtree(wd, ignore_errors=True)
+    wd.mkdir()
+
+    calc = Calculator(basename="job", working_dir=wd)
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         ShellType.UKS,

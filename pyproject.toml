@@ -117,8 +117,10 @@ strict_markers = true
 
 [tool.pytest.ini_options]
 markers = [
-    "orca: tests that require ORCA",
     "ase: tests that require ASE",
+    "examples: tests that run an example",
+    "orca: tests that require ORCA",
+    "slow: tests that take longer",
 ]
 
 

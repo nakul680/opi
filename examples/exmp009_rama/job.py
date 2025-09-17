@@ -12,6 +12,7 @@ from opi.output.core import Output
 
 
 def run_exmp009() -> Output:
+    """Perform a Raman calculation with PBE0/def2-SVP"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

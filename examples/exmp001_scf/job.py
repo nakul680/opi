@@ -3,6 +3,7 @@
 import shutil
 import sys
 from pathlib import Path
+from opi.output.core import Output
 
 from opi.core import Calculator
 from opi.input.blocks import BlockMethod
@@ -18,7 +19,8 @@ from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
 
 
-def run_exmp001():
+def run_exmp001() -> Output:
+    """Perform a HF/def2-SVP single-point"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
@@ -32,11 +34,7 @@ def run_exmp001():
         Method.HF,
         BasisSet.DEF2_SVP,
         Task.SP,
-        SolvationModel.CPCM(Solvent.WATER),
-        DispersionCorrection.D3,
     )
-
-    calc.input.add_blocks(BlockMethod(d3s6=0.64, d3a1=0.3065, d3s8=0.9147, d3a2=5.0570))
 
     calc.write_input()
     calc.run()
@@ -61,11 +59,6 @@ def run_exmp001():
     print(output.get_final_energy())
     # > is (for this calculation) equal to
     print(output.results_properties.geometries[0].single_point_data.finalenergy)
-    # > is (for this calculation) equal to
-    print(
-        output.results_properties.geometries[0].energy[0].totalenergy[0][0]
-        + output.results_properties.geometries[0].vdw_correction.vdw
-    )
 
     return output
 

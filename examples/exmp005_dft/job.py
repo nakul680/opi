@@ -12,6 +12,7 @@ from opi.output.core import Output
 
 
 def run_exmp005() -> Output:
+    "Perform a B3LYP-D3/def2-SVP single-point calculation with custom D3 parameters"
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

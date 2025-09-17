@@ -11,6 +11,7 @@ from opi.output.core import Output
 
 
 def run_exmp003() -> Output:
+    """Perform a wB97X-3c geometry optimization"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

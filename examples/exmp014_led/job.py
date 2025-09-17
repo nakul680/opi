@@ -11,12 +11,14 @@ from opi.output.core import Output
 
 
 def run_exmp014() -> Output:
-    wd = Path("RUN")
+    """Perform an LED decomposition with DLPNO-CCSD(T)/cc-pVDZ"""
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
 
     calc.input.add_simple_keywords(
         Wft.DLPNO_CCSD_T,

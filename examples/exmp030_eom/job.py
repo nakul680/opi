@@ -13,12 +13,12 @@ from opi.output.core import Output
 
 # > Perform a EOM-CCSD/def2-SVP calculation for the first five excited states
 def run_exmp030() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(Wft.EOM_CCSD, BasisSet.DEF2_SVP)
 

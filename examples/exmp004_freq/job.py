@@ -16,6 +16,7 @@ from opi.output.core import Output
 
 
 def run_exmp004() -> Output:
+    """Perform a TPSS/def2-SVP frequency calculation"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
@@ -23,7 +24,7 @@ def run_exmp004() -> Output:
 
     calc = Calculator(basename="job", working_dir=wd)
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
-    calc.input.add_simple_keywords(Scf.NOAUTOSTART, BasisSet.DEF2_TZVP, Dft.TPSS, Task.FREQ)
+    calc.input.add_simple_keywords(Scf.NOAUTOSTART, BasisSet.DEF2_SVP, Dft.TPSS, Task.FREQ)
     calc.input.ncores = 4
 
     calc.write_input()

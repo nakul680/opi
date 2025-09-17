@@ -13,10 +13,10 @@ from opi.output.core import Output
 
 
 def run_exmp040() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
-    current_folder = Path(__file__).parent
 
     struc_file = current_folder/"struc.xyz"
     lib_file = current_folder/"frag_lib.xyz"

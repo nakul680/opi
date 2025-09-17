@@ -12,6 +12,7 @@ from opi.output.core import Output
 
 
 def run_exmp010() -> Output:
+    "Perform a TD-DFT calculation with B3LYP/def2-TZVP + CPCM(Hexane)"
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

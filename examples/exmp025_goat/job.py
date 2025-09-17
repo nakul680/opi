@@ -11,7 +11,8 @@ from opi.output.core import Output
 
 
 def run_exmp025() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 

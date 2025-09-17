@@ -11,6 +11,7 @@ from opi.output.core import Output
 
 
 def run_exmp006() -> Output:
+    """Perform a MP2/def2-TZVP single-point calculation."""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
@@ -21,7 +22,7 @@ def run_exmp006() -> Output:
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Wft.MP2,
-        BasisSet.DEF2_QZVPP,
+        BasisSet.DEF2_TZVP,
     )
     calc.input.ncores = 4
 

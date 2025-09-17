@@ -5,38 +5,28 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.blocks import BlockMethod
 from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import (
-    DispersionCorrection,
-)
-from opi.input.simple_keywords import Method
+from opi.input.simple_keywords import Dft
 from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import SolvationModel
-from opi.input.simple_keywords import Solvent
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
 def run_exmp035() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz",charge=1,multiplicity=2)
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
-        Method.HF,
+        Dft.TPSS,
         BasisSet.DEF2_SVP,
         Task.SP,
-        SolvationModel.CPCM(Solvent.WATER),
-        DispersionCorrection.D3,
     )
-
-    calc.input.add_blocks(BlockMethod(d3s6=0.64, d3a1=0.3065, d3s8=0.9147, d3a2=5.0570))
 
     calc.write_input()
     calc.run()
@@ -51,7 +41,7 @@ def run_exmp035() -> Output:
     output.parse()
 
     # check for convergence of the SCF
-    if output.results_properties.geometries[0].single_point_data.converged:
+    if output.scf_converged():
         print("SCF CONVERGED")
     else:
         print("SCF DID NOT CONVERGE")
@@ -70,11 +60,8 @@ def run_exmp035() -> Output:
     print(density)
     print(spin_density)
 
-    # > save mo in script dir
-    with open(mo_5.path.name,"w") as file:
-        file.write(mo_5.cube)
-    # > save mo in script dir line by line
-    with open(f"{mo_5.path.name}.from_iterator", "w") as file:
+    # > save mo in working dir line by line
+    with open(current_folder / f"{mo_5.path.name}.from_iterator", "w") as file:
         for line in mo_5:
             file.write(line)
 

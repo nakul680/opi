@@ -12,13 +12,14 @@ from opi.output.core import Output
 
 
 def run_exmp016() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
-    calc.input.add_simple_keywords(BasisSet.DEF2_TZVP, Scf.EXTREMESCF)
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    calc.input.add_simple_keywords(BasisSet.DEF2_SVP, Scf.VERYTIGHTSCF)
     calc.input.ncores = 8
 
     calc.input.add_blocks(BlockAutoCI(citype="CISD"))

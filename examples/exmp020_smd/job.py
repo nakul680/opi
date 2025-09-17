@@ -12,16 +12,16 @@ from opi.output.core import Output
 
 
 def run_exmp020() -> Output:
-    wd = Path("RUN")
+    """
+    Run a r²SCAN-3c energy calculation with the SMD solvation model and slightly modified epsilon value
+    for the CPCM part. Also modify the radius for hydrogen.
+    """
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
-    """
-    Run a r²SCAN-3c energy calculation with the SMD solvation model and slightly modified epsilon value 
-    for the CPCM part. Also modify the radius for hydrogen. 
-    """
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART, Dft.R2SCAN_3C, SolvationModel.CPCM(Solvent.WATER)

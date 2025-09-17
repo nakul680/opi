@@ -13,12 +13,12 @@ from opi.output.core import Output
 
 
 def run_exmp039() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     shutil.copy(current_folder/'prod.xyz', wd / 'prod.xyz')
     calc.structure = Structure.from_xyz(current_folder/"reac.xyz")
     calc.input.add_simple_keywords(

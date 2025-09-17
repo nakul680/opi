@@ -4,18 +4,21 @@ import shutil
 from pathlib import Path
 
 from opi.core import Calculator
+from opi.input.structures import Structure
 from opi.input.blocks import BlockIce
 from opi.input.simple_keywords import BasisSet
 from opi.output.core import Output
 
 
 def run_exmp018() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    calc.input.add_simple_keywords(BasisSet.SV)
+    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    calc.input.add_simple_keywords(BasisSet.DEF2_SVP)
 
     calc.input.add_blocks(
         BlockIce(
@@ -33,6 +36,9 @@ def run_exmp018() -> Output:
     calc.write_input()
     calc.run()
     output = calc.get_output()
+    print("FINAL ENERGY")
+    # > Does not work at the moment
+    print(output.get_final_energy())
     return output
 
 

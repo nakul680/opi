@@ -14,6 +14,7 @@ from opi.output.core import Output
 
 
 def run_exmp008() -> Output:
+    """Perform a BP86/SARC-ZORCA-SVP calculation with the ZORA approximation for scalar relativistic effects"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

@@ -5,12 +5,13 @@ from pathlib import Path
 import sys
 
 from opi.core import Calculator
-from opi.input.simple_keywords import Scf, Wft
+from opi.input.simple_keywords import Scf, Wft, BasisSet
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
 def run_exmp002() -> Output:
+    """Perform a CCSD(T)/def2-SVP single-point"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
@@ -21,6 +22,7 @@ def run_exmp002() -> Output:
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Wft.CCSD_T,
+        BasisSet.DEF2_SVP
     )
     calc.input.ncores = 4
 

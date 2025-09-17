@@ -11,6 +11,7 @@ from opi.output.core import Output
 
 
 def run_exmp007() -> Output:
+    """Perform a BP86/def2-SVP single-point calculation with implicit CPCM solvation for water"""
     current_folder = Path(__file__).parent
     wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)

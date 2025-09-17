@@ -12,12 +12,12 @@ from opi.output.core import Output
 
 
 def run_exmp017() -> Output:
-    wd = Path("RUN")
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.structure.charge = -1
     calc.structure.multiplicity = 2

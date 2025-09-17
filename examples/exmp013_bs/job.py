@@ -12,12 +12,13 @@ from opi.output.core import Output
 
 
 def run_exmp013() -> Output:
-    wd = Path("RUN")
+    "Perform a broken symmetry calculation with B3LYP/SVP (Gaussian B3LYP)"
+    current_folder = Path(__file__).parent
+    wd = current_folder / "RUN"
     shutil.rmtree(wd, ignore_errors=True)
     wd.mkdir()
 
     calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
     calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
     calc.input.add_simple_keywords(ShellType.UKS, Dft.B3LYP_G, BasisSet.SVP, Scf.TIGHTSCF)
 
