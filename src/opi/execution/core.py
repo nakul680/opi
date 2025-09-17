@@ -12,36 +12,16 @@ import os
 import shutil
 import subprocess
 from contextlib import nullcontext
-from enum import StrEnum
 from io import TextIOWrapper
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any, Callable, Sequence, TypeVar, cast
 
 from opi import ORCA_MINIMAL_VERSION
+from opi.lib.orca_binary import OrcaBinary
 from opi.utils.config import get_config
-from opi.utils.misc import add_to_env, check_minimal_version, delete_empty_file
+from opi.utils.misc import add_to_env, check_minimal_version, delete_empty_file, resolve_binary_name
 from opi.utils.orca_version import OrcaVersion
-
-
-class OrcaBinary(StrEnum):
-    """
-    List of relevant ORCA binaries.
-    """
-
-    ORCA = "orca"
-    ORCA_2JSON = "orca_2json"
-    ORCA_2AIM = "orca_2aim"
-    ORCA_2MKL = "orca_2mkl"
-    ORCA_CRYSTALPREP = "orca_crystalprep"
-    ORCA_JFT = "orca_lft"
-    ORCA_LOC = "orca_loc"
-    ORCA_MAPSPC = "orca_mapspc"
-    ORCA_MERGEFRAG = "orca_mergefrag"
-    ORCA_PLOT = "orca_plot"
-    ORCA_PLTVIB = "orca_pltvib"
-    ORCA_VIB = "orca_vib"
-
 
 R = TypeVar("R")
 
@@ -472,7 +452,7 @@ class Runner:
             raise FileNotFoundError(f"ORCA path does not exist: {orca_path}")
 
         # > Case 1
-        if orca_path.is_file() and orca_path.name == "orca":
+        if orca_path.is_file() and orca_path.name == resolve_binary_name(OrcaBinary.ORCA):
             # > Check if the parent dir is 'bin/'
             if orca_path.parent.name == "bin":
                 orca_bin_folder = orca_path.parent
@@ -601,7 +581,12 @@ class Runner:
         """
 
         assert self._orca_bin_folder is not None
-        orca_binary = self._orca_bin_folder / str(binary)
+
+        bin_name = resolve_binary_name(str(binary))
+
+        # > Full path to ORCA binary
+        orca_binary = self._orca_bin_folder / bin_name
+
         if not orca_binary.is_file():
             raise FileNotFoundError(f"The ORCA binary does not exist: {orca_binary}")
         else:

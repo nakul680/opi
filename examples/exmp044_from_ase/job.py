@@ -51,6 +51,10 @@ def run_exmp044() -> Output:
         Task.SP
     )
 
+    # > Print number of electrons
+    print(f"Number of electrons is {calc.structure.nelectrons}")
+    print(f"Number of electrons is {'even' if calc.structure.nelec_is_even else 'odd'}")
+
     calc.write_input()
     calc.run()
 
