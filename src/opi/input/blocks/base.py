@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from opi.input.blocks.util import InputFilePath
 from opi.input.simple_keywords import SimpleKeyword
 
-__all__ = "Block"
+__all__ = ["Block"]
 
 
 class Block(BaseModel, ABC):
