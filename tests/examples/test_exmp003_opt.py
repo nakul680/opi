@@ -6,8 +6,14 @@ from opi.input.structures import Structure
 
 @pytest.mark.examples
 @pytest.mark.orca
-def test_exmp003_opt(cleanup_run) -> None:
-    output = run_exmp003()
+def test_exmp003_opt(example_input_file, tmp_path) -> None:
+    # > Get example input file
+    input_file = example_input_file(run_exmp003)
+    # > Read structure
+    structure = Structure.from_xyz(input_file)
+    # > Run the example with the structure
+    output = run_exmp003(structure=structure, working_dir=tmp_path)
+
     assert output.terminated_normally()
     assert output.scf_converged()
     assert output.geometry_optimization_converged()

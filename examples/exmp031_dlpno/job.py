@@ -12,14 +12,17 @@ from opi.output.core import Output
 
 
 # > perform a DLPNO-CCSD(T) calculation
-def run_exmp031() -> Output:
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+def run_exmp031(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
     calc.input.add_simple_keywords(
         Wft.DLPNO_CCSD_T, Dlpno.TIGHTPNO, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_SVP_C
     )

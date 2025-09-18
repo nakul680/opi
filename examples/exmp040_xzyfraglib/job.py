@@ -12,19 +12,19 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp040() -> Output:
+def run_exmp040(working_dir: Path | None = Path("RUN")) -> Output:
     current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+    working_dir = current_folder / "RUN"
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
     struc_file = current_folder/"struc.xyz"
     lib_file = current_folder/"frag_lib.xyz"
 
-    shutil.copy(struc_file, wd)
-    shutil.copy(lib_file, wd)
+    shutil.copy(struc_file, working_dir)
+    shutil.copy(lib_file, working_dir)
 
-    calc = Calculator(basename="job", working_dir=wd)
+    calc = Calculator(basename="job", working_dir=working_dir)
     calc.structure = Structure.from_xyz(struc_file)
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,

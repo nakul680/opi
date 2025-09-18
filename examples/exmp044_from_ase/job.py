@@ -16,7 +16,7 @@ from ase import Atoms
 from opi.output.core import Output
 
 
-def run_exmp044() -> Output:
+def run_exmp044(working_dir: Path | None = Path("RUN")) -> Output:
     
     # Create a water molecule (H2O)
     # Positions in Ångström
@@ -38,11 +38,10 @@ def run_exmp044() -> Output:
     water.set_initial_magnetic_moments([1.0, 0.0, 0.0])
     
     current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
+    calc = Calculator(basename="job", working_dir=working_dir)
     calc.structure = Structure.from_ase(water)
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,

@@ -13,14 +13,19 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp035() -> Output:
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+def run_exmp035(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz(current_folder/"inp.xyz",charge=1,multiplicity=2)
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
+    calc.charge = 1
+    calc.multiplicity = 2
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Dft.TPSS,
@@ -61,7 +66,7 @@ def run_exmp035() -> Output:
     print(spin_density)
 
     # > save mo in working dir line by line
-    with open(current_folder / f"{mo_5.path.name}.from_iterator", "w") as file:
+    with open(working_dir / f"{mo_5.path.name}.from_iterator", "w") as file:
         for line in mo_5:
             file.write(line)
 

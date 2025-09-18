@@ -13,15 +13,14 @@ from opi.input.structures import XyzFile
 from opi.output.core import Output
 
 
-def run_exmp034() -> Output:
+def run_exmp034(working_dir: Path | None = Path("RUN")) -> Output:
     current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    shutil.copy(current_folder/'inp.xyz', wd / 'inp.xyz')
-    calc.structure = XyzFile(wd / "inp.xyz")
+    calc = Calculator(basename="job", working_dir=working_dir)
+    shutil.copy(current_folder/'inp.xyz', working_dir / 'inp.xyz')
+    calc.structure = XyzFile(working_dir / "inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,

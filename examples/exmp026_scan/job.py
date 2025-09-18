@@ -13,15 +13,17 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp026() -> Output:
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+def run_exmp026(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    # > Scan a bond length with a relaxed surface scan
-    calc_bond = Calculator(basename="scan_bond", working_dir=wd)
-    calc_bond.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc_bond = Calculator(basename="job", working_dir=working_dir)
+    calc_bond.structure = structure
     calc_bond.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -56,8 +58,8 @@ def run_exmp026() -> Output:
 
 
     # > Scan an angle with a relaxed surface scan
-    calc_angle = Calculator(basename="scan_angle", working_dir=wd)
-    calc_angle.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    calc_angle = Calculator(basename="scan_angle", working_dir=working_dir)
+    calc_angle.structure = structure
     calc_angle.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -70,8 +72,8 @@ def run_exmp026() -> Output:
     calc_angle.run()
 
     # > Scan a dihedral with a relaxed surface scan
-    calc_dihedral = Calculator(basename="scan_dihedral", working_dir=wd)
-    calc_dihedral.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    calc_dihedral = Calculator(basename="scan_dihedral", working_dir=working_dir)
+    calc_dihedral.structure = structure
     calc_dihedral.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,

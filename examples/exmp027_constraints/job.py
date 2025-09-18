@@ -13,15 +13,17 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp027() -> Output:
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+def run_exmp027(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    # > constrained optimization
-    calc_bond = Calculator(basename="job", working_dir=wd)
-    calc_bond.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc_bond = Calculator(basename="job", working_dir=working_dir)
+    calc_bond.structure = structure
     calc_bond.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,

@@ -6,29 +6,26 @@ from pathlib import Path
 from opi.output.core import Output
 
 from opi.core import Calculator
-from opi.input.blocks import BlockMethod
 from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import (
-    DispersionCorrection,
-)
 from opi.input.simple_keywords import Method
 from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import SolvationModel
-from opi.input.simple_keywords import Solvent
 from opi.input.simple_keywords import Task
 from opi.input.structures import Structure
 
 
-def run_exmp001() -> Output:
+def run_exmp001(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
     """Perform a HF/def2-SVP single-point"""
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
 
-    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > set up the calculator
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Method.HF,
@@ -36,9 +33,11 @@ def run_exmp001() -> Output:
         Task.SP,
     )
 
+    # > write the input and run the calculation
     calc.write_input()
     calc.run()
 
+    # > get the output and check some results
     output = calc.get_output()
     if not output.terminated_normally():
         print(f"ORCA calculation failed, see output file: {output.get_outfile()}")
@@ -47,6 +46,8 @@ def run_exmp001() -> Output:
 
     # > Parse JSON files
     output.parse()
+
+
 
     # check for convergence of the SCF
     if output.results_properties.geometries[0].single_point_data.converged:
@@ -57,12 +58,10 @@ def run_exmp001() -> Output:
 
     print("FINAL SINGLE POINT ENERGY")
     print(output.get_final_energy())
-    # > is (for this calculation) equal to
-    print(output.results_properties.geometries[0].single_point_data.finalenergy)
+    # > is equal to
+    print(output.results_properties.geometries[-1].single_point_data.finalenergy)
 
     return output
-
-
 
 if __name__ == "__main__":
     output = run_exmp001()

@@ -10,15 +10,17 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp025() -> Output:
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+def run_exmp025(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    current_folder = Path(__file__).parent
-    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
     calc.input.add_simple_keywords(Sqm.GFN2_XTB, Goat.GOAT)
     calc.input.add_blocks(BlockGoat(maxiter=128, explore=True))
     calc.input.ncores = 4

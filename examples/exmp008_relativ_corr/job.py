@@ -13,15 +13,18 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp008() -> Output:
+def run_exmp008(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
     """Perform a BP86/SARC-ZORCA-SVP calculation with the ZORA approximation for scalar relativistic effects"""
-    current_folder = Path(__file__).parent
-    wd = current_folder / "RUN"
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz(current_folder/"inp.xyz")
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
     calc.input.add_simple_keywords(
         Dft.BP86, RelativisticCorrection.ZORA, BasisSet.SARC_ZORA_SVP, AuxBasisSet.SARC_J
     )
