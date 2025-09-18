@@ -311,7 +311,7 @@ class BlockBasis(Block):
         Parameters
         ----------
         inp: str | FragBasis
-        info: FieldValidationInfo
+        info: ValidationInfo
 
         Returns
         -------
