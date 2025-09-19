@@ -15,5 +15,11 @@ def test_exmp035_moplot(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp035(structure=structure, working_dir=tmp_path)
 
+    # Plot another orbital
+    mo_3 = output.plot_mo(3)
+
+    # Assert that the cube file exists
+    assert mo_3.path.exists()
+
     # Assert final energy
     assert output.get_final_energy()
