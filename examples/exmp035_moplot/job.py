@@ -65,7 +65,7 @@ def run_exmp035(
     print(spin_density)
 
     # > save mo in working dir line by line
-    with open(working_dir / f"{mo_5.path.name}.from_iterator", "w") as file:
+    with open(working_dir / f"{mo_5.path.stem}.from_iterator.cube", "w") as file:
         for line in mo_5:
             file.write(line)
 
