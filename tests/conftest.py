@@ -19,7 +19,7 @@ from _pytest.runner import CallInfo
 # >> Searching for Python modules which do no start with an underscore and converting file path to module path.
 pytest_plugins = [
     f"tests.fixtures.{filename.stem}"
-    for filename in Path.cwd().joinpath("fixtures").glob("*.py")
+    for filename in Path(__file__).parent.joinpath("fixtures").glob("*.py")
     if not filename.name.startswith("_")
 ]
 

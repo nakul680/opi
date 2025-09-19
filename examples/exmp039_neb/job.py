@@ -12,7 +12,7 @@ from opi.output.core import Output
 
 
 def run_exmp039(working_dir: Path | None = Path("RUN")) -> Output:
-    example_folder = Path.cwd()
+    example_folder = Path(__file__).parent
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
 

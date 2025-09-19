@@ -8,10 +8,13 @@ from opi.input.structures import Structure
 @pytest.mark.orca
 @pytest.mark.slow
 def test_exmp016_autoci(example_input_file, tmp_path) -> None:
-    # > Get example input file
+    """Ensure AUTOCI analysis example runs successfully and produces a final energy."""
+    # Get input file from example folder
     input_file = example_input_file(run_exmp016)
-    # > Read structure
     structure = Structure.from_xyz(input_file)
-    # > Run the example with the structure
+
+    # Run the example in tmp_path
     output = run_exmp016(structure=structure, working_dir=tmp_path)
-    assert output.terminated_normally()
+
+    # Assert final energy
+    assert output.get_final_energy()

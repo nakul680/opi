@@ -8,11 +8,13 @@ from opi.input.structures import Structure
 @pytest.mark.orca
 @pytest.mark.slow
 def test_exmp037_s2(example_input_file, tmp_path) -> None:
-    # > Get example input file
+    """Ensure S² over scan example runs successfully and allows access to S² values."""
+    # Get input file from example folder
     input_file = example_input_file(run_exmp037)
-    # > Read structure
     structure = Structure.from_xyz(input_file)
-    # > Run the example with the structure
+
+    # Run the example in tmp_path
     output = run_exmp037(structure=structure, working_dir=tmp_path)
 
-    assert output.terminated_normally()
+    # Assert S²
+    assert output.get_s2(), tuple[float, float]

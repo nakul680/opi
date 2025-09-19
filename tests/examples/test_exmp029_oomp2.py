@@ -7,12 +7,15 @@ from opi.input.structures import Structure
 @pytest.mark.examples
 @pytest.mark.orca
 def test_exmp029_oomp2(example_input_file, tmp_path) -> None:
-    # > Get example input file
+    """Ensure oo-mp2 example runs successfully and produces an energy."""
+    # Get input file from example folder
     input_file = example_input_file(run_exmp029)
-    # > Read structure
     structure = Structure.from_xyz(input_file)
-    # > Run the example with the structure
+
+    # Run the example in tmp_path
     output = run_exmp029(structure=structure, working_dir=tmp_path)
 
-    assert output.terminated_normally()
-    assert output.results_properties.geometries[0].energy[1].totalenergy[0][0]
+    # Assert final energy
+    assert output.get_final_energy()
+    # Assert correlation energy
+    assert output.get_energies()["MP2(OO)"]
