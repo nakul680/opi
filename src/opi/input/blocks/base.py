@@ -52,6 +52,30 @@ class Block(BaseModel, ABC):
         """
         self._arbitrary.__setitem__(name, val)
 
+    def modify_option(self, name: str, val: str) -> None:
+        """
+        Modify an arbitrary attribute of this block.
+        If an attribute with this name already exists, the attribute will be overwritten.
+        If the attribute doesn't exist yet, a new attribute will be created.
+
+        Parameters
+        ----------
+        name: str
+            Name of arbitrary attribute.
+        val: str
+            Value of arbitrary attribute.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If name or val are not of type string.
+
+        """
+        self._arbitrary.__setitem__(name, val, True)
 
     def remove_option(self, name: str) -> None:
         """
@@ -96,7 +120,7 @@ class Block(BaseModel, ABC):
         TypeError
             if name is not of type string
         """
-        return self._arbitrary.__contains__(key = name)
+        return self._arbitrary.__contains__(name)
 
     def get_value(self, name: str) -> str | None:
         """
@@ -119,7 +143,7 @@ class Block(BaseModel, ABC):
         TypeError
             if name is not of type string
         """
-        return self._arbitrary.__getitem__(name)
+        return str(self._arbitrary.__getitem__(name))
 
     def format_orca(self) -> str:
         """

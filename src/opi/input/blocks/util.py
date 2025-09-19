@@ -1,6 +1,6 @@
 from collections import UserDict
 from pathlib import Path
-from typing import Self
+from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, conlist
 
@@ -184,7 +184,7 @@ class IntGroup(BaseModel):
             return cls(values=integers)
 
 
-class NoCaseDict(UserDict):
+class NoCaseDict(UserDict[str, str]):
     """
     A dictionary whose keys are case-insensitive.
     This only applies for string-like keys.
@@ -218,7 +218,7 @@ class NoCaseDict(UserDict):
         key = self._norm_key(key)
         return self.data[key]
 
-    def __setitem__(self, key: str, value: str) -> None:
+    def __setitem__(self, key: Any, value: Any, force: bool = False) -> None:
         """
         Set a value in the dictionary.
 
@@ -228,6 +228,8 @@ class NoCaseDict(UserDict):
             Key of entry
         value: str
             Value of entry to be set
+        force: bool
+            Allow overwriting existing entries.
 
         Raises
         -------
@@ -240,9 +242,12 @@ class NoCaseDict(UserDict):
         if not isinstance(value, str):
             raise TypeError(f"Value must be of type string, got {type(value)}")
         key = self._norm_key(key)
-        self.data[key] = value
+        if not force and key in self.data:
+            raise KeyError(f"Key {key} already exists")
+        else:
+            self.data[key] = value
 
-    def __delitem__(self, key: str) -> None:
+    def __delitem__(self, key: Any) -> None:
         """
         Delete an item from the dictionary.
 
@@ -269,7 +274,7 @@ class NoCaseDict(UserDict):
         key = self._norm_key(key)
         del self.data[key]
 
-    def __contains__(self, key: str) -> bool:
+    def __contains__(self, key: Any) -> bool:
         """
         Check if a key exists in the dictionary.
 
@@ -294,7 +299,7 @@ class NoCaseDict(UserDict):
         key = self._norm_key(key)
         return key in self.data
 
-    def _norm_key(self, key: str, /) -> str:
+    def _norm_key(self, key: Any, /) -> Any:
         """
         Normalize key to lower case.
         Parameters
