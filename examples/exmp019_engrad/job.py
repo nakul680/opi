@@ -5,15 +5,9 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.blocks import BlockMethod
 from opi.input.simple_keywords import (
-    BasisSet,
-    DispersionCorrection,
-    Method,
-    Scf,
     Dft,
-    SolvationModel,
-    Solvent,
+    Scf,
     Task,
 )
 from opi.input.structures import Structure
@@ -38,7 +32,6 @@ def run_exmp019(
         Dft.R2SCAN_3C,
         Task.ENGRAD,
     )
-
 
     calc.write_input()
     calc.run()

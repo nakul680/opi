@@ -6,52 +6,71 @@ starting from the main package folder must be given.
 """
 
 import inspect
+from collections.abc import Callable
+
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any, cast, Optional
 
 import pytest
+from _pytest.nodes import Item
+from _pytest.reports import TestReport
+from _pytest.runner import CallInfo
+
 
 # > Location of modules containing fixtures.
 # >> Searching for Python modules which do no start with an underscore and converting file path to module path.
 pytest_plugins = [
     f"tests.fixtures.{filename.stem}"
-    for filename in Path(__file__).parent.joinpath("fixtures").glob("*.py")
+    for filename in Path.cwd().joinpath("fixtures").glob("*.py")
     if not filename.name.startswith("_")
 ]
-print(pytest_plugins)
 
 
-# > If a test with tmp_path fails we want to print the Path for debugging
+# > hookwrapper for printing the scratch directory when a test with `tmp_path` in its signature fails
 @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(
+    item: Item,
+    call: CallInfo[Any],
+) -> Generator[None, Any, None]:
+    # In a hookwrapper, the value of `outcome = yield` is *sent* into the generator.
+    # We declare the generator's SendType as `Any`.
     outcome = yield
-    rep = outcome.get_result()
 
-    # > test fails
+    # > cast outcome result to the concrete pytest report.
+    rep = cast(TestReport, outcome.get_result())
+
+    # > If the test failed
     if rep.failed:
-        tmp = item.funcargs.get("tmp_path")
-        # > tmp_path is a function argument
-        if tmp:
-            item.add_report_section(rep.when, "scratch", f"{tmp}")
+        # `funcargs` isn't in Item's public stubs; use getattr + cast to satisfy mypy.
+        funcargs = cast(dict[str, Any], getattr(item, "funcargs", {}))
+
+        # > if `tmp_path` is in the functions signature
+        tmp = cast(Optional[Path], funcargs.get("tmp_path"))
+        if tmp is not None:
+            # > make mypy happy by making sure `when` is not None
+            when = rep.when or "call"
+            item.add_report_section(when, "scratch", str(tmp))
             print(f"[scratch-dir] {tmp}")
 
 
 @pytest.fixture
-def example_path_for():
-    """
-    Return the directory where the given function is defined.
-    Usage:
-        example_path = example_path_for(run_exmp001)
-    """
+def example_path_for() -> Callable[[Callable[..., object]], Path]:
+    """Return the directory where the given function is defined."""
 
-    def _get_path(fn):
+    def _get_path(fn: Callable[..., object]) -> Path:
         return Path(inspect.getfile(fn)).parent
 
     return _get_path
 
 
 @pytest.fixture
-def example_input_file(example_path_for):
-    def _get(fn, filename="inp.xyz"):
+def example_input_file(
+    example_path_for: Callable[[Callable[..., object]], Path],
+) -> Callable[[Callable[..., object], str], Path]:
+    """Return inp.xyz from the directory where the given function is defined."""
+
+    def _get(fn: Callable[..., object], filename: str = "inp.xyz") -> Path:
         path = example_path_for(fn) / filename
         assert path.exists(), f"Missing input file: {path}"
         return path

@@ -12,13 +12,13 @@ from opi.output.core import Output
 
 
 def run_exmp039(working_dir: Path | None = Path("RUN")) -> Output:
-    current_folder = Path(__file__).parent
+    example_folder = Path.cwd()
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
 
     calc = Calculator(basename="job", working_dir=working_dir)
-    shutil.copy(current_folder / "prod.xyz", working_dir / "prod.xyz")
-    calc.structure = Structure.from_xyz(current_folder / "reac.xyz")
+    shutil.copy(example_folder / "prod.xyz", working_dir / "prod.xyz")
+    calc.structure = Structure.from_xyz(example_folder / "reac.xyz")
     calc.input.add_simple_keywords(Scf.NOAUTOSTART, Sqm.NATIVE_GFN2_XTB, Neb.NEB_TS)
 
     calc.input.add_blocks(BlockNeb(neb_end_xyzfile="prod.xyz"))
