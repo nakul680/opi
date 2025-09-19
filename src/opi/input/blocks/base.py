@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from opi.input.blocks.util import InputFilePath
+from opi.input.blocks.util import InputFilePath, NoCaseDict
 from opi.input.simple_keywords import SimpleKeyword
 
 __all__ = ["Block"]
@@ -21,29 +21,39 @@ class Block(BaseModel, ABC):
     ----------
         aftercoord: bool
             Indicates whether the block is positioned after a coordinate transformation.
-        _name | name: str
+        _name: str
             Internal name identifier for the block.
-        _arbitrary | arbitrary: dict[str, str]
-            A dictionary storing arbitrary variable names as keys and the variable values as value. Both are stored as strings.
+        _arbitrary: dict[str, str]
+            A dictionary storing arbitrary key-value options for the ORCA input that are not implemented natively.
+            Both key and value are stored as strings.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     _name: str
     aftercoord: bool = False
-    _arbitrary: dict[str, str] = {}
+    _arbitrary: NoCaseDict = NoCaseDict()
 
-    def add_arbitrary_attributes(self, var: dict[str, str]) -> None:
+    def add_option(self, name: str, val: str) -> None:
         """
         Add arbitrary attributes to this block.
 
         Parameters
         ----------
-        var: dict[str, str]
-            Dictionary storing arbitrary variable names as keys and the variable values as value
-        """
-        self._arbitrary.update(var)
+        name : str
+        Key value of arbitrary attribute.
 
-    def remove_arbitrary_attribute(self, name: str) -> None:
+        val : str
+        Value of arbitrary attribute.
+
+        Raises
+        ------
+        TypeError
+            if name or val are not of type string.
+        """
+        self._arbitrary.__setitem__(name, val)
+
+
+    def remove_option(self, name: str) -> None:
         """
         Remove arbitrary attribute from this block.
 
@@ -51,17 +61,23 @@ class Block(BaseModel, ABC):
         ----------
         name: str
             Name of arbitrary attribute to remove
-        """
-        self._arbitrary.pop(name)
 
-    def clear_arbitrary(self) -> None:
+        Raises
+        -------
+        KeyError
+            if no attribute with that name exists
+        TypeError
+            if name is not of type string
         """
-        Clear arbitrary attributes from this block.
+        self._arbitrary.__delitem__(name)
 
+    def clear_options(self) -> None:
+        """
+        Clear all arbitrary attributes from this block.
         """
         self._arbitrary.clear()
 
-    def has_arbitrary_attribute(self, name: str) -> bool:
+    def has_option(self, name: str) -> bool:
         """
         Check if an arbitrary attribute with the given name exists.
 
@@ -73,11 +89,16 @@ class Block(BaseModel, ABC):
         Returns
         -------
         bool
-            True if the attribute exists, False otherwise.
-        """
-        return name in self._arbitrary
+            True if the attribute with the given name exists, False otherwise.
 
-    def get_arbitrary_attribute(self, name: str) -> str | None:
+        Raises
+        ------
+        TypeError
+            if name is not of type string
+        """
+        return self._arbitrary.__contains__(key = name)
+
+    def get_value(self, name: str) -> str | None:
         """
         Get the value of an arbitrary attribute.
 
@@ -90,8 +111,15 @@ class Block(BaseModel, ABC):
         -------
         str or None
             The value of the attribute if it exists, else None.
+
+        Raises
+        ------
+        KeyError
+            if no attribute with that name exists
+        TypeError
+            if name is not of type string
         """
-        return self._arbitrary.get(name)
+        return self._arbitrary.__getitem__(name)
 
     def format_orca(self) -> str:
         """
