@@ -11,6 +11,7 @@ from opi.input.simple_keywords import (
     DispersionCorrection,
     Method,
     Scf,
+    Dft,
     SolvationModel,
     Solvent,
     Task,
@@ -34,15 +35,10 @@ def run_exmp019(
     calc.structure = structure
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
-        Method.HF,
-        BasisSet.DEF2_SVP,
-        Task.SP,
-        SolvationModel.CPCM(Solvent.WATER),
-        DispersionCorrection.D3,
+        Dft.R2SCAN_3C,
+        Task.ENGRAD,
     )
-    calc.input.add_simple_keywords(Task.ENGRAD)
 
-    calc.input.add_blocks(BlockMethod(d3s6=0.64, d3a1=0.3065, d3s8=0.9147, d3a2=5.0570))
 
     calc.write_input()
     calc.run()

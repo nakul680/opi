@@ -13,7 +13,6 @@ from opi.output.core import Output
 def run_exmp003(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Perform a wB97X-3c geometry optimization"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

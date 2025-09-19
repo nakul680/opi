@@ -21,7 +21,6 @@ from opi.output.core import Output
 def run_exmp015(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Obtain multiple population analysis results from DSD-PBEP86/def2-SVP"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

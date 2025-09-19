@@ -26,7 +26,6 @@ from opi.utils.element import Element
 def run_exmp012(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Calculate NMR properties with RI-MP2/pcSseg-2"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

@@ -15,9 +15,6 @@ from opi.utils.element import Element
 def run_exmp021(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """
-    Run a BP86/def2-SVP energy calculation with additional diffuse function for oxygen
-    """
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

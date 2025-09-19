@@ -18,7 +18,6 @@ from opi.output.core import Output
 def run_exmp004(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Perform a TPSS/def2-SVP frequency calculation"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

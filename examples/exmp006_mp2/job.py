@@ -13,7 +13,6 @@ from opi.output.core import Output
 def run_exmp006(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Perform a MP2/def2-TZVP single-point calculation."""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

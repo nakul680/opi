@@ -14,7 +14,6 @@ from opi.output.core import Output
 def run_exmp013(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    "Perform a broken symmetry calculation with B3LYP/SVP (Gaussian B3LYP)"
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

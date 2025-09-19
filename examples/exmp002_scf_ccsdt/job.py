@@ -13,7 +13,7 @@ from opi.output.core import Output
 def run_exmp002(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Perform a CCSD(T)/def2-SVP single-point"""
+
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

@@ -19,7 +19,6 @@ from opi.utils.element import Element
 def run_exmp011(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """Calculate EPR properties with B3LYP/EPR-II"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

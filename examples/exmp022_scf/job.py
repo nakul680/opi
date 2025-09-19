@@ -14,9 +14,6 @@ from opi.output.core import Output
 def run_exmp022(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
-    """
-    Run a PBE0/def2-SVP energy calculation and rotate the initial guess
-    """
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
