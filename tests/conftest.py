@@ -6,17 +6,14 @@ starting from the main package folder must be given.
 """
 
 import inspect
-from collections.abc import Callable
-
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Any, cast, Optional
+from typing import Any, Optional, cast
 
 import pytest
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
-
 
 # > Location of modules containing fixtures.
 # >> Searching for Python modules which do no start with an underscore and converting file path to module path.
