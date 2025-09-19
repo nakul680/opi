@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import Scf, Wft, BasisSet
+from opi.input.simple_keywords import BasisSet, Scf, Wft
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp002(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp002(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a CCSD(T)/def2-SVP single-point"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -22,11 +24,7 @@ def run_exmp002(structure: Structure | None = None, working_dir: Path | None = P
 
     calc = Calculator(basename="job", working_dir=working_dir)
     calc.structure = structure
-    calc.input.add_simple_keywords(
-        Scf.NOAUTOSTART,
-        Wft.CCSD_T,
-        BasisSet.DEF2_SVP
-    )
+    calc.input.add_simple_keywords(Scf.NOAUTOSTART, Wft.CCSD_T, BasisSet.DEF2_SVP)
     calc.input.ncores = 4
 
     calc.write_input()
@@ -47,7 +45,6 @@ def run_exmp002(structure: Structure | None = None, working_dir: Path | None = P
     print(output.results_properties.geometries[0].energy[1].correnergy[0][0])
 
     return output
-
 
 
 if __name__ == "__main__":

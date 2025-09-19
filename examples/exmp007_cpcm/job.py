@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -10,7 +10,9 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp007(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp007(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a BP86/def2-SVP single-point calculation with implicit CPCM solvation for water"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)

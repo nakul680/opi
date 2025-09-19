@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import shutil
-import sys
 from pathlib import Path
 
 from opi.core import Calculator
+from opi.input.structures import Structure
 from opi.output.core import Output
 from opi.utils.element import Element
-from opi.input.structures import Structure
 
-def run_exmp042(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+
+def run_exmp042(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -34,8 +36,3 @@ def run_exmp042(structure: Structure | None = None, working_dir: Path | None = P
 
 if __name__ == "__main__":
     run_exmp042()
-
-
-
-
-

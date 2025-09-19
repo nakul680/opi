@@ -5,15 +5,14 @@ from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockGeom
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Method
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import BasisSet, Method, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp026(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp026(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -39,23 +38,22 @@ def run_exmp026(structure: Structure | None = None, working_dir: Path | None = P
 
     # > Print hl gap for scan
     for index, gbw in enumerate(output_bond.results_gbw[1:], start=1):
-        print(index,output_bond.get_hl_gap(index))
+        print(index, output_bond.get_hl_gap(index))
 
     # > Plot mos for scan
     for index, gbw in enumerate(output_bond.results_gbw[1:], start=1):
         homo_id = output_bond.get_homo().index
-        cube_output = output_bond.plot_mo(homo_id,gbw_index=index)
-        print(index,cube_output)
+        cube_output = output_bond.plot_mo(homo_id, gbw_index=index)
+        print(index, cube_output)
 
     # > Plot density for scan
     for index, gbw in enumerate(output_bond.results_gbw[1:], start=1):
         cube_output = output_bond.plot_density(gbw_index=index)
-        print(index,cube_output)
+        print(index, cube_output)
 
     # > Access energies for scan
     for index, gbw in enumerate(output_bond.results_properties.geometries[1:], start=1):
-        print(index,output_bond.get_final_energy(index=index))
-
+        print(index, output_bond.get_final_energy(index=index))
 
     # > Scan an angle with a relaxed surface scan
     calc_angle = Calculator(basename="scan_angle", working_dir=working_dir)

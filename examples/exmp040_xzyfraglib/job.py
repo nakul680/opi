@@ -6,8 +6,7 @@ from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockFrag
-from opi.input.simple_keywords import Sqm
-from opi.input.simple_keywords import Scf
+from opi.input.simple_keywords import Scf, Sqm
 from opi.input.structures import Structure
 from opi.output.core import Output
 
@@ -18,8 +17,8 @@ def run_exmp040(working_dir: Path | None = Path("RUN")) -> Output:
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
 
-    struc_file = current_folder/"struc.xyz"
-    lib_file = current_folder/"frag_lib.xyz"
+    struc_file = current_folder / "struc.xyz"
+    lib_file = current_folder / "frag_lib.xyz"
 
     shutil.copy(struc_file, working_dir)
     shutil.copy(lib_file, working_dir)

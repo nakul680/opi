@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import AuxBasisSet, BasisSet, Dft
 from opi.input.simple_keywords import (
+    AuxBasisSet,
+    BasisSet,
+    Dft,
     RelativisticCorrection,
 )
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp008(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp008(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a BP86/SARC-ZORCA-SVP calculation with the ZORA approximation for scalar relativistic effects"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)

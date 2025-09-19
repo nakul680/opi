@@ -3,17 +3,16 @@
 import shutil
 import sys
 from pathlib import Path
-from opi.output.core import Output
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Method
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import BasisSet, Method, Scf, Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
 
-def run_exmp001(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp001(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a HF/def2-SVP single-point"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -47,8 +46,6 @@ def run_exmp001(structure: Structure | None = None, working_dir: Path | None = P
     # > Parse JSON files
     output.parse()
 
-
-
     # check for convergence of the SCF
     if output.results_properties.geometries[0].single_point_data.converged:
         print("SCF CONVERGED")
@@ -62,6 +59,7 @@ def run_exmp001(structure: Structure | None = None, working_dir: Path | None = P
     print(output.results_properties.geometries[-1].single_point_data.finalenergy)
 
     return output
+
 
 if __name__ == "__main__":
     output = run_exmp001()

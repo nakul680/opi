@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -11,7 +11,9 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp010(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp010(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     "Perform a TD-DFT calculation with B3LYP/def2-TZVP + CPCM(Hexane)"
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)

@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet, Dft, Scf, Task
+from opi.input.simple_keywords import Dft, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp003(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp003(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a wB97X-3c geometry optimization"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -44,7 +46,9 @@ def run_exmp003(structure: Structure | None = None, working_dir: Path | None = P
 
     # > Verify that geometry optimization converged
     if not output.geometry_optimization_converged():
-        print(f"ORCA geometry optimization failed to converge, see output file: {output.get_outfile()}")
+        print(
+            f"ORCA geometry optimization failed to converge, see output file: {output.get_outfile()}"
+        )
         sys.exit(1)
 
     ngeoms = len(output.results_properties.geometries)
@@ -84,4 +88,3 @@ def run_exmp003(structure: Structure | None = None, working_dir: Path | None = P
 
 if __name__ == "__main__":
     run_exmp003()
-

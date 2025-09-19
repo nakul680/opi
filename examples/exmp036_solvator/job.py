@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -11,7 +11,9 @@ from opi.input.structures.structure import Structure
 from opi.output.core import Output
 
 
-def run_exmp036(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp036(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -38,7 +40,7 @@ def run_exmp036(structure: Structure | None = None, working_dir: Path | None = P
         sys.exit(1)
 
     output.parse(read_gbw_json=False)
-    
+
     print("Solvated xyz file:")
     print(f"\t{output.basename}.solvator.xyz")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -12,7 +12,9 @@ from opi.output.core import Output
 
 
 # > Perform a EOM-CCSD/def2-SVP calculation for the first five excited states
-def run_exmp030(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp030(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

@@ -4,13 +4,15 @@ import shutil
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.structures import Structure
 from opi.input.blocks import BlockIce
 from opi.input.simple_keywords import BasisSet
+from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp018(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp018(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

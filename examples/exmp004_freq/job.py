@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.simple_keywords import (
@@ -15,7 +15,9 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp004(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp004(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Perform a TPSS/def2-SVP frequency calculation"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -64,4 +66,3 @@ def run_exmp004(structure: Structure | None = None, working_dir: Path | None = P
 
 if __name__ == "__main__":
     run_exmp004()
-

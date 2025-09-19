@@ -6,8 +6,7 @@ from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockNeb
-from opi.input.simple_keywords import Sqm, Neb
-from opi.input.simple_keywords import Scf
+from opi.input.simple_keywords import Neb, Scf, Sqm
 from opi.input.structures import Structure
 from opi.output.core import Output
 
@@ -18,13 +17,9 @@ def run_exmp039(working_dir: Path | None = Path("RUN")) -> Output:
     working_dir.mkdir()
 
     calc = Calculator(basename="job", working_dir=working_dir)
-    shutil.copy(current_folder/'prod.xyz', working_dir / 'prod.xyz')
-    calc.structure = Structure.from_xyz(current_folder/"reac.xyz")
-    calc.input.add_simple_keywords(
-        Scf.NOAUTOSTART,
-        Sqm.NATIVE_GFN2_XTB,
-        Neb.NEB_TS
-    )
+    shutil.copy(current_folder / "prod.xyz", working_dir / "prod.xyz")
+    calc.structure = Structure.from_xyz(current_folder / "reac.xyz")
+    calc.input.add_simple_keywords(Scf.NOAUTOSTART, Sqm.NATIVE_GFN2_XTB, Neb.NEB_TS)
 
     calc.input.add_blocks(BlockNeb(neb_end_xyzfile="prod.xyz"))
 
@@ -44,17 +39,14 @@ def run_exmp039(working_dir: Path | None = Path("RUN")) -> Output:
     print(f"N: {N}")
     # > Print hl gap for scan
     for index, gbw in enumerate(output.results_gbw[1:], start=1):
-        print(index,output.get_hl_gap(index))
+        print(index, output.get_hl_gap(index))
 
     # > Printing energies
     for index, gbw in enumerate(output.results_properties.geometries[1:], start=1):
-        print(index,output.get_final_energy(index=index))
-
+        print(index, output.get_final_energy(index=index))
 
     return output
 
 
 if __name__ == "__main__":
     run_exmp039()
-
-

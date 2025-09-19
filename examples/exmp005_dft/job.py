@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockMethod as BlockMethod
@@ -11,7 +11,9 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp005(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp005(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     "Perform a B3LYP-D3/def2-SVP single-point calculation with custom D3 parameters"
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -52,7 +54,6 @@ def run_exmp005(structure: Structure | None = None, working_dir: Path | None = P
     # > Parse JSON files
     output.parse()
 
-    ngeoms = len(output.results_properties.geometries)
     print("FINAL SINGLE POINT ENERGY")
     print(output.results_properties.geometries[0].single_point_data.finalenergy)
     print("DISPERSION CORRECTION")

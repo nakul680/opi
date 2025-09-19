@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import copy
 import shutil
 import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Method
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import BasisSet, Method, Scf, Task
 from opi.input.structures import XyzFile
 from opi.output.core import Output
 
@@ -19,7 +15,7 @@ def run_exmp034(working_dir: Path | None = Path("RUN")) -> Output:
     working_dir.mkdir()
 
     calc = Calculator(basename="job", working_dir=working_dir)
-    shutil.copy(current_folder/'inp.xyz', working_dir / 'inp.xyz')
+    shutil.copy(current_folder / "inp.xyz", working_dir / "inp.xyz")
     calc.structure = XyzFile(working_dir / "inp.xyz")
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,

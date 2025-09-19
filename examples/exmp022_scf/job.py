@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockScf
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Dft
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import ShellType
+from opi.input.simple_keywords import BasisSet, Dft, Scf, ShellType
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp022(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp022(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """
     Run a PBE0/def2-SVP energy calculation and rotate the initial guess
     """

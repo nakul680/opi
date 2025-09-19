@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.blocks import BlockBasis, FragBasis, FragAuxJ, FragEcp
-from opi.input.simple_keywords import Dft, Scf, OutputControl, BasisSet, AuxBasisSet, Ecp
+from opi.input.blocks import BlockBasis, FragAuxJ, FragBasis, FragEcp
+from opi.input.simple_keywords import AuxBasisSet, BasisSet, Dft, Ecp, OutputControl, Scf
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp032(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp032(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -23,14 +25,14 @@ def run_exmp032(structure: Structure | None = None, working_dir: Path | None = P
     calc = Calculator(basename="job", working_dir=working_dir)
     calc.structure = structure
     calc.input.add_simple_keywords(
-        OutputControl.PRINTBASIS,Dft.BP86, Scf.NOITER, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_J
+        OutputControl.PRINTBASIS, Dft.BP86, Scf.NOITER, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_J
     )
 
     calc.input.add_blocks(
-        BlockBasis(fragbasis= FragBasis(frag={1:BasisSet.DEF2_TZVP,2:BasisSet.DEF2_QZVP}),
-                   fragauxj = FragAuxJ(frag={2:AuxBasisSet.AUTOAUX,3:AuxBasisSet.DEF2_JK}),
-                   fragecp = FragEcp(frag={3:Ecp.SK_MCDHF_RSC}),
-
+        BlockBasis(
+            fragbasis=FragBasis(frag={1: BasisSet.DEF2_TZVP, 2: BasisSet.DEF2_QZVP}),
+            fragauxj=FragAuxJ(frag={2: AuxBasisSet.AUTOAUX, 3: AuxBasisSet.DEF2_JK}),
+            fragecp=FragEcp(frag={3: Ecp.SK_MCDHF_RSC}),
         )
     )
 

@@ -5,21 +5,14 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.blocks import BlockMethod
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import (
-    DispersionCorrection,
-)
-from opi.input.simple_keywords import Method
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import SolvationModel
-from opi.input.simple_keywords import Solvent
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import BasisSet, Method, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp041(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp041(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

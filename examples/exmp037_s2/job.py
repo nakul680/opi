@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet, Dft, Scf, Task
+from opi.input.simple_keywords import Dft, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp037(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp037(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -44,7 +46,9 @@ def run_exmp037(structure: Structure | None = None, working_dir: Path | None = P
 
     # > Verify that geometry optimization converged
     if not output.geometry_optimization_converged():
-        print(f"ORCA geometry optimization failed to converge, see output file: {output.get_outfile()}")
+        print(
+            f"ORCA geometry optimization failed to converge, see output file: {output.get_outfile()}"
+        )
         sys.exit(1)
 
     ngeoms = len(output.results_properties.geometries)
@@ -55,15 +59,11 @@ def run_exmp037(structure: Structure | None = None, working_dir: Path | None = P
     print("SCF Energy along trajectory")
     # > Geometry index starts from 0 to *ngeom*
     for igeom in range(0, ngeoms):
-        print(
-            f"{igeom})", output.get_final_energy(index=igeom)
-        )
+        print(f"{igeom})", output.get_final_energy(index=igeom))
     print("S² expectation value along optimization (expec, ideal):")
     # > Geometry index starts from 0 to *ngeom*
     for igeom in range(0, ngeoms):
-            print(
-                f"{igeom})", output.get_s2(index=igeom)
-            )
+        print(f"{igeom})", output.get_s2(index=igeom))
 
     return output
 

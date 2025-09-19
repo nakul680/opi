@@ -141,7 +141,8 @@ follow_untyped_imports = true
 include = [
     "pyproject.toml",
     "src/**/*.py",
-    "tests/**/*.py"
+    "tests/**/*.py",
+    "examples/**/*.py"
 ]
 # > Default max line-length: 100 chars
 line-length = 100

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import shutil
 import sys
 from pathlib import Path
 
 from opi.core import Calculator
 from opi.output.core import Output
+
 
 def run_exmp045() -> Output:
     # > Get output of existing calculation and parse it
@@ -13,7 +13,7 @@ def run_exmp045() -> Output:
     working_dir = current_folder / "RUN"
 
     # > same basename as existing calculation in the 'RUN' directory
-    calc = Calculator(basename="job",working_dir=working_dir)
+    calc = Calculator(basename="job", working_dir=working_dir)
     output = calc.get_output()
     if not output.terminated_normally():
         print(f"ORCA calculation failed, see output file: {output.get_outfile()}")
@@ -35,6 +35,6 @@ def run_exmp045() -> Output:
     print(output.get_homo())
     return output
 
+
 if __name__ == "__main__":
     run_exmp045()
-

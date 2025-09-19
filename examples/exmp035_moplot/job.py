@@ -5,15 +5,14 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Dft
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import BasisSet, Dft, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp035(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp035(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -75,4 +74,3 @@ def run_exmp035(structure: Structure | None = None, working_dir: Path | None = P
 
 if __name__ == "__main__":
     run_exmp035()
-

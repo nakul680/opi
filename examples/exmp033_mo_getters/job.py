@@ -5,16 +5,14 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet
-from opi.input.simple_keywords import Method
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
-from opi.input.simple_keywords import Dft
+from opi.input.simple_keywords import BasisSet, Dft, Scf, Task
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp033(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp033(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
@@ -55,7 +53,7 @@ def run_exmp033(structure: Structure | None = None, working_dir: Path | None = P
 
     print(output.get_hftype())
     print(output.get_nelectrons())
-    mos = output.get_mos()
+    output.get_mos()
     homo_data = output.get_homo()
     lumo_data = output.get_lumo()
     print(f"HOMO {homo_data.index}({homo_data.channel}) energy: {homo_data.orbitalenergy:.8f} Eh")

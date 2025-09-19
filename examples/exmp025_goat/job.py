@@ -5,12 +5,14 @@ from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockGoat
-from opi.input.simple_keywords import Sqm, Goat
+from opi.input.simple_keywords import Goat, Sqm
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp025(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp025(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()

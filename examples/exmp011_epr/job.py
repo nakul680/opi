@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -16,7 +16,9 @@ from opi.output.core import Output
 from opi.utils.element import Element
 
 
-def run_exmp011(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp011(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Calculate EPR properties with B3LYP/EPR-II"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -34,7 +36,7 @@ def run_exmp011(structure: Structure | None = None, working_dir: Path | None = P
     calc.input.add_blocks(
         BlockEprnmr(
             gtensor=True,
-            nuclei=Nuclei(atom=Element.HYDROGEN, flags=NucleiFlag(adip=True,aiso=True,aorb=True)),
+            nuclei=Nuclei(atom=Element.HYDROGEN, flags=NucleiFlag(adip=True, aiso=True, aorb=True)),
         )
     )
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 from opi.core import Calculator
@@ -23,7 +23,9 @@ from opi.output.core import Output
 from opi.utils.element import Element
 
 
-def run_exmp012(structure: Structure | None = None, working_dir: Path | None = Path("RUN")) -> Output:
+def run_exmp012(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
     """Calculate NMR properties with RI-MP2/pcSseg-2"""
     # > recreate the working dir
     shutil.rmtree(working_dir, ignore_errors=True)
@@ -44,7 +46,9 @@ def run_exmp012(structure: Structure | None = None, working_dir: Path | None = P
     )
 
     calc.input.add_blocks(
-        BlockEprnmr(nuclei=Nuclei(atom=Element.HYDROGEN, flags=(NucleiFlag(shift=True,ssall=True))))
+        BlockEprnmr(
+            nuclei=Nuclei(atom=Element.HYDROGEN, flags=(NucleiFlag(shift=True, ssall=True)))
+        )
     )
 
     calc.write_input()
@@ -62,4 +66,4 @@ def run_exmp012(structure: Structure | None = None, working_dir: Path | None = P
 
 
 if __name__ == "__main__":
-    run_exmp011()
+    run_exmp012()
