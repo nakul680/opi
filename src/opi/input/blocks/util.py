@@ -218,7 +218,7 @@ class NoCaseDict(UserDict[str, str]):
         key = self._norm_key(key)
         return self.data[key]
 
-    def __setitem__(self, key: Any, value: Any, force: bool = False) -> None:
+    def __setitem__(self, key: str, value: str) -> None:
         """
         Set a value in the dictionary.
 
@@ -228,8 +228,6 @@ class NoCaseDict(UserDict[str, str]):
             Key of entry
         value: str
             Value of entry to be set
-        force: bool
-            Allow overwriting existing entries.
 
         Raises
         -------
@@ -242,12 +240,9 @@ class NoCaseDict(UserDict[str, str]):
         if not isinstance(value, str):
             raise TypeError(f"Value must be of type string, got {type(value)}")
         key = self._norm_key(key)
-        if not force and key in self.data:
-            raise KeyError(f"Key {key} already exists")
-        else:
-            self.data[key] = value
+        self.data[key] = value
 
-    def __delitem__(self, key: Any) -> None:
+    def __delitem__(self, key: str) -> None:
         """
         Delete an item from the dictionary.
 
@@ -299,7 +294,7 @@ class NoCaseDict(UserDict[str, str]):
         key = self._norm_key(key)
         return key in self.data
 
-    def _norm_key(self, key: Any, /) -> Any:
+    def _norm_key(self, key: str, /) -> Any:
         """
         Normalize key to lower case.
         Parameters

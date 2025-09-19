@@ -49,7 +49,12 @@ class Block(BaseModel, ABC):
         ------
         TypeError
             if name or val are not of type string.
+
+        KeyError
+            if attribute of same name is already defined.
         """
+        if self.has_option(name):
+            raise KeyError(f"Attribute {name} already defined")
         self._arbitrary.__setitem__(name, val)
 
     def modify_option(self, name: str, val: str) -> None:
@@ -75,7 +80,7 @@ class Block(BaseModel, ABC):
             If name or val are not of type string.
 
         """
-        self._arbitrary.__setitem__(name, val, True)
+        self._arbitrary.__setitem__(name, val)
 
     def remove_option(self, name: str) -> None:
         """
