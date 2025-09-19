@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
 
     scf_block = BlockScf()
-    scf_block.add_option(879 , "True")
+    scf_block.add_option("xtbfod" , "True")
     calc.input.add_blocks(scf_block)
 
     calc.write_input()
