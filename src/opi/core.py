@@ -196,20 +196,16 @@ class Calculator:
         Returns
         -------
         bool
-            Whether the ORCA input file was overwritten.
+            Whether an existing ORCA .inp file was overwritten.
         """
 
         assert self.working_dir
         self._inpfile = self.working_dir / f"{self.basename}.inp"
 
-        if self._inpfile.exists() and not force:
-            raise RuntimeError(
-                f"Input file {self._inpfile} already exists and cannot be overwritten."
-            )
-        elif self._inpfile.exists() and force:
-            return_value = True
-        else:
-            return_value = False
+        exists = self._inpfile.exists()
+        if exists and not force:
+            raise RuntimeError("...")
+        input_overwritten = exists and force
 
         # add JSON generation to output blocks
         if self.json_via_input:
@@ -292,7 +288,7 @@ class Calculator:
                         if item.pos is ArbitraryStringPos.BOTTOM:
                             inp.write(f"\n{item}\n")
 
-                return return_value
+                return input_overwritten
 
         except IOError as err:
             raise RuntimeError(
