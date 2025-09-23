@@ -42,7 +42,7 @@ python3 job.py
 - exmp019_engrad: Perfrom an energy & gradient calculation with r²SCAN-3c
 - exmp020_smd: Run a r²SCAN-3c+SMD(Water) calculation
 - exmp021_basis: Run a BP86/def2-SVP energy calculation with additional diffuse function for oxygen
-- exmp022_scf: Run a PBE0/def2-SVP energy calculation and rotate the initial SCF guess
+- exmp022_scf_block: Run a PBE0/def2-SVP energy calculation and rotate the initial SCF guess
 - exmp023_thermo: Obtain thermostatistical corrections from a frequency calculation
 - exmp024_blocks: Demonstrate input of blocks
 - exmp025_goat: Perform a GOAT conformer search
@@ -51,7 +51,7 @@ python3 job.py
 - exmp028_nevpt2: Run a NEVPT2 calculation
 - exmp029_oomp2: Run a OO-MP2 calculation
 - exmp030_eom: Run a EOM-CCSD calculation
-- exmp031_dlpno: Perform a DLPNO-CCSD(T) calculation
+- exmp031_dlpno_ccsdt: Perform a DLPNO-CCSD(T) calculation
 - exmp032_fragbasis: Assign different basis sets to different fragments
 - exmp033_mo_getters: Access to molecular orbital data
 - exmp034_strucfile: Hand structure as external file to ORCA
