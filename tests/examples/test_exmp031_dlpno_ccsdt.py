@@ -1,12 +1,12 @@
 import pytest
 
-from examples.exmp031_dlpno.job import run_exmp031
+from examples.exmp031_dlpno_ccsdt.job import run_exmp031
 from opi.input.structures import Structure
 
 
 @pytest.mark.examples
 @pytest.mark.orca
-def test_exmp031_dlpno(example_input_file, tmp_path) -> None:
+def test_exmp031_dlpno_ccsdt(example_input_file, tmp_path) -> None:
     """Ensure DLPNO-CCSD(T) example runs successfully and produces an energy."""
     # Get input file from example folder
     input_file = example_input_file(run_exmp031)

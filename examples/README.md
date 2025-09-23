@@ -12,7 +12,7 @@ These examples serve **two purposes**:
 - To run an example manually, you can execute the corresponding script within the folder:
 
 ```bash
-python example001.py
+python3 job.py
 ```
 
 ## Notes for Contributors
