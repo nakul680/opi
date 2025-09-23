@@ -15,5 +15,5 @@ def test_exmp031_dlpno_ccsdt(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp031(structure=structure, working_dir=tmp_path)
 
-    # Assert final energy
-    assert output.get_final_energy()
+    # Assert negative final energy
+    assert output.get_final_energy() < 0

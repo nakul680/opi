@@ -15,7 +15,8 @@ def test_exmp003_opt(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp003(structure=structure, working_dir=tmp_path)
 
-    # > Assert that the final energy is available
-    assert output.get_final_energy()
+    # Assert negative final energy
+    assert output.get_final_energy() < 0
     # > Assert that a structure is available
-    assert output.get_structure(), Structure
+    structure = output.get_structure()
+    assert isinstance(structure, Structure), f"Expected Structure, got {type(structure).__name__}"

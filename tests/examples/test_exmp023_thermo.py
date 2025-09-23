@@ -15,7 +15,7 @@ def test_exmp023_thermo(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp023(structure=structure, working_dir=tmp_path)
 
-    # Assert free energy
-    assert output.get_free_energy()
-    # Assert temperature of thermostatistical corrections
-    assert output.results_properties.geometries[0].thermochemistry_energies[0].temperature
+    # Assert negative final energy
+    assert output.get_final_energy() < 0
+    # Assert finite temperature for thermostatistical corrections
+    assert output.results_properties.geometries[0].thermochemistry_energies[0].temperature > 0

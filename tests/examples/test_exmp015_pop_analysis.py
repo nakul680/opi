@@ -15,5 +15,5 @@ def test_exmp015_pop_analysis(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp015(structure=structure, working_dir=tmp_path)
 
-    # Assert final energy
-    assert output.get_final_energy()
+    # Assert negative final energy
+    assert output.get_final_energy() < 0

@@ -15,7 +15,10 @@ def test_exmp019_engrad(example_input_file, tmp_path) -> None:
     # Run the example in tmp_path
     output = run_exmp019(structure=structure, working_dir=tmp_path)
 
-    # Assert final energy
-    assert output.get_final_energy()
-    # Assert gradient
-    assert output.get_gradient()
+    # Assert negative final energy
+    assert output.get_final_energy() < 0
+    # Assert that the gradient is a list
+    gradient = output.get_gradient()
+    assert isinstance(gradient, list)
+    # Assert that gradient contains floats
+    assert all(isinstance(x, float) for x in gradient)

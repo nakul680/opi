@@ -21,5 +21,5 @@ def test_exmp035_moplot(example_input_file, tmp_path) -> None:
     # Assert that the cube file exists
     assert mo_3.path.exists()
 
-    # Assert final energy
-    assert output.get_final_energy()
+    # Assert negative final energy
+    assert output.get_final_energy() < 0
