@@ -269,7 +269,7 @@ class NoCaseDict(UserDict[str, str]):
         key = self._norm_key(key)
         del self.data[key]
 
-    def __contains__(self, key: str) -> bool:
+    def __contains__(self, key: Any) -> bool:
         """
         Check if a key exists in the dictionary.
 
