@@ -275,7 +275,7 @@ class NoCaseDict(UserDict[str, str]):
 
         Parameters
         ----------
-        key: str
+        key: Any
             Key of entry
 
         Returns
