@@ -204,7 +204,7 @@ class Calculator:
 
         exists = self._inpfile.exists()
         if exists and not force:
-            raise RuntimeError("...")
+            raise RuntimeError(f"Input file {self._inpfile} already exists and cannot be overwritten.")
         input_overwritten = exists and force
 
         # add JSON generation to output blocks
