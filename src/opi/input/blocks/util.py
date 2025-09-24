@@ -269,7 +269,7 @@ class NoCaseDict(UserDict[str, str]):
         key = self._norm_key(key)
         del self.data[key]
 
-    def __contains__(self, key: Any) -> bool:
+    def __contains__(self, key: str) -> bool:
         """
         Check if a key exists in the dictionary.
 
@@ -294,7 +294,7 @@ class NoCaseDict(UserDict[str, str]):
         key = self._norm_key(key)
         return key in self.data
 
-    def _norm_key(self, key: str, /) -> Any:
+    def _norm_key(self, key: str, /) -> str:
         """
         Normalize key to lower case.
         Parameters

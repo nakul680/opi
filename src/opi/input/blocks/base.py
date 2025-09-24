@@ -70,10 +70,6 @@ class Block(BaseModel, ABC):
         val: str
             Value of arbitrary attribute.
 
-        Returns
-        -------
-        None
-
         Raises
         ------
         TypeError
