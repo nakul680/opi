@@ -6,9 +6,7 @@ from pathlib import Path
 
 from opi.core import Calculator
 from opi.input.blocks import BlockScf
-from opi.input.simple_keywords import Sqm
-from opi.input.simple_keywords import Scf
-from opi.input.simple_keywords import Task
+from opi.input.simple_keywords import Scf, Sqm, Task
 from opi.input.structures import Structure
 
 if __name__ == "__main__":
@@ -25,7 +23,7 @@ if __name__ == "__main__":
     )
 
     scf_block = BlockScf()
-    scf_block.add_option("xtbfod" , "True")
+    scf_block.add_option("xtbfod", "True")
     calc.input.add_blocks(scf_block)
 
     calc.write_input()

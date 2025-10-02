@@ -281,7 +281,7 @@ class NoCaseDict(UserDict[str, str]):
         Returns
         -------
         bool
-            True if key exists in the dictionary.False otherwise.
+            True if key exists in the dictionary. False otherwise.
 
         Raises
         ------
@@ -297,6 +297,7 @@ class NoCaseDict(UserDict[str, str]):
     def _norm_key(self, key: str, /) -> str:
         """
         Normalize key to lower case.
+
         Parameters
         ----------
         key: str
@@ -307,13 +308,5 @@ class NoCaseDict(UserDict[str, str]):
         str
             Normalized key.
 
-        Raises
-        -------
-        AttributeError
-            If normalization is not possible.
-
         """
-        try:
-            return key.lower().strip()
-        except AttributeError:
-            return key
+        return key.lower().strip()

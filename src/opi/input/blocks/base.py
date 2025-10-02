@@ -123,7 +123,7 @@ class Block(BaseModel, ABC):
         """
         return self._arbitrary.__contains__(name)
 
-    def get_value(self, name: str) -> str | None:
+    def get_option(self, name: str) -> str | None:
         """
         Get the value of an arbitrary attribute.
 
@@ -144,7 +144,7 @@ class Block(BaseModel, ABC):
         TypeError
             if name is not of type string
         """
-        return str(self._arbitrary.__getitem__(name))
+        return self._arbitrary.__getitem__(name)
 
     def format_orca(self) -> str:
         """
@@ -152,16 +152,19 @@ class Block(BaseModel, ABC):
         Returns the string representation of the respective class it is called by.
         """
         s = f"%{self.name}\n"
-        for key, value in self._arbitrary.items():
+        for key, value in self._arbitrary.items():  # print arbitrary key value pairs first
             s += f"    {key} {value.lower()}\n"
-        for key, value in self.__dict__.items():
+        for (
+            key,
+            value,
+        ) in self.__dict__.items():  # iterate through all key value pairs defined in the block
             if value is not None:
-                if key == "aftercoord":
+                if key == "aftercoord":  # skip aftercoord
                     continue
                 elif isinstance(value, SimpleKeyword):
-                    s += f'    {key} "{str(value).lower()}"\n'
+                    s += f'    {key} "{str(value).lower()}"\n'  # add quotations if value is of type SimpleKeyword
                 else:
-                    s += f"    {key} {str(value).lower()}\n"
+                    s += f"    {key} {str(value).lower()}\n"  # print key value pairs
         s += "end"
 
         return s
