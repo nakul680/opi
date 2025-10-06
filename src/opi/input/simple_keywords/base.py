@@ -82,3 +82,6 @@ class SimpleKeyword:
 
     def __str__(self) -> str:
         return self.format_orca()
+
+    def __eq__(self, other):
+        return self.keyword==other.keyword
