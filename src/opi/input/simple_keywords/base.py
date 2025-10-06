@@ -83,7 +83,7 @@ class SimpleKeyword:
     def __str__(self) -> str:
         return self.format_orca()
 
-    def __eq__(self, other:object) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, SimpleKeyword):
             return False
-        return self.keyword==other.keyword
+        return self.keyword == other.keyword
