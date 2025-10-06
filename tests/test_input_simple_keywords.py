@@ -9,6 +9,7 @@ def empty_calc() -> Calculator:
     new_calc = Calculator("test")
     return new_calc
 
+
 @pytest.fixture()
 def calc():
     calc = Calculator("test")
@@ -102,4 +103,3 @@ def test_multiple_keywords(calc: Calculator):
 
 def test_has_keyword_with_string(calc: Calculator):
     assert calc.input.has_simple_keywords("hf", "ex") == (True, True)
-
