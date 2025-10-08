@@ -32,10 +32,10 @@ def calc():
     "blocks",
     [
         (BlockScf(maxiter=10),),
-        (BlockScf(maxiter=10),BlockMethod(d3s6=0.64, d3a1=0.3065)),
-    ]
+        (BlockScf(maxiter=10), BlockMethod(d3s6=0.64, d3a1=0.3065)),
+    ],
 )
-def test_add_block(empty_calc: Calculator,blocks: tuple):
+def test_add_block(empty_calc: Calculator, blocks: tuple):
     """Test for Input.add_blocks() with singular and multiple blocks."""
     calc = empty_calc
     calc.input.add_blocks(*blocks)
@@ -58,11 +58,11 @@ def test_add_blocks_overwrite(calc: Calculator):
 @pytest.mark.parametrize(
     "blocks,expected",
     [
-        ((BlockEprnmr(),) , (False,)),
-        ((BlockEprnmr(),BlockMethod()) , (False,False)),
-    ]
+        ((BlockEprnmr(),), (False,)),
+        ((BlockEprnmr(), BlockMethod()), (False, False)),
+    ],
 )
-def test_remove_block(calc: Calculator, blocks: tuple, expected:tuple):
+def test_remove_block(calc: Calculator, blocks: tuple, expected: tuple):
     """Test for Input.remove_blocks().
     Test for singular and multiple blocks."""
     calc.input.remove_blocks(*blocks)
@@ -84,12 +84,12 @@ def test_has_block_empty_calc(empty_calc: Calculator):
 @pytest.mark.parametrize(
     "blocks, expected",
     [
-        ((BlockMethod(),) , (True,)),
-        ((BlockMethod(), BlockEprnmr()) , (True, True)),
-        ((BlockScf(),) , (False,))
-    ]
+        ((BlockMethod(),), (True,)),
+        ((BlockMethod(), BlockEprnmr()), (True, True)),
+        ((BlockScf(),), (False,)),
+    ],
 )
-def test_has_block(calc: Calculator, blocks: tuple, expected:tuple):
+def test_has_block(calc: Calculator, blocks: tuple, expected: tuple):
     """Test for Input.has_blocks() with different combinations of blocks and expected results"""
     assert calc.input.has_blocks(*blocks) == expected
 
