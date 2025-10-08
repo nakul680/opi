@@ -5,8 +5,6 @@ __all__ = (
     "ArbitraryString",
 )
 
-from os import MFD_ALLOW_SEALING
-
 
 class ArbitraryStringPos(StrEnum):
     """
@@ -89,8 +87,7 @@ class ArbitraryString:
         """
         return hash(self.string)
 
-
-    def __eq__(self, other:object) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, ArbitraryString):
             return False
         return self.string == other.string and self.pos == other.pos
