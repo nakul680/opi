@@ -1,7 +1,7 @@
 import pytest
 
 from opi.core import Calculator
-from opi.input.blocks import BlockEprnmr, BlockMethod, BlockScf, Nuclei, NucleiFlag, Block
+from opi.input.blocks import Block, BlockEprnmr, BlockMethod, BlockScf, Nuclei, NucleiFlag
 from opi.utils.element import Element
 
 
@@ -33,20 +33,27 @@ def empty_test_block():
     return BlockScf()
 
 
-@pytest.fixture(params=[
-        (BlockEprnmr(
-            gtensor=True,
-            nuclei=Nuclei(atom=Element.HYDROGEN, flags=NucleiFlag(adip=True, aiso=True, aorb=True)),
+@pytest.fixture(
+    params=[
+        (
+            BlockEprnmr(
+                gtensor=True,
+                nuclei=Nuclei(
+                    atom=Element.HYDROGEN, flags=NucleiFlag(adip=True, aiso=True, aorb=True)
+                ),
             ),
         ),
         (
             BlockEprnmr(
-            gtensor=True,
-            nuclei=Nuclei(atom=Element.HYDROGEN, flags=NucleiFlag(adip=True, aiso=True, aorb=True)),
+                gtensor=True,
+                nuclei=Nuclei(
+                    atom=Element.HYDROGEN, flags=NucleiFlag(adip=True, aiso=True, aorb=True)
+                ),
             ),
-            BlockMethod(d3s6=0.64, d3a1=0.3065)
+            BlockMethod(d3s6=0.64, d3a1=0.3065),
         ),
-    ])
+    ]
+)
 def blocks(request) -> tuple:
     """Provide different block combinations for parameterized testing."""
     return request.param

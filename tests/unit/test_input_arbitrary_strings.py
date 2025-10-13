@@ -30,7 +30,9 @@ def test_add_arbitrary_strings(empty_calc: Calculator, string: str):
         ("Bottom", ArbitraryStringPos.BOTTOM),
     ],
 )
-def test_add_arbitrary_strings_pos(empty_calc: Calculator, string: str, position: ArbitraryStringPos):
+def test_add_arbitrary_strings_pos(
+    empty_calc: Calculator, string: str, position: ArbitraryStringPos
+):
     """Test for Input.add_arbitrary_string() with specific position."""
     empty_calc.input.add_arbitrary_string(string, pos=position)
     assert ArbitraryString(string, pos=position) in empty_calc.input.arbitrary_strings

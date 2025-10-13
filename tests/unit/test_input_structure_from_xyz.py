@@ -7,7 +7,6 @@ import pytest
 from opi.input.structures import Structure
 from opi.utils.element import Element
 from opi.utils.textio import TrackingTextIO
-from tests.test_opi_multicore import tmp_path
 
 
 @pytest.fixture
@@ -87,7 +86,11 @@ def test_from_xyz_single_structure_nonexistent_file(tmp_path: Path):
 def test_from_xyz_single_structure_check_coordinates(xyz_single_file: Path):
     """Test to check if Structure file created has the correct coordinates"""
     structure = Structure.from_xyz(xyz_single_file)
-    assert np.allclose(structure.atoms[0].coordinates.coordinates, np.array([-3.56626, 1.77639, 0.00000]), atol=1e-5)
+    assert np.allclose(
+        structure.atoms[0].coordinates.coordinates,
+        np.array([-3.56626, 1.77639, 0.00000]),
+        atol=1e-5,
+    )
 
 
 def test_from_xyz_multi_structure_object_created(xyz_multi_file: Path):
@@ -132,6 +135,7 @@ def test_from_xyz_buffer_empty():
     structure = Structure.from_xyz_buffer(TrackingTextIO(StringIO("")))
     assert not structure
 
+
 def test_from_xyz_buffer_raises_on_invalid_header():
     """Text to check if Structure.from_xyz_buffer() raises error on invalid header"""
     xyz_text = """NotAnInteger
@@ -141,17 +145,3 @@ O 0.0 0.0 0.0
     buffer = TrackingTextIO(StringIO(xyz_text))
     with pytest.raises(ValueError):
         Structure.from_xyz_buffer(buffer)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -17,11 +17,13 @@ def calc():
     return calc
 
 
-@pytest.fixture(params=[
-    (Method.HF,),
-    (Method.HF, BasisSet.DEF2_SVP),
-    (SimpleKeyword("ex"),),
-])
+@pytest.fixture(
+    params=[
+        (Method.HF,),
+        (Method.HF, BasisSet.DEF2_SVP),
+        (SimpleKeyword("ex"),),
+    ]
+)
 def keywords(request) -> tuple:
     """Provide different keyword combinations for parameterized testing."""
     return request.param
@@ -53,7 +55,6 @@ def test_clear_simple_keywords_strict(empty_calc: Calculator):
     """Test for Input.clear_simple_keywords() with strict = True."""
     with pytest.raises(ValueError):
         empty_calc.input.clear_simple_keywords(strict=True)
-
 
 
 def test_get_keywords(calc: Calculator, keywords: tuple):
