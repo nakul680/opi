@@ -8,14 +8,22 @@ from opi.core import Calculator
 from opi.input.blocks import BlockScf
 from opi.input.simple_keywords import Scf, Sqm, Task
 from opi.input.structures import Structure
+from opi.output.core import Output
 
-if __name__ == "__main__":
-    wd = Path("RUN")
-    shutil.rmtree(wd, ignore_errors=True)
-    wd.mkdir()
 
-    calc = Calculator(basename="job", working_dir=wd)
-    calc.structure = Structure.from_xyz("inp.xyz")
+def run_exmp049(
+    structure: Structure | None = None, working_dir: Path | None = Path("RUN")
+) -> Output:
+    # > recreate the working dir
+    shutil.rmtree(working_dir, ignore_errors=True)
+    working_dir.mkdir()
+
+    # > if no structure is given read structure from inp.xyz
+    if structure is None:
+        structure = Structure.from_xyz("inp.xyz")
+
+    calc = Calculator(basename="job", working_dir=working_dir)
+    calc.structure = structure
     calc.input.add_simple_keywords(
         Scf.NOAUTOSTART,
         Sqm.NATIVE_GFN2_XTB,
@@ -47,3 +55,8 @@ if __name__ == "__main__":
 
     print("FINAL SINGLE POINT ENERGY")
     print(output.get_final_energy())
+    return output
+
+
+if __name__ == "__main__":
+    run_exmp049()
