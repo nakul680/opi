@@ -74,15 +74,15 @@ def test_get_keyword_with_string(calc: Calculator, keywords: tuple):
         assert SimpleKeyword(keyword) in returned_keywords
 
 
-def test_get_keyword_create_missing(calc: Calculator, keywords: tuple):
+def test_get_keyword_create_missing(empty_calc: Calculator, keywords: tuple):
     """Test Input.get_simple_keywords() with create_missing = True."""
-    returned_keywords = calc.input.get_simple_keywords(*keywords, create_missing=True)
+    returned_keywords = empty_calc.input.get_simple_keywords(*keywords, create_missing=True)
     assert keywords[0] in returned_keywords
 
 
-def test_get_nonexistent_keyword(calc: Calculator, keywords: tuple):
+def test_get_nonexistent_keyword(empty_calc: Calculator, keywords: tuple):
     """Test Input.get_simple_keywords() with a not yet added keyword."""
-    returned_keywords = calc.input.get_simple_keywords(*keywords)
+    returned_keywords = empty_calc.input.get_simple_keywords(*keywords)
     assert not returned_keywords
 
 
