@@ -89,13 +89,13 @@ def test_get_nonexistent_keyword(calc: Calculator, keywords: tuple):
 @pytest.mark.parametrize(
     "keywords_tuple",
     [
-        pytest.param((Method.HF,), (True,), id="method_hf"),
-        pytest.param((Method.HF_3C,), (False,), id="method_hf3c_missing"),
-        pytest.param((Method.HF_3C, BasisSet.DEF2_SVP), (False, True), id="combo_hf3c_sv"),
-        pytest.param(("hf", "ex"), (True, True), id="strings_hf_ex"),
+        pytest.param(((Method.HF,), (True,)), id="method_hf"),
+        pytest.param(((Method.HF_3C,), (False,)), id="method_hf3c_missing"),
+        pytest.param(((Method.HF_3C, BasisSet.DEF2_SVP), (False, True)), id="combo_hf3c_sv"),
+        pytest.param((("hf", "ex"), (True, True)), id="strings_hf_ex"),
     ],
 )
 def test_has_simple_keyword(calc: Calculator, keywords_tuple: tuple):
     """Test Input.has_simple_keywords() with different combinations of keywords and expected values."""
-    keywords, results = keywords_tuple
-    assert calc.input.has_simple_keywords(*keywords) == results
+    keyword, result = keywords_tuple
+    assert calc.input.has_simple_keywords(*keyword) == result
