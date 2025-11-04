@@ -18,7 +18,7 @@ def structure() -> Structure:
 
 @pytest.fixture
 def test_atom():
-    atom = Atom("H", coordinates=[3.88959,1.36040,0.81444])
+    atom = Atom("H", coordinates=[3.88959, 1.36040, 0.81444])
     return atom
 
 
@@ -57,7 +57,7 @@ def test_delete_atom(structure: Structure):
     """Test to check if delete_atom works correctly."""
     atom_to_delete = structure.atoms[1]
     structure.delete_atom(1)
-    assert not atom_to_delete in structure.atoms
+    assert atom_to_delete not in structure.atoms
 
 
 def test_delete_atom_invalid_position(structure: Structure, invalid_position: int):
@@ -84,31 +84,22 @@ def test_update_coordinates(structure: Structure, new_coord_block: np.ndarray):
     """Test to check if update_coordinates works correctly."""
     structure.update_coordinates(new_coord_block)
     for atom in structure.atoms:
-        np.testing.assert_array_equal(
-            atom.coordinates.coordinates, np.zeros(3)
-        )
+        np.testing.assert_array_equal(atom.coordinates.coordinates, np.zeros(3))
 
 
 def test_update_coordinates_invalid_array(structure: Structure):
     """Test to check if update_coordinates correctly raises errors given invalid array."""
     with pytest.raises(ValueError):
-        structure.update_coordinates(np.zeros((3,2)))
+        structure.update_coordinates(np.zeros((3, 2)))
 
 
 def test_extract_substructure(structure: Structure):
     """Test to check if extract_substructure correctly creates a Structure object."""
-    substructure = structure.extract_substructure([0,1])
+    substructure = structure.extract_substructure([0, 1])
     assert isinstance(substructure, Structure)
 
 
-@pytest.mark.parametrize(
-    "index_range",
-    [
-        [0,2],
-        [0,1,2],
-        [2]
-    ]
-)
+@pytest.mark.parametrize("index_range", [[0, 2], [0, 1, 2], [2]])
 def test_extract_substructure_correct_size(structure: Structure, index_range: list[int]):
     substructure = structure.extract_substructure(index_range)
     assert len(substructure) == len(index_range)
@@ -117,4 +108,4 @@ def test_extract_substructure_correct_size(structure: Structure, index_range: li
 def test_extract_substructure_invalid_index(structure: Structure):
     """Test to check if extract_substructure correctly raises errors given invalid index."""
     with pytest.raises(IndexError):
-        structure.extract_substructure([len(structure.atoms)+1])
+        structure.extract_substructure([len(structure.atoms) + 1])
