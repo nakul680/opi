@@ -12,7 +12,7 @@ def empty_calc():
 
 @pytest.fixture
 def calc():
-    calc = Calculator("test", version_check= False)
+    calc = Calculator("test", version_check=False)
     calc.input.add_blocks(
         BlockMethod(
             d3s6=0.64,
