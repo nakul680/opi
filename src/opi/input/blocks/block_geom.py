@@ -496,19 +496,19 @@ class BlockGeom(Block):
     """Class to model %geom block in ORCA"""
 
     _name: str = "geom"
-    maxiter: int | None = None
-    projecttr: bool | None = None
-    maxstep: float | None = None
-    trust: float | None = None
+    maxiter: int | None = None   # maximum number of geometry iterations
+    projecttr: bool | None = None # disable translation and rotation projection
+    maxstep: float | None = None  # maximum step length in internal coordinates
+    trust: float | None = None    # fixed trust radius
     bmatderiv: bool | None = None
     updatefromcart: bool | None = None
-    cartfallback: bool | None = None
+    cartfallback: bool | None = None  # use cartesian step if internal coordinaet step fails
     maxnsteptrial: int | None = None
     largeinternals: bool | None = None
     interpolate: bool | None = None
     shake: int | None = None
     shakermsd: float | None = None
-    coordsys: Literal["cartesian", "redundant"] | None = None
+    coordsys: Literal["cartesian", "redundant"] | None = None # use redundant internal or Cartesian coordinates
     update: (
         Literal[
             "noupdate",
@@ -523,10 +523,10 @@ class BlockGeom(Block):
             "l-bfgs",
         ]
         | None
-    ) = None
-    nstepsinresethess: int | None = None
-    nresethess: int | None = None
-    resethessmethod: int | None = None
+    ) = None   # hessian update
+    nstepsinresethess: int | None = None # number of previous steps used to inform new model hessian
+    nresethess: int | None = None  # rebuild model hessian after x steps
+    resethessmethod: int | None = None  #
     maxrmsdresethess: float | None = None
     printinternals: bool | None = None
     step: Literal["qn", "rfo", "gmf", "prfo"] | None = None
@@ -546,44 +546,44 @@ class BlockGeom(Block):
             "gfn-ff",
         ]
         | None
-    ) = None
-    tole: float | None = None
-    tolrmsg: float | None = None
-    tolmaxg: float | None = None
-    tolrmsd: float | None = None
-    tolmaxd: float | None = None
+    ) = None  # initial hessian
+    tole: float | None = None  # convergence threshold for energy change
+    tolrmsg: float | None = None # convergence threshold for RMS gradient
+    tolmaxg: float | None = None # convergence threshold for max gradient
+    tolrmsd: float | None = None # convergence threshold for RMS displacement
+    tolmaxd: float | None = None # convergenec threshold for max displacement
     tolesc: float | None = None
     enforcestrictconvergence: bool | None = None
-    usesoscf: bool | None = None
-    reduceprint: bool | None = None
-    optguess: Literal["patom", "pmodel", "hueckel", "oneelec", "moread"] | None = None
-    convergence: Literal["loose", "normal", "tight"] | None = None
-    fullscan: bool | None = None
+    usesoscf: bool | None = None  # use SOSCF after first point
+    reduceprint: bool | None = None # reduces printout after first point
+    optguess: Literal["patom", "pmodel", "hueckel", "oneelec", "moread"] | None = None  # initial guess control
+    convergence: Literal["loose", "normal", "tight"] | None = None # convergence threshold settings
+    fullscan: bool | None = None  # forces full surface scan before TS optimization
     refinetsguess: bool | None = None
-    simul_scan: bool | None = None
-    optimizehydrogens: bool | None = None
-    freezehydrogens: bool | None = None
-    invertconstraints: bool | None = None
-    ts_search: Literal["ef"] | None = None
-    numhess: bool | None = None
+    simul_scan: bool | None = None  # enable simultaneous multidimensional scans
+    optimizehydrogens: bool | None = None # optimize coordinates involving H atoms while constraining others
+    freezehydrogens: bool | None = None   # freeze H atoms relative to heteroatoms
+    invertconstraints: bool | None = None # invert the defined constraints
+    ts_search: Literal["ef"] | None = None  # enable TS search using Eigenvector Following
+    numhess: bool | None = None  # request numerical hessian
     numhess_centraldiff: bool | None = None
-    calc_hess: bool | None = None
-    recalc_hess: int | None = None
+    calc_hess: bool | None = None  # calculate numerical hessian at beginning of optimization
+    recalc_hess: int | None = None # recalculate hessian every x cycles
     read_temp_hess: bool | None = None
     reconvcharge: int | None = None
-    ts_active_atoms_factor: float | None = None
-    hess_modification: Literal["shift_diag", "ev_reverse"] | None = None
-    hess_minev: float | None = None
+    ts_active_atoms_factor: float | None = None  # factor by which cutoff for bonds is increased
+    hess_modification: Literal["shift_diag", "ev_reverse"] | None = None  # shift diagonal elements or reverse sign of diagonals
+    hess_minev: float | None = None  # minimum allowed hessian eigenvalue
     scalepcdamp: float | None = None
     scalepccenter: float | None = None
     doscaleembeddingcharges: bool | None = None
     scaleembeddingpc: int | None = None
     scaleembeddingpc_a: float | None = None
     scaleembeddingpc_b: float | None = None
-    addextrabonds: bool | None = None
-    addextrabonds_maxlength: int | None = None
-    addextrabonds_maxdist: float | None = None
-    reduceredints: bool | None = None
+    addextrabonds: bool | None = None  # enable extra bonds between close atom pairs
+    addextrabonds_maxlength: int | None = None   # max number of bonds conencting two atoms for extra bonding
+    addextrabonds_maxdist: float | None = None   # max distance for considering extra bonding
+    reduceredints: bool | None = None  # generates internal coordinates of constrains atoms
     printinternalhess: bool | None = None
     printtsactiveatoms: bool | None = None
     thr_printtsactiveatoms: float | None = None
@@ -595,34 +595,34 @@ class BlockGeom(Block):
     usespherepot: bool | None = None
     useboxpot: bool | None = None
     useellipsepot: bool | None = None
-    boxpot: float | None = None
-    spherepot: float | None = None
-    ellipsepot: float | None = None
+    boxpot: float | None = None      # box potential
+    spherepot: float | None = None   # spherical potential
+    ellipsepot: float | None = None  # ellipsoidal potential
     wallexponent: float | None = None
     followmode: int | None = None
     fmkeepref: bool | None = None
     fmminoverlap: float | None = None
     rigidbody: bool | None = None
     check_topo: bool | None = None
-    inhessname: InputFilePath | None = None
+    inhessname: InputFilePath | None = None  # file containing the hessian
     inhessname2: InputFilePath | None = None
-    optelement: Element | None = None
-    hybridhess: Hybrid | None = None
+    optelement: Element | None = None  # optimize atoms of this element only
+    hybridhess: Hybrid | None = None  # calculate exact hessian for specified atoms, model for rest
     hybridhess_core: Hybrid | None = None
-    ts_active_atoms: Hybrid | None = None
+    ts_active_atoms: Hybrid | None = None  # atoms that are involved in TS
     ts_active_atoms2: Hybrid | None = None
-    constraints: Constraints | None = None
+    constraints: Constraints | None = None  # add geometrical constraints
     potentials: Potential | None = None
-    scan: Scan | None = None
-    ts_mode: TSMode | None = None
-    modify_internal: ModifyInternal | None = None
-    connectfragments: ConnectFragments | None = None
-    constrainfragments: FragList | None = None
-    rigidfrags: FragList | None = None
-    relaxfrags: FragList | None = None
-    relaxhfrags: FragList | None = None
+    scan: Scan | None = None  # surface scanned geometry optimization
+    ts_mode: TSMode | None = None  #
+    modify_internal: ModifyInternal | None = None  # modify internal geometry
+    connectfragments: ConnectFragments | None = None  # connect fragments
+    constrainfragments: FragList | None = None    # constrain all internal coordinates within specific fragments
+    rigidfrags: FragList | None = None   # treat fragments as rigit bodies but relax position/orientation
+    relaxfrags: FragList | None = None   # relax all atoms of specified fragments
+    relaxhfrags: FragList | None = None  # relax hydrogen atoms of specified fragments
     ghostfrags: FragList | None = None
-    frags: Frags | None = None
+    frags: Frags | None = None  # define fragment
 
     @field_validator("constraints", mode="before")
     @classmethod

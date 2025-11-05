@@ -90,15 +90,15 @@ class BlockFrag(Block):
 
     _name: str = "frag"
 
-    printlevel: int | None = None
-    storefrags: bool | None = None
-    dointerfragbonds: bool | None = None
-    fragproc: FragProc | str | None = None
-    usetopology: bool | None = None
-    printinputflags: bool | None = None
-    topolfile: InputFilePath | None = None
+    printlevel: int | None = None # output control for automated fragmentation
+    storefrags: bool | None = None # stores assigned fragments in a .fragments.xyz file
+    dointerfragbonds: bool | None = None # automatically detects bonds between fragments for CoVaLED analysis
+    fragproc: FragProc | str | None = None # Fragmentation procedures to be applied automatically
+    usetopology: bool | None = None # generate main geometry graph based on .prms file
+    printinputflags: bool | None = None # writes a %frag block equivalent to current calculation fragments
+    topolfile: InputFilePath | None = None # topology file name to be used when usetopology is true
     definition: FragDefinition | None = None
-    xzyfraglib: InputString | str | None = None
+    xzyfraglib: InputString | str | None = None # filenames used in FragProx Extlib
 
     @field_validator("definition", mode="before")
     @classmethod

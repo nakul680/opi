@@ -12,17 +12,17 @@ class BlockCasscf(Block):
     """Class to model %casscf block in ORCA"""
 
     _name: str = "casscf"
-    nel: int | None = None
-    norb: int | None = None
-    mult: int | NumList | None = None
-    irrep: int | NumList | None = None
-    nroots: int | NumList | None = None
-    bweight: float | NumList | None = None
-    weights: float | None = None
-    hessroot: int | None = None
-    iroot: int | None = None
+    nel: int | None = None  # number of active space electrons
+    norb: int | None = None # number of active orbitals
+    mult: int | NumList | None = None # multiplicities
+    irrep: int | NumList | None = None # irrep for each mult block
+    nroots: int | NumList | None = None #
+    bweight: float | NumList | None = None  # define weights for multiplicity blocks
+    weights: float | None = None  # define custo weighting scheme for multiplicity blocks and roots
+    hessroot: int | None = None   #
+    iroot: int | None = None      # root for given imult
     jroot: int | None = None
-    imult: int | None = None
+    imult: int | None = None      # multiplicity block
     followiroot: bool | None = None
     followirootno: bool | None = None
     followirootmix: bool | None = None
@@ -39,7 +39,7 @@ class BlockCasscf(Block):
             "trah",
         ]
         | None
-    ) = None
+    ) = None   # orbital optimization method
     cistep: (
         Literal[
             "csfci",
@@ -54,23 +54,23 @@ class BlockCasscf(Block):
             "treecsf",
         ]
         | None
-    ) = None
+    ) = None  #
     trafostep: Literal["exact", "rimo", "ri"] | None = None
-    switchconv: float | None = None
-    switchiter: int | None = None
+    switchconv: float | None = None  # define gradient at which to switch
+    switchiter: int | None = None    # iteration at which the switch takes place
     switchstep: int | None = None
     parametrization: Literal["cayley", "expk"] | None = None
-    etol: float | None = None
-    gtol: float | None = None
-    printlevel: int | None = None
-    printgstate: int | None = None
+    etol: float | None = None  # convergence criteria for energy
+    gtol: float | None = None  # convergence criteria for g
+    printlevel: int | None = None  # amount of output during AH iteration
+    printgstate: int | None = None # optional printing of state-specific orbital gradients
     printndo: int | None = None
-    printwf: int | None = None
+    printwf: int | None = None     # print settings for wave functions
     actorbs: int | None = None
-    actconstraints: Literal["unchanged", "canonorbs", "locorbs", "natorbs"] | None = None
+    actconstraints: Literal["unchanged", "canonorbs", "locorbs", "natorbs"] | None = None #
     locmet: Literal["pipekmezey", "pm", "fosterboys", "fb", "iaoibo", "iaoboys", "ahfb"] | None = (
         None
-    )
+    )  # choose localization method
     nevpt2: int | None = None
     ptmethod: (
         Literal[
@@ -87,33 +87,33 @@ class BlockCasscf(Block):
         ]
         | None
     ) = None
-    freezeactive: float | None = None
-    dthresh: float | None = None
+    freezeactive: float | None = None  # damping options
+    dthresh: float | None = None  # thresh for critical occupation
     buildhessian: int | None = None
     resethessian: int | None = None
     maxdampiter: int | None = None
-    gradscaling: float | None = None
+    gradscaling: float | None = None # damping option
     convrate: float | None = None
-    freezeie: float | None = None
-    freezegrad: float | None = None
+    freezeie: float | None = None  # damping option
+    freezegrad: float | None = None # damping option
     superdiis: bool | None = None
-    maxiter: int | None = None
-    maxmicroiter: int | None = None
-    maxdiis: int | None = None
-    diisthresh: float | None = None
-    resetfreq: int | None = None
-    switchdens: float | None = None
+    maxiter: int | None = None  # maximum number of macro-iterations
+    maxmicroiter: int | None = None # maximum number of micro-iterations
+    maxdiis: int | None = None  # max no. of DIIS vectors to keep
+    diisthresh: float | None = None # overlap criteria for linear dependancy
+    resetfreq: int | None = None  # reset frequency for direct SCF
+    switchdens: float | None = None # approximate active Fock when density is considered unchanged
     doipea: bool | None = None
     donto: bool | None = None
-    ntothresh: float | None = None
+    ntothresh: float | None = None  # threshold for printing occupation numbers
     nntostates: int | None = None
-    ntostates: int | None = None
-    dondo: bool | None = None
+    ntostates: int | None = None    # states to consider for NTO analysis
+    dondo: bool | None = None       # generate NAtural Difference Density Orbitals
     nndostates: int | None = None
-    ndostates: int | None = None
+    ndostates: int | None = None    # states to consider for NDO analysis
     dotransdens: bool | None = None
     inistateenerrange: float | None = None
-    docd: bool | None = None
+    docd: bool | None = None  #
     dodipolelength: bool | None = None
     dodipolevelocity: bool | None = None
     dohighermoments: bool | None = None

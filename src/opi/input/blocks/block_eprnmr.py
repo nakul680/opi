@@ -275,27 +275,28 @@ class BlockEprnmr(Block):
 
     _name: str = "eprnmr"
     aftercoord: bool = True
-    gtensor: int | None = None
+    gtensor: int | None = None  # Calculate g-tensor
     gtensor_dso_zeff: bool | None = None
-    gtensor_1el2el: int | None = None
-    hfcgaugecorrection_zeff: bool | None = None
-    hfcgaugecorrection_angulargrid: int | None = None
-    hfcgaugecorrection_prunegrid: int | None = None
-    hfcgaugecorrection_intacc: float | None = None
-    hfcgaugecorrection_bfcutoff: float | None = None
-    hfcgaugecorrection_wcutoff: float | None = None
-    hfcgaugecorrection_numeric: bool | None = None
-    nmrshielding: int | None = None
-    dtensor: Literal["ss", "so", "soc", "ssandso"] | None = None
-    dsoc: Literal["qro", "pk", "cp", "pcp", "cvw"] | None = None
-    dss: Literal["direct", "uno"] | None = None
+    gtensor_1el2el: int | None = None # print the 1- and 2-electron contributions to the g-tensor
+    hfcgaugecorrection_zeff: bool | None = None # use effective nuclear charges for guage correction to the A-tensor
+    hfcgaugecorrection_angulargrid: int | None = None # grid settings, <0 means to use DFT grid setting
+    hfcgaugecorrection_prunegrid: int | None = None   # grid settings, <0 means to use DFT grid setting
+    hfcgaugecorrection_intacc: float | None = None    # grid settings, <0 means to use DFT grid setting
+    hfcgaugecorrection_bfcutoff: float | None = None  # grid settings, <0 means to use DFT grid setting
+    hfcgaugecorrection_wcutoff: float | None = None   # grid settings, <0 means to use DFT grid setting
+    hfcgaugecorrection_numeric: bool | None = None    # calculate diamagnetic spin-orbit (DSO) integrals needed for the
+                                                      # gauge correction to the A-tensor numerically
+    nmrshielding: int | None = None                   # calculate NMR shielding tensor
+    dtensor: Literal["ss", "so", "soc", "ssandso"] | None = None # calculate D-tensor
+    dsoc: Literal["qro", "pk", "cp", "pcp", "cvw"] | None = None # calculate D-tensor
+    dss: Literal["direct", "uno"] | None = None                  # calculate D-tensor
     printlevel: int | None = None
-    solver: Literal["cg", "diis", "pople"] | None = None
-    tol: float | None = None
-    maxiter: int | None = None
-    maxdiis: int | None = None
-    levelshift: float | None = None
-    giao_1el: Literal["giao_1el_numeric", "giao_1el_analytic"] | None = None
+    solver: Literal["cg", "diis", "pople"] | None = None # for solution of CP-SCF equations
+    tol: float | None = None  # convergence tolerance
+    maxiter: int | None = None # maxium number of iterations
+    maxdiis: int | None = None # max. number of DIIS vectors
+    levelshift: float | None = None # level shift for DIIS
+    giao_1el: Literal["giao_1el_numeric", "giao_1el_analytic"] | None = None # treatment of 1-electron integrals in RHS of CPSCF equations
     giao_2el: (
         Literal[
             "giao_2el_same_as_scf",
@@ -309,17 +310,17 @@ class BlockEprnmr(Block):
             "giao_2el_exactjrik",
         ]
         | None
-    ) = None
-    spinspinrthresh: float | None = None
-    printreducedcoupling: bool | None = None
-    printeuler: bool | None = None
+    ) = None  # treatment of 2-electron integrals in the RHS of the CPSCF equations
+    spinspinrthresh: float | None = None # distance threshold for spin-spin coupling constants
+    printreducedcoupling: bool | None = None # whether to print reduced spin-spin coupling constants
+    printeuler: bool | None = None  # whether to calculate and print Euler angles
     nmrspectrum: bool | None = None
     nmrref: float | None = None
     nmrspecfreq: float | None = None
     nmrcoal: float | None = None
-    tau: Literal["ms", "gi", "dobson"] | None = None
+    tau: Literal["ms", "gi", "dobson"] | None = None # treatment of tau in meta-GGA DFT
     dospinadmixture: bool | None = None
-    nuclei: Nuclei | None = None
+    nuclei: Nuclei | None = None # calculate nuclear properties
     ewin: NumList | None = None
     zeff: NumList | None = None
     origin: (

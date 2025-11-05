@@ -21,29 +21,29 @@ class BlockFreq(Block):
     """Class to model %freq block in ORCA"""
 
     _name: str = "freq"
-    numfreq: bool | None = None
-    anfreq: bool | None = None
+    numfreq: bool | None = None   # numerical frequencies
+    anfreq: bool | None = None    # analytical frequencies
     dovcd: bool | None = None
-    centraldiff: bool | None = None
+    centraldiff: bool | None = None # use central differences
     restart: bool | None = None  # Restart numerical frequency calculation?
     increment: float | None = None  # Sets the increment in numerical freq
     quasirrho: bool | None = None  # Use quasi RRHO?
     cutofffreq: float | None = None  # cutoff value for low freqs
     qrrhoreffreq: float | None = None  # QRRHO reference frequency
-    scalfreq: float | None = None
+    scalfreq: float | None = None   # scaling factor for frequencies
     transinvar: bool | None = None  # Make sure the hessian is translational invariant
     projecttr: bool | None = None  # Project our translation and rotation in the hessian?
-    finitediff: bool | None = None
+    finitediff: bool | None = None  #
     accuracy: int | None = None
     hessgridx: int | None = None
     dryrun: bool | None = None
     nearir: bool | None = None
-    xtbvpt2: bool | None = None
-    delq: float | None = None
+    xtbvpt2: bool | None = None     # use XTB for thr VPT2 correction of the IR
+    delq: float | None = None       # displacement in dimensionless coordinates used during the VPT2
     temp: float | None = None
     pressure: float | None = None
-    hybrid_hess: HessList | None = None
-    partial_hess: HessList | None = None
+    hybrid_hess: HessList | None = None  # calculate (numerical) Hybrid Hessian
+    partial_hess: HessList | None = None # calculate (numerical) Partial Hessian
     inhessname: FilePath | None = None
 
     @field_validator("inhessname")

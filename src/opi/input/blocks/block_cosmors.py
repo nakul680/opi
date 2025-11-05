@@ -11,24 +11,24 @@ class BlockCosmors(Block):
     """Class to model %cosmors block in ORCA"""
 
     _name: str = "cosmors"
-    orbs_vac: bool | None = None
-    aeff: float | None = None
-    lnalpha: float | None = None
-    lnchb: float | None = None
-    chbt: float | None = None
-    sigmahb: float | None = None
-    rav: float | None = None
-    fcorr: float | None = None
-    ravcorr: float | None = None
-    astd: float | None = None
-    zcoord: float | None = None
-    dgsolv_eta: float | None = None
-    dgsolv_omegaring: float | None = None
-    temp: float | None = None
-    dftfunc: SimpleKeyword | None = None
-    dftbas: SimpleKeyword | None = None
-    solvent: Solvent | None = None
-    solventfilename: InputFilePath | None = None
+    orbs_vac: bool | None = None # reyse gas-phase orbitals for calculation involving solute in a conductor
+    aeff: float | None = None    # effective contact area between surface segments
+    lnalpha: float | None = None # logarithm of misfit prefactor
+    lnchb: float | None = None   # hydrogen bond strength parameter
+    chbt: float | None = None    # parameter for temperature dpendance of the HB
+    sigmahb: float | None = None # HB threshold parameter
+    rav: float | None = None     # radius to average ideal screening charges in Angstrom
+    fcorr: float | None = None   # Parameter adjusted from dielectric screening energies
+    ravcorr: float | None = None # Additional radius to calculate misfit energy in Angstrom
+    astd: float | None = None    # Standard surface area ( normalization factor )
+    zcoord: float | None = None  # Cooridnation number
+    dgsolv_eta: float | None = None # Offset for solv. energy calculation
+    dgsolv_omegaring: float | None = None # Correction for solv. energy of molecules with rings
+    temp: float | None = None    # reference temperature in Kelvin
+    dftfunc: SimpleKeyword | None = None # DFT functional
+    dftbas: SimpleKeyword | None = None  # Basis set
+    solvent: Solvent | None = None  # Solvent from internal database
+    solventfilename: InputFilePath | None = None # NAme of .cosmorsxyz solvent file
 
     @field_validator("solventfilename", mode="before")
     @classmethod
