@@ -6,13 +6,13 @@ from opi.input.simple_keywords import BasisSet, Method, SimpleKeyword
 
 @pytest.fixture()
 def empty_calc() -> Calculator:
-    new_calc = Calculator("test")
+    new_calc = Calculator("test", version_check=False)
     return new_calc
 
 
 @pytest.fixture()
 def calc():
-    calc = Calculator("test")
+    calc = Calculator("test", version_check=False)
     calc.input.add_simple_keywords(Method.HF, BasisSet.DEF2_SVP, SimpleKeyword("ex"))
     return calc
 

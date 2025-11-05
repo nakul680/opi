@@ -6,7 +6,7 @@ from opi.input import ArbitraryString, ArbitraryStringPos
 
 @pytest.fixture
 def empty_calc():
-    empty_calc = Calculator("test")
+    empty_calc = Calculator("test", version_check=False)
     return empty_calc
 
 

@@ -7,12 +7,12 @@ from opi.utils.element import Element
 
 @pytest.fixture
 def empty_calc():
-    return Calculator("test")
+    return Calculator("test", version_check=False)
 
 
 @pytest.fixture
 def calc():
-    calc = Calculator("test")
+    calc = Calculator("test", version_check= False)
     calc.input.add_blocks(
         BlockMethod(
             d3s6=0.64,
