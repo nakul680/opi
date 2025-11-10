@@ -11,6 +11,7 @@ from opi.utils.textio import TrackingTextIO
 
 @pytest.fixture
 def xyz_single_file(tmp_path: Path) -> Path:
+    """Returns a test .xyz file."""
     xyz_file = tmp_path / "water.xyz"
     content = """3
 
@@ -23,6 +24,7 @@ H         -3.88959        1.36040       -0.81444"""
 
 @pytest.fixture
 def xyz_multi_file(tmp_path: Path) -> Path:
+    """Returns a test .xyz file with multiple structures.."""
     xyz_file = tmp_path / "methane.xyz"
     content = """8
 Coordinates from ORCA-job job_MEP E  -7.336370651022
@@ -51,6 +53,7 @@ Coordinates from ORCA-job job_MEP E  -7.334880224742
 
 @pytest.fixture
 def xyz_buffer_single_structure(xyz_single_file: Path):
+    """Returns a test buffer of a single structure .xyz file"""
     with xyz_single_file.open("r") as f:
         tracking_text = TrackingTextIO(StringIO(f.read()))
 
@@ -58,7 +61,7 @@ def xyz_buffer_single_structure(xyz_single_file: Path):
 
 
 def test_from_xyz_single_structure_created(xyz_single_file: Path):
-    """Test to check if Structure object is created correctly from .xyz file"""
+    """Test to check if `Structure` object is created correctly from .xyz file"""
     structure = Structure.from_xyz(xyz_single_file)
     assert isinstance(structure, Structure)
 
@@ -77,7 +80,7 @@ def test_from_xyz_single_structure_correct_atoms(xyz_single_file: Path):
 
 
 def test_from_xyz_single_structure_nonexistent_file(tmp_path: Path):
-    """Test to check if Structure.from_xyz() correctly raises error in case of nonexistent file"""
+    """Test to check if `Structure.from_xyz()` correctly raises error in case of nonexistent file"""
     nonexistent_file = tmp_path / "nonexistent.xyz"
     with pytest.raises(FileNotFoundError):
         Structure.from_xyz(nonexistent_file)
@@ -94,13 +97,13 @@ def test_from_xyz_single_structure_check_coordinates(xyz_single_file: Path):
 
 
 def test_from_xyz_multi_structure_object_created(xyz_multi_file: Path):
-    """Test to check if Structure.from_xyz() works correctly in case of multi structure .xyz file"""
+    """Test to check if `Structure.from_xyz()` works correctly in case of multi structure .xyz file"""
     structure = Structure.from_xyz(xyz_multi_file)
     assert isinstance(structure, Structure)
 
 
 def test_from_trj_xyz_structure_created(xyz_multi_file: Path):
-    """Test to check if Structure.from_trj_xyz() correctly creates list of Structure objects"""
+    """Test to check if `Structure.from_trj_xyz()` correctly creates list of Structure objects"""
     structures = Structure.from_trj_xyz(xyz_multi_file)
     assert all(isinstance(structure, Structure) for structure in structures)
 
@@ -112,32 +115,32 @@ def test_from_trj_xyz_correct_number_of_structures(xyz_multi_file: Path):
 
 
 def test_from_trj_xyz_struc_limit(xyz_multi_file: Path):
-    """Test to check if struc_limit parameter is enforced correctly"""
+    """Test to check if `struc_limit` parameter is enforced correctly"""
     structures = Structure.from_trj_xyz(xyz_multi_file, struc_limit=1)
     assert len(structures) == 1
 
 
 def test_from_trj_xyz_nonexistent_file(tmp_path: Path):
-    """Test to check if Structure.from_trj_xyz() correctly raises error in case of nonexistent file"""
+    """Test to check if `Structure.from_trj_xyz()` correctly raises error in case of nonexistent file"""
     nonexistent_file = tmp_path / "nonexistent.xyz"
     with pytest.raises(FileNotFoundError):
         Structure.from_trj_xyz(nonexistent_file)
 
 
 def test_from_xyz_buffer(xyz_buffer_single_structure):
-    """Test to check if Structure object is created from xyz buffer"""
+    """Test to check if `Structure` object is created from xyz buffer"""
     structure = Structure.from_xyz_buffer(xyz_buffer_single_structure)
     assert isinstance(structure, Structure)
 
 
 def test_from_xyz_buffer_empty():
-    """Test to check if Structure.from_xyz_buffer() returns None in case of empty buffer."""
+    """Test to check if `Structure.from_xyz_buffer()` returns None in case of empty buffer."""
     structure = Structure.from_xyz_buffer(TrackingTextIO(StringIO("")))
     assert not structure
 
 
 def test_from_xyz_buffer_raises_on_invalid_header():
-    """Text to check if Structure.from_xyz_buffer() raises error on invalid header"""
+    """Text to check if `Structure.from_xyz_buffer()` raises error on invalid header"""
     xyz_text = """NotAnInteger
 Comment line
 O 0.0 0.0 0.0
