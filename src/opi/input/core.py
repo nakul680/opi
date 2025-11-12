@@ -167,6 +167,120 @@ class Input:
     # > METHODS
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    def format_before_coords(self, working_directory: Path) -> str:
+        """
+        Function to format input data that appears before the coordinate block in the ORCA .inp file.
+
+        Parameters
+        ----------
+        working_directory: Path
+            working directory of the ORCA calculation.
+
+        Raises
+        ------
+        ValueError
+            If the working directory is empty
+
+        Returns
+        -------
+        str
+            Formatted string of input data
+        """
+        input_before_coords = ""
+        try:
+            simple_keywords = self.simple_keywords
+            blocks = self.blocks.values() if self.blocks else ()
+            arbitrary_strings = self.arbitrary_strings
+
+            # ---------------------------------
+            # > Arbitrary Strings: top
+            # ---------------------------------
+            if arbitrary_strings:
+                for item in arbitrary_strings:
+                    if item.pos is ArbitraryStringPos.TOP:
+                        input_before_coords += f"{item.format_orca()}\n"
+
+            # ---------------------------------
+            # > Simple Keywords
+            # ---------------------------------
+            if simple_keywords:
+                for keyword in simple_keywords:
+                    if isinstance(keyword, str):
+                        input_before_coords += f"!{keyword}\n"
+                    else:
+                        input_before_coords += f"!{keyword.format_orca()}\n"
+
+            # ---------------------------------
+            # > Special Strings
+            # ---------------------------------
+            if (memory := self.memory) is not None:
+                input_before_coords += f"%maxcore {memory:d}\n"
+            if (ncores := self.ncores) is not None:
+                input_before_coords += f"%pal\n    nprocs {ncores:d}\nend\n"
+            if (moinp := self.moinp) is not None:
+                input_before_coords += f'%moinp "{moinp.relative_to(working_directory)}"\n'
+
+            # ---------------------------------
+            # > Block Options: Before coords
+            # ---------------------------------
+            if blocks:
+                for block in blocks:
+                    if not block.aftercoord:
+                        input_before_coords += f"\n{block.format_orca()}\n"
+
+            # ---------------------------------
+            # > Arbitrary Strings: Before Coords
+            # ---------------------------------
+            if arbitrary_strings:
+                for item in arbitrary_strings:
+                    if item.pos is ArbitraryStringPos.BEFORE_COORDS:
+                        input_before_coords += f"\n{item}\n"
+
+            return input_before_coords
+
+        except ValueError as err:
+            raise ValueError(f"Error formatting Input: {err}") from err
+
+    def format_after_coords(self) -> str:
+        """
+        Function to format input data that appears after the coordinate block in the ORCA .inp file.
+
+        Raises
+        ------
+        ValueError
+
+
+        Returns
+        -------
+        str
+            Formatted string of input data
+
+        """
+        input_after_coords = ""
+        try:
+            blocks = self.blocks.values() if self.blocks else ()
+            arbitrary_strings = self.arbitrary_strings
+            # ---------------------------------
+            # > Block options: After coords
+            # ---------------------------------
+            if blocks:
+                for block in blocks:
+                    if block.aftercoord:
+                        input_after_coords += f"\n{block.format_orca()}\n"
+
+            # ---------------------------------
+            # > Arbitrary Strings: Bottom
+            # ---------------------------------
+            if arbitrary_strings:
+                for item in arbitrary_strings:
+                    if item.pos is ArbitraryStringPos.BOTTOM:
+                        input_after_coords += f"\n{item}\n"
+
+            return input_after_coords
+
+        except ValueError as err:
+            raise ValueError(f"Error formatting Input: {err}") from err
+
     # ----------------------------------------------------------------------
     # > SIMPLE KEYWORDS
     # ----------------------------------------------------------------------
