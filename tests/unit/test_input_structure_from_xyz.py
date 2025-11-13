@@ -24,7 +24,7 @@ H         -3.88959        1.36040       -0.81444"""
 
 @pytest.fixture
 def xyz_multi_file(tmp_path: Path) -> Path:
-    """Returns a test .xyz file with multiple structures.."""
+    """Returns a test .xyz file with multiple structures."""
     xyz_file = tmp_path / "methane.xyz"
     content = """8
 Coordinates from ORCA-job job_MEP E  -7.336370651022

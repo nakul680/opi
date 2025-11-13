@@ -77,14 +77,14 @@ def test_add_blocks(empty_calc: Calculator, blocks: tuple):
 
 
 def test_add_blocks_strict(calc: Calculator, blocks: tuple):
-    """Test for `Input.add_blocks()` with `strict = True`. When `strict=True`, a ValueError should be raised
+    """Test for `Input.add_blocks()` with `strict=True`. When `strict=True`, a `ValueError` should be raised
     if that Block instance has already been added."""
     with pytest.raises(ValueError):
         calc.input.add_blocks(*blocks, strict=True)
 
 
 def test_add_blocks_overwrite(calc: Calculator):
-    """Test for `Input.add_blocks()` with `overwritten = True`. When `overwritten=True`, the existing Block instance
+    """Test for `Input.add_blocks()` with `overwritten=True`. When `overwritten=True`, the existing `Block` instance
     should be overwritten if it exists."""
     calc.input.add_blocks(BlockMethod(d3s6=0.75), overwrite=True)
 
@@ -106,7 +106,7 @@ def test_remove_block(calc: Calculator, blocks: tuple, expected: tuple):
 
 
 def test_remove_blocks_strict(calc: Calculator, empty_test_block: Block):
-    """Test for `Input.remove_blocks()` with strict = True."""
+    """Test for `Input.remove_blocks()` with `strict = True`."""
     with pytest.raises(ValueError):
         calc.input.remove_blocks(empty_test_block, strict=True)
 
@@ -143,7 +143,7 @@ def test_get_block(calc_with_test_block: Calculator, empty_test_block: Block):
 
 
 def test_get_blocks_create_missing(empty_calc: Calculator, empty_test_block: Block):
-    """Test for `Input.get_blocks()` with `create_missing = True`."""
+    """Test for `Input.get_blocks()` with `create_missing=True`."""
     type_instance = type(empty_test_block)
     returned_blocks = empty_calc.input.get_blocks(type_instance, create_missing=True)
     assert BlockScf in returned_blocks
@@ -156,6 +156,6 @@ def test_clear_blocks(calc: Calculator):
 
 
 def test_clear_blocks_strict(empty_calc: Calculator):
-    """Test for `Input.clear_blocks()` with `strict = True`."""
+    """Test for `Input.clear_blocks()` with `strict=True`."""
     with pytest.raises(ValueError):
         empty_calc.input.clear_blocks(strict=True)

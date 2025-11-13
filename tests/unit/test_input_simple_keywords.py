@@ -47,7 +47,7 @@ def test_add_simple_keyword(calc_with_keywords: Calculator, keywords: tuple):
 
 
 def test_add_simple_keywords_strict(calc_with_keywords: Calculator, keywords: tuple):
-    """Test addition of keywords with `strict = True`. When `strict = True`, a ValueError should be raised
+    """Test addition of keywords with `strict=True`. When `strict=True`, a `ValueError` should be raised
     if keywords have already been added."""
     with pytest.raises(ValueError):
         calc_with_keywords.input.add_simple_keywords(keywords[0], strict=True)
@@ -60,7 +60,7 @@ def test_clear_simple_keywords(calc: Calculator):
 
 
 def test_clear_simple_keywords_strict(empty_calc: Calculator):
-    """Test for `Input.clear_simple_keywords()` with `strict = True`. When `strict = True`, a ValueError should be '
+    """Test for `Input.clear_simple_keywords()` with `strict=True`. When `strict=True`, a `ValueError` should be
     raised if there are no keywords to be removed."""
     with pytest.raises(ValueError):
         empty_calc.input.clear_simple_keywords(strict=True)
@@ -84,7 +84,7 @@ def test_get_keyword_with_string(calc: Calculator, keywords: tuple):
 
 
 def test_get_keyword_create_missing(empty_calc: Calculator, keywords: tuple):
-    """Test `Input.get_simple_keywords()` with `create_missing = True`. When `create_missing = True`, the missing keyword
+    """Test `Input.get_simple_keywords()` with `create_missing=True`. When `create_missing=True`, the missing keyword
     gets created and added to simple keywords."""
     returned_keywords = empty_calc.input.get_simple_keywords(*keywords, create_missing=True)
     assert keywords[0] in returned_keywords
