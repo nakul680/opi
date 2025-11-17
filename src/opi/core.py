@@ -216,13 +216,12 @@ class Calculator:
             input_param = self.input
 
             assert self.inpfile is not None
-            with open(self._inpfile, "w") as inp:
+            with self.inpfile.open("w") as inp:
                 # ---------------------------------
                 # > Before coords block
                 # ---------------------------------
-                input_string_before_coords = input_param.format_before_coords(self.working_dir)
 
-                inp.write(input_string_before_coords)
+                inp.write(input_param.format_before_coords(self.working_dir))
 
                 # ---------------------------------
                 # > Coords block
@@ -236,9 +235,8 @@ class Calculator:
                 # ---------------------------------
                 # > After coords block
                 # ---------------------------------
-                input_string_after_coords = input_param.format_after_coords()
 
-                inp.write(input_string_after_coords)
+                inp.write(input_param.format_after_coords())
 
                 return input_overwritten
 

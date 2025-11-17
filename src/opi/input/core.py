@@ -179,7 +179,7 @@ class Input:
         Raises
         ------
         ValueError
-            If the working directory is empty
+            If the working directory does not exist, the error is raised when formatting path to moinp file.
 
         Returns
         -------
@@ -218,15 +218,14 @@ class Input:
             if (ncores := self.ncores) is not None:
                 input_before_coords += f"%pal\n    nprocs {ncores:d}\nend\n"
             if (moinp := self.moinp) is not None:
-                input_before_coords += f'%moinp "{moinp.relative_to(working_directory)}"\n'
+                input_before_coords += f'%moinp "{moinp.relative_to(working_directory)}"\n'  # ValueError could be raised if working_directory does not exist
 
             # ---------------------------------
             # > Block Options: Before coords
             # ---------------------------------
-            if blocks:
-                for block in blocks:
-                    if not block.aftercoord:
-                        input_before_coords += f"\n{block.format_orca()}\n"
+            for block in blocks:
+                if not block.aftercoord:
+                    input_before_coords += f"\n{block.format_orca()}\n"
 
             # ---------------------------------
             # > Arbitrary Strings: Before Coords
@@ -248,6 +247,7 @@ class Input:
         Raises
         ------
         ValueError
+            if error occurs during formatting of any block or arbitrary string.
 
 
         Returns
@@ -263,10 +263,9 @@ class Input:
             # ---------------------------------
             # > Block options: After coords
             # ---------------------------------
-            if blocks:
-                for block in blocks:
-                    if block.aftercoord:
-                        input_after_coords += f"\n{block.format_orca()}\n"
+            for block in blocks:
+                if block.aftercoord:
+                    input_after_coords += f"\n{block.format_orca()}\n"
 
             # ---------------------------------
             # > Arbitrary Strings: Bottom
