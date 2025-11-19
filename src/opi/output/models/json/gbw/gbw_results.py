@@ -44,9 +44,19 @@ class GbwResults(GetItem):
         -------
         GbwResults
             An instance of the `GbwResults` class
+
+        Raises
+        ------
+        FileNotFoundError
+            Raised if `json_file` does not point to a file.
+        AssertionError
+            Raised if `dict_to_lower` does not return a dict.
         """
-        with open(json_file, "r") as file:
-            data = json.load(file)
+        try:
+            with open(json_file, "r") as file:
+                data = json.load(file)
+        except:
+            raise FileNotFoundError(f"File {json_file} not found")
 
         data = dict_to_lower(data)
         if not isinstance(data, dict):

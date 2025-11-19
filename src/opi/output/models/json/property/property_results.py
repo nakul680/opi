@@ -37,12 +37,12 @@ class PropertyResults(GetItem):
     geometries: list[Geometries] | None = None
 
     @classmethod
-    def from_json(cls, file_path: Path | str) -> "PropertyResults":
+    def from_json(cls, json_file: Path | str) -> "PropertyResults":
         """
         Creates a `PropertyResults` instance from a JSON file.
         Parameters
         ----------
-        file_path: Path | str
+        json_file: Path | str
             Path to the JSON file
 
         Returns
@@ -50,9 +50,20 @@ class PropertyResults(GetItem):
         PropertyResults
             `PropertyResults` object created from JSON file
 
+        Raises
+        ------
+        AssertionError
+            Raised if `dict_to_lower()` does not return a dictionary.
+        FileNotFoundError
+            Raised if `json_file` does not point to a file.
+
         """
-        with open(file_path, "r") as file:
-            data = json.load(file)
+        try:
+
+            with open(json_file, "r") as file:
+                data = json.load(file)
+        except:
+            raise FileNotFoundError(f"File {json_file} not found")
 
         data = dict_to_lower(data)
 
