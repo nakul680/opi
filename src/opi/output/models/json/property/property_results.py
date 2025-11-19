@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from opi.output.models.base.get_item import GetItem
@@ -10,7 +11,7 @@ from opi.output.models.json.property.properties.calc_time import (
 )
 from opi.output.models.json.property.properties.geometries import Geometries
 from opi.output.models.json.property.properties.pal import PalFlags
-import json
+from opi.utils.dict_to_lower import dict_to_lower
 
 
 class PropertyResults(GetItem):
@@ -36,24 +37,26 @@ class PropertyResults(GetItem):
     geometries: list[Geometries] | None = None
 
     @classmethod
-    def from_json(cls, file_path:Path | str) -> "PropertyResults":
+    def from_json(cls, file_path: Path | str) -> "PropertyResults":
+        """
+        Creates a `PropertyResults` instance from a JSON file.
+        Parameters
+        ----------
+        file_path: Path | str
+            Path to the JSON file
+
+        Returns
+        -------
+        PropertyResults
+            `PropertyResults` object created from JSON file
+
+        """
         with open(file_path, "r") as file:
             data = json.load(file)
 
-        calc_info = data.get("Calculation_Info",{})
-        calc_info = {k.lower(): v for k,v in calc_info.items()}
-        calc_status = data.get("Calculation_Status",{})
-        calc_status = {k.lower(): v for k,v in calc_status.items()}
-        calc_timings = data.get("Calculation_Timings",{})
-        calc_timings = {k.lower(): v for k, v in calc_timings.items()}
-        pal_flags = data.get("PAL_Flags",{})
-        pal_flags = {k.lower(): v for k, v in pal_flags.items()}
-        geometries = data.get("Geometries",[])
+        data = dict_to_lower(data)
 
-        return cls(
-            calculation_info=CalcInfo(**calc_info),
-            calculation_status=CalculationStatus(**calc_status),
-            calculation_timings=CalculationTiming(**calc_timings),
-            pal_flags=PalFlags(**pal_flags),
-            geometries=geometries,
-        )
+        if not isinstance(data, dict):
+            raise AssertionError("Data is not a dictionary")
+
+        return cls(**data)
