@@ -2,8 +2,8 @@ from typing import Any
 
 
 def dict_to_lower(
-    obj: dict[Any, Any] | list[dict[Any, Any]],
-) -> dict[Any, Any] | list[dict[Any, Any]]:
+    obj: dict[str, Any],
+) -> dict[str, Any] | list[dict[str, Any]]:
     """
     Recursively convert all key values in a dictionary to lowercase.
 
