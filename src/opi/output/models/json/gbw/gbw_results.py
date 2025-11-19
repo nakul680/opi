@@ -55,7 +55,7 @@ class GbwResults(GetItem):
         try:
             with open(json_file, "r") as file:
                 data = json.load(file)
-        except:
+        except FileNotFoundError:
             raise FileNotFoundError(f"File {json_file} not found")
 
         data = dict_to_lower(data)
