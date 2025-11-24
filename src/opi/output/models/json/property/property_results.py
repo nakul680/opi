@@ -1,7 +1,3 @@
-import json
-from pathlib import Path
-
-from opi.output.models.base.get_item import GetItem
 from opi.output.models.json.property.properties.calc_info import CalcInfo
 from opi.output.models.json.property.properties.calc_status import (
     CalculationStatus,
@@ -11,10 +7,10 @@ from opi.output.models.json.property.properties.calc_time import (
 )
 from opi.output.models.json.property.properties.geometries import Geometries
 from opi.output.models.json.property.properties.pal import PalFlags
-from opi.utils.dict_to_lower import dict_to_lower
+from opi.output.models.jsonreadable import JSONLoadable
 
 
-class PropertyResults(GetItem):
+class PropertyResults(JSONLoadable):
     """
     Has all the information calculated in the ORCA job
 
@@ -35,38 +31,3 @@ class PropertyResults(GetItem):
     calculation_timings: CalculationTiming | None = None
     pal_flags: PalFlags | None = None
     geometries: list[Geometries] | None = None
-
-    @classmethod
-    def from_json(cls, json_file: Path | str) -> "PropertyResults":
-        """
-        Creates a `PropertyResults` instance from a JSON file.
-        Parameters
-        ----------
-        json_file: Path | str
-            Path to the JSON file
-
-        Returns
-        -------
-        PropertyResults
-            `PropertyResults` object created from JSON file
-
-        Raises
-        ------
-        AssertionError
-            Raised if `dict_to_lower()` does not return a dictionary.
-        FileNotFoundError
-            Raised if `json_file` does not point to a file.
-
-        """
-        try:
-            with open(json_file, "r") as file:
-                data = json.load(file)
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File {json_file} not found")
-
-        data = dict_to_lower(data)
-
-        if not isinstance(data, dict):
-            raise AssertionError("Data is not a dictionary")
-
-        return cls(**data)
