@@ -228,4 +228,3 @@ def dict_to_lower(obj: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | lis
         return [dict_to_lower(item) for item in obj]
     else:
         return obj
-
