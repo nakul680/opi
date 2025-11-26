@@ -1,12 +1,13 @@
 import json
+from abc import ABC
 from pathlib import Path
 from typing import Any, Self
 
 from opi.output.models.base.get_item import GetItem
-from opi.utils.dict_to_lower import dict_to_lower
+from opi.utils.misc import dict_to_lower
 
 
-class JSONLoadable(GetItem):
+class JSONLoadable(GetItem, ABC):
     """
     Superclass providing utility methods for loading objects from JSON data or files.
     """
@@ -14,7 +15,8 @@ class JSONLoadable(GetItem):
     @classmethod
     def from_json(cls, json_data: dict[str, Any]) -> Self:
         """
-        Loads object from JSON data
+        Create object from JSON data
+
         Parameters
         ----------
         json_data : dict[str,Any]
@@ -41,6 +43,7 @@ class JSONLoadable(GetItem):
     def from_json_file(cls, json_file: Path | str) -> Self:
         """
         Creates an object from a JSON file.
+
         Parameters
         ----------
         json_file: Path | str
@@ -69,6 +72,6 @@ class JSONLoadable(GetItem):
         except FileNotFoundError:
             raise FileNotFoundError(f"File {json_file} not found")
         except json.decoder.JSONDecodeError:
-            raise ValueError("Invalid JSON")
+            raise ValueError(f"Invalid JSON: {json_file}")
 
         return cls.from_json(data)
