@@ -3,7 +3,7 @@ from pydantic import Field
 from opi.output.models.json.gbw.properties.cite import Cite
 from opi.output.models.json.gbw.properties.header import OrcaHeader
 from opi.output.models.json.gbw.properties.molecule import Molecule
-from opi.output.models.jsonreadable import JSONLoadable
+from opi.output.models.json_loadable import JSONLoadable
 
 
 class GbwResults(JSONLoadable):

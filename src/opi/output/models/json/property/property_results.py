@@ -7,7 +7,7 @@ from opi.output.models.json.property.properties.calc_time import (
 )
 from opi.output.models.json.property.properties.geometries import Geometries
 from opi.output.models.json.property.properties.pal import PalFlags
-from opi.output.models.jsonreadable import JSONLoadable
+from opi.output.models.json_loadable import JSONLoadable
 
 
 class PropertyResults(JSONLoadable):
