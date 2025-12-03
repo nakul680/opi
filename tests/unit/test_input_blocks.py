@@ -69,20 +69,23 @@ def blocks(request) -> tuple:
     """Provide different block combinations for parameterized testing."""
     return request.param
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_add_blocks(empty_calc: Calculator, blocks: tuple):
     """Test for `Input.add_blocks()` with singular and multiple blocks."""
     empty_calc.input.add_blocks(*blocks)
     assert empty_calc.input.has_blocks(*blocks)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_add_blocks_strict(calc: Calculator, blocks: tuple):
     """Test for `Input.add_blocks()` with `strict=True`. When `strict=True`, a `ValueError` should be raised
     if that Block instance has already been added."""
     with pytest.raises(ValueError):
         calc.input.add_blocks(*blocks, strict=True)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_add_blocks_overwrite(calc: Calculator):
     """Test for `Input.add_blocks()` with `overwritten=True`. When `overwritten=True`, the existing `Block` instance
     should be overwritten if it exists."""
@@ -90,7 +93,8 @@ def test_add_blocks_overwrite(calc: Calculator):
 
     assert calc.input.blocks[BlockMethod].d3s6 == 0.75
 
-
+@pytest.mark.unit
+@pytest.mark.input
 @pytest.mark.parametrize(
     "blocks,expected",
     [
@@ -104,19 +108,22 @@ def test_remove_block(calc: Calculator, blocks: tuple, expected: tuple):
     calc.input.remove_blocks(*blocks)
     assert calc.input.has_blocks(*blocks) == expected
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_remove_blocks_strict(calc: Calculator, empty_test_block: Block):
     """Test for `Input.remove_blocks()` with `strict = True`."""
     with pytest.raises(ValueError):
         calc.input.remove_blocks(empty_test_block, strict=True)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_has_block_empty_calc(empty_calc: Calculator, empty_test_block: Block):
     """Test for `Input.has_blocks()` when no blocks have been added."""
     calc = empty_calc
     assert calc.input.has_blocks(empty_test_block) == (False,)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 @pytest.mark.parametrize(
     "blocks, expected",
     [
@@ -129,32 +136,37 @@ def test_has_block(calc: Calculator, blocks: tuple, expected: tuple):
     """Test for `Input.has_blocks()` with different combinations of blocks and expected results"""
     assert calc.input.has_blocks(*blocks) == expected
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_get_block_empty(empty_calc: Calculator):
     """Test for `Input.get_block()` when no blocks have been added."""
     returned_block = empty_calc.input.get_blocks(BlockMethod)
     assert not returned_block
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_get_block(calc_with_test_block: Calculator, empty_test_block: Block):
     """Test for `Input.get_blocks()`."""
     type_instance = type(empty_test_block)
     assert calc_with_test_block.input.get_blocks(type_instance) == {type_instance: empty_test_block}
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_get_blocks_create_missing(empty_calc: Calculator, empty_test_block: Block):
     """Test for `Input.get_blocks()` with `create_missing=True`."""
     type_instance = type(empty_test_block)
     returned_blocks = empty_calc.input.get_blocks(type_instance, create_missing=True)
     assert BlockScf in returned_blocks
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_clear_blocks(calc: Calculator):
     """Test for `Input.clear_blocks()`."""
     calc.input.clear_blocks()
     assert not calc.input.blocks
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_clear_blocks_strict(empty_calc: Calculator):
     """Test for `Input.clear_blocks()` with `strict=True`."""
     with pytest.raises(ValueError):

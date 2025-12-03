@@ -58,33 +58,38 @@ def xyz_buffer_single_structure(xyz_single_file: Path):
 
     return tracking_text
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_single_structure_created(xyz_single_file: Path):
     """Test to check if `Structure` object is created correctly from .xyz file"""
     structure = Structure.from_xyz(xyz_single_file)
     assert isinstance(structure, Structure)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_single_structure_correct_number_of_atoms(xyz_single_file: Path):
     """Test to check if Structure file created has the correct number of atoms"""
     structure = Structure.from_xyz(xyz_single_file)
     assert len(structure.atoms) == 3
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_single_structure_correct_atoms(xyz_single_file: Path):
     """Test to check if order of atoms is preserved"""
     structure = Structure.from_xyz(xyz_single_file)
     structure_symbols = [atom.element for atom in structure.atoms]
     assert structure_symbols == [Element.O, Element.H, Element.H]
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_single_structure_nonexistent_file(tmp_path: Path):
     """Test to check if `Structure.from_xyz()` correctly raises error in case of nonexistent file"""
     nonexistent_file = tmp_path / "nonexistent.xyz"
     with pytest.raises(FileNotFoundError):
         Structure.from_xyz(nonexistent_file)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_single_structure_check_coordinates(xyz_single_file: Path):
     """Test to check if Structure file created has the correct coordinates"""
     structure = Structure.from_xyz(xyz_single_file)
@@ -94,50 +99,58 @@ def test_from_xyz_single_structure_check_coordinates(xyz_single_file: Path):
         atol=1e-5,
     )
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_multi_structure_object_created(xyz_multi_file: Path):
     """Test to check if `Structure.from_xyz()` works correctly in case of multi structure .xyz file"""
     structure = Structure.from_xyz(xyz_multi_file)
     assert isinstance(structure, Structure)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_trj_xyz_structure_created(xyz_multi_file: Path):
     """Test to check if `Structure.from_trj_xyz()` correctly creates list of Structure objects"""
     structures = Structure.from_trj_xyz(xyz_multi_file)
     assert all(isinstance(structure, Structure) for structure in structures)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_trj_xyz_correct_number_of_structures(xyz_multi_file: Path):
     """Test to check if correct number of structures are created"""
     structures = Structure.from_trj_xyz(xyz_multi_file)
     assert len(structures) == 2
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_trj_xyz_struc_limit(xyz_multi_file: Path):
     """Test to check if `struc_limit` parameter is enforced correctly"""
     structures = Structure.from_trj_xyz(xyz_multi_file, n_struc_limit=1)
     assert len(structures) == 1
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_trj_xyz_nonexistent_file(tmp_path: Path):
     """Test to check if `Structure.from_trj_xyz()` correctly raises error in case of nonexistent file"""
     nonexistent_file = tmp_path / "nonexistent.xyz"
     with pytest.raises(FileNotFoundError):
         Structure.from_trj_xyz(nonexistent_file)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_buffer(xyz_buffer_single_structure):
     """Test to check if `Structure` object is created from xyz buffer"""
     structure = Structure.from_xyz_buffer(xyz_buffer_single_structure)
     assert isinstance(structure, Structure)
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_buffer_empty():
     """Test to check if `Structure.from_xyz_buffer()` raises EOFError in case of empty buffer."""
     with pytest.raises(EOFError):
         Structure.from_xyz_buffer(TrackingTextIO(""))
 
-
+@pytest.mark.unit
+@pytest.mark.input
 def test_from_xyz_buffer_raises_on_invalid_header():
     """Text to check if `Structure.from_xyz_buffer()` raises error on invalid header"""
     xyz_text = """NotAnInteger
