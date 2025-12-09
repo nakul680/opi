@@ -167,7 +167,7 @@ class Input:
     # > METHODS
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    def format_before_coords(self, working_directory: Path) -> str:
+    def format_before_coords(self, working_directory: Path | None) -> str:
         """
         Function to format input data that appears before the coordinate block in the ORCA .inp file.
 
@@ -191,6 +191,7 @@ class Input:
             simple_keywords = self.simple_keywords
             blocks = self.blocks.values() if self.blocks else ()
             arbitrary_strings = self.arbitrary_strings
+            working_directory = Path.cwd() if working_directory is None else working_directory
 
             # ---------------------------------
             # > Arbitrary Strings: top
