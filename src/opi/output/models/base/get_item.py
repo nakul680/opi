@@ -113,3 +113,8 @@ class GetItem(BaseModel, ABC):
                 lines.append(header)
 
         return "\n".join(lines)
+
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+        return self.__dict__ == other.__dict__
