@@ -5,17 +5,17 @@ To define the location of module containing fixtures, the absolute path to that 
 starting from the main package folder must be given.
 """
 
+import shutil
 from collections.abc import Generator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, cast
 
 import pytest
-import shutil
 from _pytest._code.code import ExceptionRepr
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
-from dataclasses import dataclass
 
 # > Location of modules containing fixtures.
 # >> Searching for Python modules which do no start with an underscore and converting file path to module path.
@@ -74,6 +74,7 @@ def pytest_runtest_makereport(
                 else:
                     rep.longrepr = f"Test of an example failed, see ORCA files in: {tmp}"
 
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--update-json-files",
@@ -81,6 +82,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="After json file generator tests pass, copy all produced *.json from tmp_path into tests/json_files/.",
     )
+
 
 @dataclass(frozen=True)
 class JsonFilesExporter:

@@ -7,7 +7,7 @@ from opi.input.structures import Structure
 @pytest.mark.examples
 @pytest.mark.orca
 @pytest.mark.json_files
-def test_exmp013_bs(example_input_file, tmp_path,  json_files_exporter) -> None:
+def test_exmp013_bs(example_input_file, tmp_path, json_files_exporter) -> None:
     """Ensure broken symmetry example runs successfully and produces a final energy."""
     # Get input file from example folder
     input_file = example_input_file(run_exmp013)
