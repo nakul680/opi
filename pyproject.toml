@@ -121,7 +121,8 @@ markers = [
     "slow: tests that take longer",
     "output: output side unit tests",
     "input: input side unit tests",
-    "unit: unit tests"
+    "unit: unit tests",
+    "json_files: Export JSON files with --update-json-files",
 ]
 
 

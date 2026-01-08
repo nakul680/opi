@@ -79,16 +79,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "--update-json-files",
         action="store_true",
         default=False,
-        help="After generator tests pass, copy all produced *.json from tmp_path into tests/json_files/ (git-tracked).",
+        help="After json file generator tests pass, copy all produced *.json from tmp_path into tests/json_files/.",
     )
-
-
-def pytest_configure(config: pytest.Config) -> None:
-    config.addinivalue_line(
-        "markers",
-        "generator_test: test produces json files in tmp_path; can export them with --update-json-files",
-    )
-
 
 @dataclass(frozen=True)
 class JsonFilesExporter:
@@ -160,11 +152,11 @@ def json_files_dir(request: pytest.FixtureRequest) -> Path:
 
 @pytest.fixture
 def json_files_exporter(request: pytest.FixtureRequest, json_files_dir: Path) -> JsonFilesExporter:
-    if "generator_test" not in request.node.keywords:
-        pytest.fail("json_files_exporter is intended for tests marked with @pytest.mark.generator_test")
+    if "json_files" not in request.node.keywords:
+        pytest.fail("json_files_exporter is intended for tests marked with @pytest.mark.json_files")
 
     return JsonFilesExporter(
         json_files_dir=json_files_dir,
-        prefix=request.node.name,  # generator test basename
+        prefix=request.node.name,  # json_file basename
         enabled=request.config.getoption("--update-json-files"),
     )

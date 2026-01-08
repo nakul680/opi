@@ -6,8 +6,7 @@ from opi.input.structures import Structure
 
 @pytest.mark.examples
 @pytest.mark.orca
-@pytest.mark.generator_test
-def test_exmp001_scf(example_input_file, tmp_path, json_files_exporter) -> None:
+def test_exmp001_scf(example_input_file, tmp_path) -> None:
     """Ensure SCF example runs successfully and produces a final energy."""
 
     # Get input file from example folder
@@ -19,6 +18,3 @@ def test_exmp001_scf(example_input_file, tmp_path, json_files_exporter) -> None:
 
     # Assert negative final energy
     assert output.get_final_energy() < 0
-
-    # optional export to git-tracked folder (no-op unless flag is used)
-    json_files_exporter.export_jsons_from(tmp_path)
