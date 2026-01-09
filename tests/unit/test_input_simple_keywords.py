@@ -38,6 +38,7 @@ def calc_with_keywords(keywords) -> Calculator:
     new_calc.input.add_simple_keywords(*keywords)
     return new_calc
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_add_simple_keyword(calc_with_keywords: Calculator, keywords: tuple):
@@ -45,6 +46,7 @@ def test_add_simple_keyword(calc_with_keywords: Calculator, keywords: tuple):
     Test to add simple keywords to an empty `Calculator` object.
     """
     assert calc_with_keywords.input.has_simple_keywords(*keywords)
+
 
 @pytest.mark.unit
 @pytest.mark.input
@@ -54,12 +56,14 @@ def test_add_simple_keywords_strict(calc_with_keywords: Calculator, keywords: tu
     with pytest.raises(ValueError):
         calc_with_keywords.input.add_simple_keywords(keywords[0], strict=True)
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_clear_simple_keywords(calc: Calculator):
     """Test for `Input.clear_simple_keywords()`."""
     calc.input.clear_simple_keywords()
     assert not calc.input.simple_keywords
+
 
 @pytest.mark.unit
 @pytest.mark.input
@@ -69,6 +73,7 @@ def test_clear_simple_keywords_strict(empty_calc: Calculator):
     with pytest.raises(ValueError):
         empty_calc.input.clear_simple_keywords(strict=True)
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_get_keywords(calc: Calculator, keywords: tuple):
@@ -77,6 +82,7 @@ def test_get_keywords(calc: Calculator, keywords: tuple):
     returned_keywords = calc.input.get_simple_keywords(*keywords)
     for keyword in keywords:
         assert keyword in returned_keywords
+
 
 @pytest.mark.unit
 @pytest.mark.input
@@ -88,6 +94,7 @@ def test_get_keyword_with_string(calc: Calculator, keywords: tuple):
     for keyword in keywords:
         assert SimpleKeyword(keyword) in returned_keywords
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_get_keyword_create_missing(empty_calc: Calculator, keywords: tuple):
@@ -96,12 +103,14 @@ def test_get_keyword_create_missing(empty_calc: Calculator, keywords: tuple):
     returned_keywords = empty_calc.input.get_simple_keywords(*keywords, create_missing=True)
     assert keywords[0] in returned_keywords
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_get_nonexistent_keyword(empty_calc: Calculator, keywords: tuple):
     """Test `Input.get_simple_keywords()` with a not yet added keyword."""
     returned_keywords = empty_calc.input.get_simple_keywords(*keywords)
     assert not returned_keywords
+
 
 @pytest.mark.unit
 @pytest.mark.input

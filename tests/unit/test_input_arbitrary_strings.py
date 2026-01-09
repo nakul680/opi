@@ -32,6 +32,7 @@ def test_add_arbitrary_strings(empty_calc: Calculator, string: str):
     empty_calc.input.add_arbitrary_string(string)
     assert ArbitraryString(string) in empty_calc.input.arbitrary_strings
 
+
 @pytest.mark.unit
 @pytest.mark.input
 @pytest.mark.parametrize(
@@ -50,6 +51,7 @@ def test_add_arbitrary_strings_pos(
     empty_calc.input.add_arbitrary_string(string, pos=position)
     assert ArbitraryString(string, pos=position) in empty_calc.input.arbitrary_strings
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_add_arbitrary_string_default_pos(empty_calc: Calculator):
@@ -60,6 +62,7 @@ def test_add_arbitrary_string_default_pos(empty_calc: Calculator):
         in empty_calc.input.arbitrary_strings
     )
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_add_arbitrary_strings_not_str(empty_calc: Calculator):
@@ -67,12 +70,14 @@ def test_add_arbitrary_strings_not_str(empty_calc: Calculator):
     with pytest.raises(TypeError):
         empty_calc.input.add_arbitrary_string(1234)
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_add_empty_string(empty_calc: Calculator):
     """Test for adding an empty string to arbitrary strings."""
     with pytest.raises(ValueError):
         empty_calc.input.add_arbitrary_string("")
+
 
 @pytest.mark.unit
 @pytest.mark.input
@@ -91,6 +96,7 @@ def test_remove_string(
     calc.input.remove_arbitrary_string(remove_param)
     assert removed_string not in calc.input.arbitrary_strings
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_remove_arbitrary_string_strict(empty_calc: Calculator):
@@ -99,12 +105,14 @@ def test_remove_arbitrary_string_strict(empty_calc: Calculator):
     with pytest.raises(ValueError):
         empty_calc.input.remove_arbitrary_string("test", strict=True)
 
+
 @pytest.mark.unit
 @pytest.mark.input
 def test_clear_arbitrary_strings(calc: Calculator):
     """Test for `Input.clear_arbitrary_strings()`."""
     calc.input.clear_arbitrary_strings()
     assert not calc.input.arbitrary_strings
+
 
 @pytest.mark.unit
 @pytest.mark.input

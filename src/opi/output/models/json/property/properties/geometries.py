@@ -169,5 +169,5 @@ class Geometries(GetItem):
     quadrupole_moment: list[QuadrupoleMoment] | None = None
     cipsi_energies: list[CiPsi] | None = None
     energy_extrapolation: EnergyExtrapolation | None = None
-    roci_energy: list[RoCiEnergy] | None = None
+    rocis_energies: RoCiEnergy | None = None
     thermochemistry_energies: list[ThermochemistryEnergy] | None = None
