@@ -1,7 +1,10 @@
 import inspect
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Set, get_args, get_origin
 
+import pytest
 from pydantic import BaseModel
 
 from opi.output.core import Output
@@ -344,7 +347,7 @@ PROPRESULTS_ATTR = {
     "orbitalsymmetry",
     "x",
 }
-JSON_DIR = Path(__file__).parent.parent / "fixtures/json_files"
+JSON_DIR = Path(__file__).parent.parent / "json_files"
 
 
 def get_all_attributes(
@@ -513,8 +516,24 @@ def collect_non_none_attrs(
 
 
 def make_output_object(basename: str):
-    output_object = Output(basename=basename, working_dir=JSON_DIR, version_check=False)
-    if (JSON_DIR / f"{basename}.json").exists():
+    # Look for basename.json in JSON_DIR and all subdirectories
+    json_files = list(JSON_DIR.rglob(f"{basename}.*"))
+    # Separate GBW json and property json
+    gbw_json = next(
+        f for f in json_files if f.suffix == ".json" and not f.name.endswith(".property.json")
+    )
+    property_json = next(f for f in json_files if f.name.endswith(".property.json"))
+
+    temp_dir = Path(tempfile.mkdtemp())
+
+    # Copy files into temp directory
+    shutil.copy(gbw_json, temp_dir / gbw_json.name)
+    shutil.copy(property_json, temp_dir / property_json.name)
+
+    output_object = Output(basename=basename, working_dir=temp_dir, version_check=False)
+
+    if json_files:
+        # Optionally: pick the first match
         output_object.parse(read_gbw_json=True)
     else:
         output_object.parse(read_gbw_json=False)
@@ -522,13 +541,14 @@ def make_output_object(basename: str):
     return output_object
 
 
+@pytest.mark.output
 def test_attributes():
     created = set()
     gbw_attr = get_all_attributes(GbwResults, prefix="GbwResults")
     prop_attr = get_all_attributes(PropertyResults, prefix="PropertyResults")
     output_attr = gbw_attr.union(prop_attr)
     print(output_attr)
-    for file in JSON_DIR.glob("*.json"):
+    for file in JSON_DIR.rglob("*.json"):
         basename = file.stem
         basename = basename.split(".", 1)[0]
 
