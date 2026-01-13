@@ -29,5 +29,5 @@ class PropertyResults(JSONLoadable):
     calculation_info: CalcInfo | None = None
     calculation_status: CalculationStatus | None = None
     calculation_timings: CalculationTiming | None = None
-    pal_flags: PalFlags | None = None
+    # pal_flags: PalFlags | None = None
     geometries: list[Geometries] | None = None

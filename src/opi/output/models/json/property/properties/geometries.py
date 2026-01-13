@@ -168,6 +168,6 @@ class Geometries(GetItem):
     broken_symmetry: BrokenSym | None = None
     quadrupole_moment: list[QuadrupoleMoment] | None = None
     cipsi_energies: CiPsi | None = None
-    energy_extrapolation: EnergyExtrapolation | None = None
+    # energy_extrapolation: EnergyExtrapolation | None = None
     rocis_energies: RoCiEnergy | None = None
     thermochemistry_energies: list[ThermochemistryEnergy] | None = None

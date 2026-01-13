@@ -38,5 +38,5 @@ class DftEnergy(GetItem):
     ecorr: StrictFiniteFloat | None = None
     ecnl: StrictFiniteFloat | None = None
     exc: StrictFiniteFloat | None = None
-    eembed: StrictFiniteFloat | None = None
+    # eembed: StrictFiniteFloat | None = None
     finalen: StrictFiniteFloat | None = None

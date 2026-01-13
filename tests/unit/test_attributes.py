@@ -350,6 +350,13 @@ PROPRESULTS_ATTR = {
 JSON_DIR = Path(__file__).parent.parent / "json_files"
 
 
+def add_gbw_jsons(output_object: Output, gbw_jsons):
+    for gbw_json in gbw_jsons:
+        output_object.gbw_json_files.append(gbw_json)
+
+    output_object.parse(read_gbw_json=True)
+
+
 def get_all_attributes(
     model: type[BaseModel], visited: Set[type] = None, prefix: str = ""
 ) -> Set[str]:
@@ -531,12 +538,13 @@ def make_output_object(basename: str):
     shutil.copy(property_json, temp_dir / property_json.name)
 
     output_object = Output(basename=basename, working_dir=temp_dir, version_check=False)
+    add_gbw_jsons(output_object, [gbw_json])
 
-    if json_files:
-        # Optionally: pick the first match
-        output_object.parse(read_gbw_json=True)
-    else:
-        output_object.parse(read_gbw_json=False)
+    # if json_files:
+    #     # Optionally: pick the first match
+    #     output_object.parse(read_gbw_json=True)
+    # else:
+    #     output_object.parse(read_gbw_json=False)
 
     return output_object
 
@@ -547,7 +555,7 @@ def test_attributes():
     gbw_attr = get_all_attributes(GbwResults, prefix="GbwResults")
     prop_attr = get_all_attributes(PropertyResults, prefix="PropertyResults")
     output_attr = gbw_attr.union(prop_attr)
-    print(output_attr)
+    print(len(output_attr))
     for file in JSON_DIR.rglob("*.json"):
         basename = file.stem
         basename = basename.split(".", 1)[0]
