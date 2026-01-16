@@ -1,15 +1,16 @@
 from typing import Literal
 
-from pydantic import field_validator, BaseModel
+from pydantic import BaseModel, field_validator
 
 from opi.input.blocks import Block
 from opi.input.blocks.util import InputFilePath
 
 __all__ = ("BlockMethod",)
 
+
 class ExternalParam(BaseModel):
     """
-    Class to model `extparamx'. `extparamx` and `extparamxc` attributes in `BlockMethod`.
+    Class to model `extparamx', `extparamx` and `extparamxc` attributes in `BlockMethod`.
 
     Attributes
     -----------
@@ -20,6 +21,7 @@ class ExternalParam(BaseModel):
         New value of parameter.
 
     """
+
     paramname: str
     new_value: float
 
@@ -31,10 +33,8 @@ class ExternalParam(BaseModel):
         except TypeError:
             raise TypeError(f"Invalid string'{string}'")
 
-
     def __str__(self) -> str:
-        return f"\"{self.paramname}\" {self.new_value}"
-
+        return f'"{self.paramname}" {self.new_value}'
 
 
 class BlockMethod(Block):
@@ -124,7 +124,7 @@ class BlockMethod(Block):
         else:
             return path
 
-    @field_validator("extparamx", "extparamc", "extparamxc", mode= "before")
+    @field_validator("extparamx", "extparamc", "extparamxc", mode="before")
     @classmethod
     def init_ext_param_from_string(cls, string: str) -> ExternalParam:
         """
@@ -138,5 +138,3 @@ class BlockMethod(Block):
         ExternalParam
         """
         return ExternalParam.from_string(string=string)
-
-
