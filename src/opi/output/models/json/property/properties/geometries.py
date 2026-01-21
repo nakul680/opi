@@ -7,9 +7,6 @@ from opi.output.models.json.property.properties.ci_psi import CiPsi
 from opi.output.models.json.property.properties.dft_energy import DftEnergy
 from opi.output.models.json.property.properties.dipole_moment import DipoleMoment
 from opi.output.models.json.property.properties.efg_tensor import EfgTensor
-from opi.output.models.json.property.properties.energy_extrap import (
-    EnergyExtrapolation,
-)
 from opi.output.models.json.property.properties.energy_list import (
     EnergyList,
 )
@@ -129,9 +126,7 @@ class Geometries(GetItem):
         Contains the information about the SCF calculated quadruple moment
     cipsi_energies: list[CiPsi] | None, default = None
         Contains the information about the CIPSI calculation
-    energy_extrapolation: EnergyExtrapolation | None, default = None
-        Contains information about the energy extrapolation
-    roci_energy: list[RoCiEnergy] | None, default = None
+    rocis_energies: list[RoCiEnergy] | None, default = None
         Contains information about the ROCI energy
     thermochemistry_energies: list[ThermochemistryEnergy] | None = None
         Contains information about thermostatistical corrections
@@ -168,6 +163,5 @@ class Geometries(GetItem):
     broken_symmetry: BrokenSym | None = None
     quadrupole_moment: list[QuadrupoleMoment] | None = None
     cipsi_energies: CiPsi | None = None
-    # energy_extrapolation: EnergyExtrapolation | None = None
     rocis_energies: RoCiEnergy | None = None
     thermochemistry_energies: list[ThermochemistryEnergy] | None = None

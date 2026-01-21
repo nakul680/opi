@@ -52,7 +52,7 @@ class Coordinates:
         """
         Returns coordinates as list
         """
-        if self.coordinates:
+        if all(self.coordinates):
             coords = self.coordinates.tolist()
             return cast(list[float], coords)
         else:

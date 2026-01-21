@@ -1,4 +1,3 @@
-from opi.output.models.base.get_item import GetItem
 from opi.output.models.base.strict_types import (
     StrictFiniteFloat,
     StrictNonNegativeInt,

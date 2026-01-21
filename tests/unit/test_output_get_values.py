@@ -31,8 +31,6 @@ from opi.output.models.json.property.properties.scf_energy import ScfEnergy
 from opi.output.models.json.property.property_results import PropertyResults
 
 JSON_DIR = Path(__file__).parent.parent / "fixtures/json_files"
-GBW_JSON_DIR = Path(__file__).parent.parent / "fixtures/gbw_json"
-PROPERTY_JSON_DIR = Path(__file__).parent.parent / "fixtures/property_json"
 
 
 @pytest.fixture
@@ -46,7 +44,7 @@ def output_object_aborted() -> Output:
 
 
 @pytest.fixture
-def output_object() -> Output:
+def output_object_job() -> Output:
     output_object = Output(
         "job",
         working_dir=Path(__file__).parent.parent / "fixtures/output_files",
@@ -91,14 +89,23 @@ def output_object_geometry_opt() -> Output:
     return output_object
 
 
+@pytest.fixture
+def output_object(request) -> Output:
+    return request.getfixturevalue(request.param)
+
+
 def make_output_fixtures(basename: str):
     @pytest.fixture
     def _fixture() -> Output:
         output_fixture = Output(basename=basename, working_dir=JSON_DIR, version_check=False)
-        if (JSON_DIR / f"{basename}.json").exists():
-            output_fixture.parse(read_gbw_json=True)
-        else:
-            output_fixture.parse(read_gbw_json=False)
+        gbw_file = JSON_DIR / f"{basename}.json"
+        if gbw_file.exists():
+            # output_fixture.parse(read_gbw_json=True)
+            output_fixture.gbw_json_files = [gbw_file]
+        # else:
+        #     output_fixture.parse(read_gbw_json=False)
+
+        output_fixture.parse()
 
         return output_fixture
 
@@ -140,108 +147,120 @@ def test_load_property_result_from_json():
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_aborted", False),
-        ("output_object", True),
+        ("output_object_job", True),
         ("output_object_nonexistent", False),
     ],
+    indirect=["output_object"],
 )
-def test_terminated_normally(fixture: str, expected_values: bool, request):
-    output_object = request.getfixturevalue(fixture_name)
-    print(output_object.terminated_normally())
+def test_terminated_normally(output_object, expected_values: bool):
+    """Test if `Output.terminated_normally()` returns correct values."""
     assert output_object.terminated_normally() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_scf_failed", False),
-        ("output_object", True),
+        ("output_object_job", True),
         ("output_object_nonexistent", False),
     ],
+    indirect=["output_object"],
 )
-def test_scf_converged(fixture: str, expected_values: bool, request):
-    output_object = request.getfixturevalue(fixture_name)
+def test_scf_converged(output_object: Output, expected_values: bool):
+    """Test if `Output.scf_converged()` returns correct values."""
     assert output_object.scf_converged() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_geometry_opt_failed", False),
         ("output_object_geometry_opt", True),
         ("output_object_nonexistent", False),
     ],
+    indirect=["output_object"],
 )
-def test_geometry_optimization_converged(fixture: str, expected_values: bool, request):
-    output_object = request.getfixturevalue(fixture)
+def test_geometry_optimization_converged(output_object: Output, expected_values: bool):
+    """Test if `Output.geometry_optimization_converged()` returns correct values."""
     assert output_object.geometry_optimization_converged() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_opt", "rhf"),
         ("output_object_roci", "rohf"),
     ],
+    indirect=["output_object"],
 )
-def test_get_hftype(fixture: str, expected_values: str, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_hftype(output_object: Output, expected_values: str):
+    """Test to check if `Output.get_hftype()` returns expected value."""
     assert output_object.get_hftype() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_hftype_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_hftype()` returns None when expected."""
     assert not output_object_nonexistent.get_hftype()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values", [("output_object_opt", 0), ("output_object_roci", -1)]
+    "output_object, expected_values",
+    [("output_object_opt", 0), ("output_object_roci", -1)],
+    indirect=["output_object"],
 )
-def test_get_charge(fixture: str, expected_values: int, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_charge(output_object: Output, expected_values: int):
+    """Test to check if `Output.get_charge()` returns expected values."""
     assert output_object.get_charge() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_charge_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_charge()` returns None when expected."""
     assert not output_object_nonexistent.get_charge()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values", [("output_object_opt", 1), ("output_object_roci", 2)]
+    "output_object, expected_values",
+    [("output_object_opt", 1), ("output_object_roci", 2)],
+    indirect=["output_object"],
 )
-def test_get_mult(fixture: str, expected_values: int, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_mult(output_object: Output, expected_values: int):
+    """Test to check if `Output.get_mult()` returns expected values."""
     assert output_object.get_mult() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_mult_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_mult()` returns None when expected."""
     assert not output_object_nonexistent.get_mult()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values", [("output_object_opt", 10), ("output_object_roci", 11)]
+    "output_object, expected_values",
+    [("output_object_opt", 10), ("output_object_roci", 11)],
+    indirect=["output_object"],
 )
-def test_get_nelectrons_not_spin_resolved(fixture: str, expected_values: int, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_nelectrons_not_spin_resolved(output_object: Output, expected_values: int):
+    """Test to check if `Output.get_nelectrons()` returns expected values."""
     x, y = output_object.get_nelectrons()
     assert (x == expected_values) and (not y)
 
@@ -249,21 +268,23 @@ def test_get_nelectrons_not_spin_resolved(fixture: str, expected_values: int, re
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_scf", (5, 5)),
         ("output_object_roci", (6, 5)),
         ("output_object_relative_corr", (80, 80)),
     ],
+    indirect=["output_object"],
 )
-def test_get_nelectrons_spin_resolved(fixture: str, expected_values: tuple[int, int], request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_nelectrons_spin_resolved(output_object: Output, expected_values: tuple[int, int]):
+    """Test to check if `Output.get_nelectrons()` returns expected values, when `spin_resolved` is True."""
     assert output_object.get_nelectrons(spin_resolved=True) == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_nelectrons_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_nelectrons()` returns None when expected."""
     x, y = output_object_nonexistent.get_nelectrons()
     assert (not x) and (not y)
 
@@ -271,31 +292,35 @@ def test_get_nelectrons_nonexistent(output_object_nonexistent: Output):
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values", [("output_object_relative_corr", 208), ("output_object_uvvis", 43)]
+    "output_object, expected_values",
+    [("output_object_relative_corr", 208), ("output_object_uvvis", 43)],
+    indirect=["output_object"],
 )
-def test_get_nbf(fixture: str, expected_values: int, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_nbf(output_object: Output, expected_values: int):
+    """Test to check if `Output.get_nbf()` returns expected values."""
     assert output_object.get_nbf() == expected_values
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_nbf_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_nbf()` returns None when expected."""
     assert not output_object_nonexistent.get_nbf()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_values",
+    "output_object, expected_values",
     [
         ("output_object_opt", -76.47401149223077),
         ("output_object_scf", -75.95956918902469),
         ("output_object_neb", -7.33223897857281),
     ],
+    indirect=["output_object"],
 )
-def test_get_final_energy_no_index(fixture: str, expected_values: float, request, output_object):
-    output_object = request.getfixturevalue(fixture)
+def test_get_final_energy_no_index(output_object: Output, expected_values: float):
+    """Test to check if `Output.get_final_energy()` returns expected values."""
     assert output_object.get_final_energy() == expected_values
 
 
@@ -307,12 +332,14 @@ def test_get_final_energy_no_index(fixture: str, expected_values: float, request
 def test_get_final_energy_with_index(
     output_object_neb: Output, test_index: int, expected_value: float
 ):
+    """Test to check if `Output.get_final_energy()` returns expected values when given index."""
     assert output_object_neb.get_final_energy(index=test_index) == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_final_energy_invalid_index(output_object_neb: Output):
+    """Test to check if `Output.get_final_energy()` returns None when given invalid index."""
     assert not output_object_neb.get_final_energy(
         index=len(output_object_neb.results_properties.geometries)
     )
@@ -321,24 +348,26 @@ def test_get_final_energy_invalid_index(output_object_neb: Output):
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_final_energy_nonexistent(output_object_nonexistent: Output):
+    """Test to check if `Output.get_final_energy()` returns None when expected."""
     assert not output_object_nonexistent.get_final_energy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, key_name,expected_type",
+    "output_object, key_name,expected_type",
     [("output_object_scf", "SCF", ScfEnergy), ("output_object_mp2", "MP2", Mp2Energy)],
+    indirect=["output_object"],
 )
-def test_get_energies_type_no_index(fixture: str, key_name: str, expected_type, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_energies_type_no_index(output_object: Output, key_name: str, expected_type):
+    """Test to check if `Output.get_energies()` returns expected type."""
     assert isinstance(output_object.get_energies()[key_name], expected_type)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, key_name, expected",
+    "output_object, key_name, expected",
     [
         (
             "output_object_mp2",
@@ -357,9 +386,10 @@ def test_get_energies_type_no_index(fixture: str, key_name: str, expected_type, 
             ),
         ),
     ],
+    indirect=["output_object"],
 )
-def test_get_energies_no_index(fixture: str, key_name: str, expected: Energy, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_energies_no_index(output_object: Output, key_name: str, expected: Energy):
+    """Test to check if `Output.get_energies()` returns expected values."""
     assert output_object.get_energies()[key_name] == expected
 
 
@@ -373,34 +403,43 @@ def test_get_energies_no_index(fixture: str, key_name: str, expected: Energy, re
     ],
 )
 def test_get_energies_with_index(output_object_neb: Output, index, expected, key_name: str = "SCF"):
+    """Test to check if `Output.get_energies()` returns expected values given index."""
     assert output_object_neb.get_energies(index=index)[key_name] == expected
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_gradient_default_index(output_object_neb: Output):
+    """Test to check if `Output.get_gradient()` returns None when expected."""
     assert not output_object_neb.get_gradient()
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture, index", [("output_object_neb", -2), ("output_object_opt", 1)])
-def test_get_gradient_with_index(fixture: str, index: int, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object, index",
+    [("output_object_neb", -2), ("output_object_opt", 1)],
+    indirect=["output_object"],
+)
+def test_get_gradient_with_index(output_object: Output, index: int):
+    """Test to check if `Output.get_gradient()` returns expected values when given index."""
     assert isinstance(output_object.get_gradient(index=index), list)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", [("output_object_opt"), ("output_object_neb")])
-def test_get_structure_no_fragments(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", [("output_object_opt"), ("output_object_neb")], indirect=["output_object"]
+)
+def test_get_structure_no_fragments(output_object: Output):
+    """Test to check if `Output.get_structure()` returns `Structure` object."""
     assert isinstance(output_object.get_structure(), Structure)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_structure_with_fragments(output_object_led: Output):
+    """Test to check if `Output.get_structure()` returns `Structure` object with fragment ids when `with_fragments=True`."""
     structure = output_object_led.get_structure(with_fragments=True)
     for atom in structure.atoms:
         assert atom.fragment_id
@@ -415,80 +454,80 @@ def test_get_structure_with_fragments(output_object_led: Output):
         (1, [-3.5694568743985595, 1.7784458165284545, 0.004024935055685528]),
     ],
 )
-def test_get_structure_with_index(output_object_opt, index: int, expected_coordinates: list):
+def test_get_structure_with_index(
+    output_object_opt: Output, index: int, expected_coordinates: list
+):
+    """Test to check if Output.get_structure() returns index-specific `Structure` object when index is given."""
     structure = output_object_opt.get_structure(index=index)
     assert structure.atoms[0].coordinates.to_list() == expected_coordinates
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", [("output_object_led")])
-def test_get_mos_returns_dict(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", [("output_object_led")], indirect=["output_object"])
+def test_get_mos_returns_dict(output_object: Output):
+    """Test to check if `Output.get_mos()` returns `dict` object."""
     assert isinstance(output_object.get_mos(), dict)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", [("output_object_led")])
-def test_get_mos_returns_MO(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", [("output_object_led")], indirect=["output_object"])
+def test_get_mos_returns_mo(output_object: Output):
+    """Test to check if `Output.get_mos()` returns `dict` with `MO` objects."""
     for value in output_object.get_mos().values():
         assert all(isinstance(mo, MO) for mo in value)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", [("output_object_led")])
-def test_get_homo(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_homo())
+@pytest.mark.parametrize("output_object", [("output_object_led")], indirect=["output_object"])
+def test_get_homo(output_object: Output):
+    """Test to check if `Output.get_homo()` returns `MOData` object."""
     assert isinstance(output_object.get_homo(), MOData)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", [("output_object_led")])
-def test_get_lumo(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_lumo())
+@pytest.mark.parametrize("output_object", [("output_object_led")], indirect=["output_object"])
+def test_get_lumo(output_object: Output):
+    """Test to check if `Output.get_lumo()` returns `MOData` object."""
     assert isinstance(output_object.get_lumo(), MOData)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected",
+    "output_object, expected",
     [("output_object_led", 17.656923115035248), ("output_object_roci", 8.035362912976161)],
+    indirect=["output_object"],
 )
-def test_get_hl_gap(fixture: str, expected: float, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.gbw_json_files)
+def test_get_hl_gap(output_object: Output, expected: float):
+    """Test to check if `Output.get_hl_gap()` returns expected values."""
     assert output_object.get_hl_gap() == expected
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt"])
-def test_get_mulliken(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_mulliken())
+@pytest.mark.parametrize("output_object", ["output_object_opt"], indirect=["output_object"])
+def test_get_mulliken(output_object: Output):
+    """Test to check if `Output.get_mulliken()` returns `MullikenPopulationAnalysis` object."""
     for mulliken in output_object.get_mulliken():
         assert isinstance(mulliken, MullikenPopulationAnalysis)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_mulliken_returns_none(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=["output_object"])
+def test_get_mulliken_returns_none(output_object: Output):
+    """Test to check if `Output.get_mulliken()` returns `None` when expected."""
     assert not output_object.get_mulliken()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_opt",
@@ -519,36 +558,36 @@ def test_get_mulliken_returns_none(fixture: str, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_mulliken_with_index(
-    fixture: str, index: int, expected_object: MullikenPopulationAnalysis, request
+    output_object: Output, index: int, expected_object: MullikenPopulationAnalysis
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test to check if `Output.get_mulliken()` returns expected `MullikenPopulationAnalysis` object when index is given."""
     assert output_object.get_mulliken(index=index)[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt"])
-def test_get_loewdin(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_loewdin())
+@pytest.mark.parametrize("output_object", ["output_object_opt"], indirect=["output_object"])
+def test_get_loewdin(output_object: Output):
+    """Test to check if `Output.get_loewdin()` returns `LoewdinPopulationAnalysis` object."""
     for loewdin in output_object.get_loewdin():
         assert isinstance(loewdin, LoewdinPopulationAnalysis)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_loewdin_returns_none(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=["output_object"])
+def test_get_loewdin_returns_none(output_object: Output):
+    """Test if `Output.get_loewdin()` returns `None` when expected."""
     assert not output_object.get_loewdin()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_opt",
@@ -583,36 +622,38 @@ def test_get_loewdin_returns_none(fixture: str, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_loewdin_with_index(
-    fixture: str, index: int, expected_object: LoewdinPopulationAnalysis, request
+    output_object: Output, index: int, expected_object: LoewdinPopulationAnalysis
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test to check if `Output.get_loewdin()` returns expected `LoewdinPopulationAnalysis` object when index is given."""
     assert output_object.get_loewdin(index=index)[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis"])
-def test_get_chelpg(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_chelpg())
+@pytest.mark.parametrize(
+    "output_object", ["output_object_pop_analysis"], indirect=["output_object"]
+)
+def test_get_chelpg(output_object: Output):
+    """Test to check whether `Output.get_chelpg()` returns `ChelpgPopulationAnalysis` object."""
     for chelpg in output_object.get_chelpg():
         assert isinstance(chelpg, ChelpgPopulationAnalysis)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_chelpg_returns_none(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=["output_object"])
+def test_get_chelpg_returns_none(output_object: Output):
+    """Test if `Output.get_chelpg()` returns `None` when expected."""
     assert not output_object.get_loewdin()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_pop_analysis",
@@ -629,36 +670,36 @@ def test_get_chelpg_returns_none(fixture: str, request):
             ),
         )
     ],
+    indirect=["output_object"],
 )
 def test_get_chelpg_with_index(
-    fixture: str, index: int, expected_object: ChelpgPopulationAnalysis, request
+    output_object: Output, index: int, expected_object: ChelpgPopulationAnalysis
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test to check whether `Output.get_chelpg()` returns expected `ChelpgPopulationAnalysis` object when index is given."""
     assert output_object.get_chelpg(index=index)[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt"])
-def test_get_mayer(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_mayer(index=0))
+@pytest.mark.parametrize("output_object", ["output_object_opt"], indirect=["output_object"])
+def test_get_mayer(output_object: Output):
+    """Test to check whether `Output.get_mayer()` returns `MayerPopulationAnalysis` object."""
     for loewdin in output_object.get_mayer():
         assert isinstance(loewdin, MayerPopulationAnalysis)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_mayer_returns_none(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=["output_object"])
+def test_get_mayer_returns_none(output_object: Output):
+    """Test if `Output.get_mayer()` returns `None` when expected."""
     assert not output_object.get_mayer()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_opt",
@@ -709,44 +750,48 @@ def test_get_mayer_returns_none(fixture: str, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_mayer_with_index(
-    fixture: str, index: int, expected_object: MayerPopulationAnalysis, request
+    output_object: Output, index: int, expected_object: MayerPopulationAnalysis
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test if `Output.get_mayer()` returns expected object when given index."""
     assert output_object.get_mayer(index=index)[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis"])
-def test_get_hirshfeld(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_hirshfeld())
+@pytest.mark.parametrize(
+    "output_object", ["output_object_pop_analysis"], indirect=["output_object"]
+)
+def test_get_hirshfeld(output_object: Output):
+    """Test if `Output.get_hirshfeld()` returns `HirshfeldPopulationAnalysis` object."""
     for hirshfeld in output_object.get_hirshfeld():
         assert isinstance(hirshfeld, HirshfeldPopulationAnalysis)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_hirshfeld_returns_none(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=["output_object"])
+def test_get_hirshfeld_returns_none(output_object: Output):
+    """Test if `Output.get_hirshfeld()` returns `None` when expected."""
     assert not output_object.get_hirshfeld()
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture,length", [("output_object_pop_analysis", 3)])
-def test_get_hirshfeld_length_of_list(fixture: str, length: int, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object,length", [("output_object_pop_analysis", 3)], indirect=["output_object"]
+)
+def test_get_hirshfeld_length_of_list(output_object: str, length: int):
+    """Test if `Output.get_hirshfeld()` returns list of correct length."""
     assert len(output_object.get_hirshfeld()) == length
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_pop_analysis",
@@ -804,31 +849,33 @@ def test_get_hirshfeld_length_of_list(fixture: str, length: int, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_hirshfeld_with_index(
-    fixture: str, index: int, expected_object: HirshfeldPopulationAnalysis, request
+    output_object: Output, index: int, expected_object: HirshfeldPopulationAnalysis
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test if `Output.get_hirshfeld()` returns expected `HirshfeldPopulationAnalysis` object when given index."""
     assert output_object.get_hirshfeld()[index] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_mbis_returns_list(output_object_mbis: Output):
-    print(output_object_mbis.get_mbis())
+    """Test if `Output.get_mbis()` returns list."""
     assert isinstance(output_object_mbis.get_mbis(), list)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 def test_get_mbis_returns_none(output_object_neb: Output):
+    """Test if `Output.get_mbis()` returns `None` when expected."""
     assert not output_object_neb.get_mbis()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_object",
+    "output_object, expected_object",
     [
         (
             "output_object_mbis",
@@ -852,34 +899,40 @@ def test_get_mbis_returns_none(output_object_neb: Output):
             ),
         )
     ],
+    indirect=["output_object"],
 )
-def test_get_mbis_returned_object(fixture: str, expected_object: Output, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_mbis_returned_object(output_object: Output, expected_object: MbisPopulationAnalysis):
+    """Test if `Output.get_mbis()` returns expected `MbisPopulationAnalysis` object."""
     assert output_object.get_mbis()[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb", "output_object_opt"])
-def test_get_dipole_returns_list_of_dipole_moment(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_dipole())
+@pytest.mark.parametrize(
+    "output_object", ["output_object_neb", "output_object_opt"], indirect=["output_object"]
+)
+def test_get_dipole_returns_list_of_dipole_moment(output_object: Output):
+    """Test if `Output.get_dipole()` returns list of `DipoleMoment` objects."""
     for dipole_moment in output_object.get_dipole():
         assert isinstance(dipole_moment, DipoleMoment)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture, index", [("output_object_opt", 0), ("output_object_neb", 1)])
-def test_get_dipole_returns_none(fixture: str, index: int, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object, index",
+    [("output_object_opt", 0), ("output_object_neb", 1)],
+    indirect=["output_object"],
+)
+def test_get_dipole_returns_none(output_object: str, index: int):
+    """Test if `Output.get_dipole()` returns `None` when expected."""
     assert not output_object.get_dipole(index=index)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_object",
+    "output_object, expected_object",
     [
         (
             "output_object_opt",
@@ -932,42 +985,50 @@ def test_get_dipole_returns_none(fixture: str, index: int, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
-def test_get_dipole_returns_correct_object(fixture: str, expected_object: DipoleMoment, request):
-    output_object = request.getfixturevalue(fixture)
+def test_get_dipole_returns_correct_object(output_object: Output, expected_object: DipoleMoment):
+    """Test if `Output.get_dipole()` returns expected `DipoleMoment` object."""
     assert output_object.get_dipole()[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis"])
-def test_get_quadrupole_returns_list_of_dipole_moment(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_quadrupole())
+@pytest.mark.parametrize(
+    "output_object", ["output_object_pop_analysis"], indirect=["output_object"]
+)
+def test_get_quadrupole_returns_list_of_quadrupole_moment(output_object: Output):
+    """Test if `Output.get_quadrupole()` returns list of `QuadrupoleMoment` objects."""
     for quadrupole_moment in output_object.get_quadrupole():
         assert isinstance(quadrupole_moment, QuadrupoleMoment)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis"])
-def test_get_quadrupole_returns_list_of_correct_length(fixture: str, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_pop_analysis"], indirect=["output_object"]
+)
+def test_get_quadrupole_returns_list_of_correct_length(output_object: Output):
+    """Test if `Output.get_quadrupole()` returns list of correct length"""
     assert len(output_object.get_quadrupole()) == 3
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture, index", [("output_object_opt", 0), ("output_object_neb", 1)])
-def test_get_quadrupole_returns_none(fixture: str, index: int, request):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object, index",
+    [("output_object_opt", 0), ("output_object_neb", 1)],
+    indirect=["output_object"],
+)
+def test_get_quadrupole_returns_none(output_object: Output, index: int):
+    """Test if `Output.get_quadrupole()` returns `None` when expected."""
     assert not output_object.get_quadrupole(index=index)
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, index, expected_object",
+    "output_object, index, expected_object",
     [
         (
             "output_object_pop_analysis",
@@ -1054,38 +1115,44 @@ def test_get_quadrupole_returns_none(fixture: str, index: int, request):
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_quadrupole_returns_correct_object(
-    fixture: str, index: int, expected_object: QuadrupoleMoment, request
+    output_object: Output, index: int, expected_object: QuadrupoleMoment
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test if `Output.get_quadrupole` returns expected object when given index."""
     assert output_object.get_quadrupole()[index] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis", "output_object_rama"])
-def test_get_polarizability_returns_list(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_pop_analysis", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_polarizability_returns_list(output_object: Output):
+    """Test if `Output.get_polarizability()` returns list."""
     assert isinstance(output_object.get_polarizability(), list)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb"])
-def test_get_polarizability_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize("output_object", ["output_object_neb"], indirect=True)
+def test_get_polarizability_returns_none(output_object: Output):
+    """Test if `Output.get_polarizability()` returns None when expected."""
     assert not output_object.get_polarizability()
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_pop_analysis", "output_object_rama"])
-def test_get_polarizability_returns_list_of_correct_type(
-    fixture: str, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_polarizability())
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_pop_analysis", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_polarizability_returns_list_of_correct_type(output_object: Output):
+    """Test of Output.get_polarizability() returns list of `Polarizability` type."""
     for polarizability in output_object.get_polarizability():
         assert isinstance(polarizability, Polarizability)
 
@@ -1093,19 +1160,19 @@ def test_get_polarizability_returns_list_of_correct_type(
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, length", [("output_object_pop_analysis", 3), ("output_object_rama", 1)]
+    "output_object, length",
+    [("output_object_pop_analysis", 3), ("output_object_rama", 1)],
+    indirect=["output_object"],
 )
-def test_get_polarizability_returns_list_of_correct_length(
-    fixture: str, length: int, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_polarizability_returns_list_of_correct_length(output_object: Output, length: int):
+    """Test of Output.get_polarizability() returns list of correct length."""
     assert len(output_object.get_polarizability()) == length
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_object",
+    "output_object, expected_object",
     [
         (
             "output_object_pop_analysis",
@@ -1154,235 +1221,267 @@ def test_get_polarizability_returns_list_of_correct_length(
             ),
         ),
     ],
+    indirect=["output_object"],
 )
 def test_get_polarizability_returns_correct_objects(
-    fixture: str, expected_object: Polarizability, request: pytest.FixtureRequest
+    output_object: Output, expected_object: Polarizability
 ):
-    output_object = request.getfixturevalue(fixture)
+    """Test if `Output.get_polarizability()` returns correct objects."""
     assert output_object.get_polarizability()[0] == expected_object
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_freq", "output_object_pal"])
-def test_get_zpe_returns_correct_type(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_freq", "output_object_pal"], indirect=["output_object"]
+)
+def test_get_zpe_returns_correct_type(output_object: Output):
+    """Test if `Output.get_zpe()` returns correct type."""
     assert isinstance(output_object.get_zpe(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_neb", "output_object_dft"])
-def test_get_zpe_returns_correct_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_neb", "output_object_dft"], indirect=["output_object"]
+)
+def test_get_zpe_returns_correct_none(output_object: Output):
+    """Test if `Output.get_zpe()` returns None when expected."""
     assert not output_object.get_zpe()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_freq", 0.02062156916775446),
         ("output_object_pal", 0.021204801105653905),
     ],
+    indirect=["output_object"],
 )
-def test_get_zpe_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_zpe_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_zpe()` returns correct value."""
     assert output_object.get_zpe() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_inner_energy_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_inner_energy_returns_float(output_object: Output):
+    """Test if `Output.get_inner_energy()` returns float."""
     assert isinstance(output_object.get_inner_energy(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_inner_energy_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_inner_energy_returns_none(output_object: Output):
+    """Test if `Output.get_inner_energy()` returns None when expected."""
     assert not output_object.get_inner_energy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", -40659.55477913393),
         ("output_object_rama", -76.29223117253484),
     ],
+    indirect=["output_object"],
 )
-def test_get_inner_energy_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_inner_energy_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_inner_energy()` returns correct value."""
     assert output_object.get_inner_energy() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_enthalpy_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_enthalpy_returns_float(output_object: Output):
+    """Test if `Output.get_enthalpy()` returns float."""
     assert isinstance(output_object.get_enthalpy(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_enthalpy_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_enthalpy_returns_none(output_object: Output):
+    """Test if `Output.get_enthalpy()` returns None when expected."""
     assert not output_object.get_enthalpy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", -40659.55383492488),
         ("output_object_rama", -76.29128696349258),
     ],
+    indirect=["output_object"],
 )
-def test_get_enthalpy_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_enthalpy_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_enthalpy()` returns correct value."""
     assert output_object.get_enthalpy() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_entropy_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_entropy())
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_entropy_returns_float(output_object: Output):
+    """Test if `Output.get_entropy()` returns float."""
     assert isinstance(output_object.get_entropy(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_entropy_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_entropy_returns_none(output_object: Output):
+    """Test if `Output.get_entropy()` returns None when expected."""
     assert not output_object.get_entropy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", 0.032484726133754235),
         ("output_object_rama", 0.021312497484212576),
     ],
+    indirect=["output_object"],
 )
-def test_get_entropy_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_entropy_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_entropy()` returns correct value."""
     assert output_object.get_entropy() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_free_energy_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_free_energy_returns_float(output_object: Output):
+    """Test if `Output.get_free_energy()` returns float."""
     assert isinstance(output_object.get_free_energy(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_free_energy_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_free_energy_returns_none(output_object: Output):
+    """Test if `Output.get_free_energy()` returns None when expected."""
     assert not output_object.get_free_energy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", -40659.58631965102),
         ("output_object_rama", -76.3125994609768),
     ],
+    indirect=["output_object"],
 )
-def test_get_free_energy_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_free_energy_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_free_energy()` returns correct value."""
     assert output_object.get_free_energy() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_el_energy_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_el_energy_returns_float(output_object: Output):
+    """Test if `Output.get_el_energy()` returns correct value."""
     assert isinstance(output_object.get_el_energy(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_el_energy_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_el_energy_returns_none(output_object: Output):
+    """Test if `Output.get_el_energy()` returns None when expected."""
     assert not output_object.get_el_energy()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", -40659.558084306336),
         ("output_object_rama", -76.31703512990781),
     ],
+    indirect=["output_object"],
 )
-def test_get_el_energy_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_el_energy_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_el_energy()` returns correct value."""
     assert output_object.get_el_energy() == expected_value
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_relative_corr", "output_object_rama"])
-def test_get_free_energy_delta_returns_float(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
-    print(output_object.get_free_energy_delta())
+@pytest.mark.parametrize(
+    "output_object",
+    ["output_object_relative_corr", "output_object_rama"],
+    indirect=["output_object"],
+)
+def test_get_free_energy_delta_returns_float(output_object: Output):
+    """Test if `Output.get_free_energy()` returns correct value."""
     assert isinstance(output_object.get_free_energy_delta(), float)
 
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("fixture", ["output_object_opt", "output_object_cpcm"])
-def test_get_free_energy_delta_returns_none(fixture: str, request: pytest.FixtureRequest):
-    output_object = request.getfixturevalue(fixture)
+@pytest.mark.parametrize(
+    "output_object", ["output_object_opt", "output_object_cpcm"], indirect=["output_object"]
+)
+def test_get_free_energy_delta_returns_none(output_object: Output):
+    """Test if `Output.get_free_energy_delta()` returns None when expected."""
     assert not output_object.get_free_energy_delta()
 
 
 @pytest.mark.unit
 @pytest.mark.output
 @pytest.mark.parametrize(
-    "fixture, expected_value",
+    "output_object, expected_value",
     [
         ("output_object_relative_corr", -0.02823534468188882),
         ("output_object_rama", 0.004435668931009218),
     ],
+    indirect=["output_object"],
 )
-def test_get_free_energy_delta_returns_correct_value(
-    fixture: str, expected_value: float, request: pytest.FixtureRequest
-):
-    output_object = request.getfixturevalue(fixture)
+def test_get_free_energy_delta_returns_correct_value(output_object: Output, expected_value: float):
+    """Test if `Output.get_free_energy_delta()` returns correct value."""
     assert output_object.get_free_energy_delta() == expected_value

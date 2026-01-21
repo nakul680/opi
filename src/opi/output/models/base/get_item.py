@@ -114,7 +114,7 @@ class GetItem(BaseModel, ABC):
 
         return "\n".join(lines)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if type(self) is not type(other):
             return False
-        return self.__dict__ == other.__dict__
+        return bool(self.__dict__ == other.__dict__)

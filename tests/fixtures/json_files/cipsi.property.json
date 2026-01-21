@@ -24,8 +24,7 @@
     },
     "Geometries": [
         {
-            "CIPSI_Energies":[
-                {
+            "CIPSI_Energies":{
                 "energies": [
                     [
                         -76.08247512082995
@@ -34,8 +33,7 @@
                 "finalEnergy": -76.08247512082995,
                 "multiplicity": 1,
                 "numOfRoots": 1
-                }
-            ],
+            },
             "Dipole_Moment": [
                 {
                     "Irrep": 0,
