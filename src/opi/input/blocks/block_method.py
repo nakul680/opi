@@ -1,6 +1,7 @@
 from typing import Literal
 
 from pydantic import BaseModel, field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from opi.input.blocks import Block
 from opi.input.blocks.util import InputFilePath
@@ -14,27 +15,35 @@ class ExternalParam(BaseModel):
 
     Attributes
     -----------
-    paramname : str
-        Name of parameter.
+    field_name: str
+        Field name.
 
-    new_value : float
-        New value of parameter.
+    parameters: dict[str, float]
+        Dictionary of parameter values.
 
     """
-
-    paramname: str
-    new_value: float
+    field_name: str | None = None
+    parameters: dict[str, float]
 
     @classmethod
-    def from_string(cls, string: str) -> "ExternalParam":
-        paramname, value = string.rsplit(" ", maxsplit=1)
-        try:
-            return ExternalParam(paramname=paramname.strip(), new_value=float(value.strip()))
-        except TypeError:
-            raise TypeError(f"Invalid string'{string}'")
+    def from_string(cls, field_name, strings: list[str]) -> "ExternalParam":
+        params = {}
+        for string in strings:
+            paramname, value = string.rsplit(" ", maxsplit=1)
+            params[paramname.strip()] = float(value.strip())
+
+        return ExternalParam(field_name=field_name, parameters=params)
 
     def __str__(self) -> str:
-        return f'"{self.paramname}" {self.new_value}'
+        lines = []
+
+        for i, (key, value) in enumerate(self.parameters.items()):
+            if i == 0:
+                lines.append(f'"{key}" {value}')
+            else:
+                lines.append(f'    {self.field_name} "{key}" {value}')
+
+        return "\n".join(lines)
 
 
 class BlockMethod(Block):
@@ -62,6 +71,7 @@ class BlockMethod(Block):
             "x_scan",
             "x_rscan",
             "x_r2scan",
+            "gga_x_mpw91"
         ]
         | None
     ) = None
@@ -81,6 +91,7 @@ class BlockMethod(Block):
             "c_scan",
             "c_rscan",
             "c_r2scan",
+            "mgga_c_bc95"
         ]
         | None
     ) = None
@@ -126,15 +137,24 @@ class BlockMethod(Block):
 
     @field_validator("extparamx", "extparamc", "extparamxc", mode="before")
     @classmethod
-    def init_ext_param_from_string(cls, string: str) -> ExternalParam:
+    def init_ext_param_from_string(cls, inp: dict[str, float] | ExternalParam, info: ValidationInfo) -> ExternalParam:
         """
 
         Parameters
         ----------
-        string: str
+        inp: dict[str, float]| ExternalParam
+
+        info: ValidationInfo
 
         Returns
         -------
         ExternalParam
+            ExternalParam instance
         """
-        return ExternalParam.from_string(string=string)
+        field_name = info.field_name
+        if isinstance(inp, ExternalParam):
+            if inp.field_name is None:
+                inp.field_name = field_name
+            return inp
+        else:
+            return ExternalParam(field_name=field_name,parameters=inp)

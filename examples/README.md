@@ -71,4 +71,5 @@ python3 job.py
 - exmp048_loc_gbw: Read localized MO coefficients and transform integrals in LMO basis
 - exmp049_arbitrary_block_variable: Use arbitrary block variable in the SCF block
 - exmp050_docker: Use DOCKER to dock water with water
+- exmp051_libxc: Shows modification of DFT LibXC parameters via the method block
 
