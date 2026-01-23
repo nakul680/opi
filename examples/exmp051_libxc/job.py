@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 
 from opi.core import Calculator
-from opi.input.blocks import BlockDocker, BlockMethod
-from opi.input.simple_keywords import Sqm, Dft, BasisSet, AuxBasisSet
-from opi.input.structures import Properties, Structure
+from opi.input.blocks import BlockMethod
+from opi.input.simple_keywords import AuxBasisSet, BasisSet, Dft
+from opi.input.structures import Structure
 from opi.output.core import Output
 
 
@@ -18,9 +18,6 @@ def run_exmp051(
     shutil.rmtree(working_dir, ignore_errors=True)
     working_dir.mkdir()
 
-    # > Guest structure lies in example folder
-    example_folder = Path(__file__).parent
-
     # > if no structure is given read structure from inp.xyz
     if structure is None:
         structure = Structure.from_xyz("inp.xyz")
@@ -28,15 +25,16 @@ def run_exmp051(
     # > set up the calculator
     calc = Calculator(basename="job", working_dir=working_dir)
     calc.structure = structure
-    calc.input.add_simple_keywords(
-        Dft.PWPB95,
-        BasisSet.DEF2_SVP,
-        AuxBasisSet.DEF2_SVP_C
+    calc.input.add_simple_keywords(Dft.PWPB95, BasisSet.DEF2_SVP, AuxBasisSet.DEF2_SVP_C)
 
+    calc.input.add_blocks(
+        BlockMethod(
+            exchange="gga_x_mpw91",
+            correlation="mgga_c_bc95",
+            extparamx={"_bt": 0.00444, "_alpha": 19.823391, "_expo": 3.7868},
+            extparamc={"_css": 0.03241, "_copp": 0.00250},
+        )
     )
-
-    calc.input.add_blocks(BlockMethod(exchange="gga_x_mpw91",correlation="mgga_c_bc95", extparamx={"_bt":0.00444, "_alpha":19.823391, "_expo":3.7868}, extparamc={"_css":0.03241, "_copp":0.00250}))
-
 
     # > write the input and run the calculation
     calc.write_input()

@@ -2,7 +2,6 @@ import pytest
 
 from examples.exmp051_libxc.job import run_exmp051
 from opi.input.structures import Structure
-from tests.fixtures.example_input_file import example_input_file
 
 
 @pytest.mark.examples

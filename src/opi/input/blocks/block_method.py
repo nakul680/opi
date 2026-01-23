@@ -22,11 +22,12 @@ class ExternalParam(BaseModel):
         Dictionary of parameter values.
 
     """
+
     field_name: str | None = None
     parameters: dict[str, float]
 
     @classmethod
-    def from_string(cls, field_name, strings: list[str]) -> "ExternalParam":
+    def from_string(cls, field_name: str, strings: list[str]) -> "ExternalParam":
         params = {}
         for string in strings:
             paramname, value = string.rsplit(" ", maxsplit=1)
@@ -71,7 +72,7 @@ class BlockMethod(Block):
             "x_scan",
             "x_rscan",
             "x_r2scan",
-            "gga_x_mpw91"
+            "gga_x_mpw91",
         ]
         | None
     ) = None
@@ -91,7 +92,7 @@ class BlockMethod(Block):
             "c_scan",
             "c_rscan",
             "c_r2scan",
-            "mgga_c_bc95"
+            "mgga_c_bc95",
         ]
         | None
     ) = None
@@ -137,7 +138,9 @@ class BlockMethod(Block):
 
     @field_validator("extparamx", "extparamc", "extparamxc", mode="before")
     @classmethod
-    def init_ext_param_from_string(cls, inp: dict[str, float] | ExternalParam, info: ValidationInfo) -> ExternalParam:
+    def init_ext_param_from_string(
+        cls, inp: dict[str, float] | ExternalParam, info: ValidationInfo
+    ) -> ExternalParam:
         """
 
         Parameters
@@ -157,4 +160,4 @@ class BlockMethod(Block):
                 inp.field_name = field_name
             return inp
         else:
-            return ExternalParam(field_name=field_name,parameters=inp)
+            return ExternalParam(field_name=field_name, parameters=inp)
