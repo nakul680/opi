@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -175,9 +175,15 @@ class BlockMethod(Block):
 
     @field_validator("method", "exchange", "correlation", "ldaopt", mode="before")
     @classmethod
-    def string_tolower(cls, inp: Any) -> Any:
-        """If input is a string, convert it to lowercase."""
-        if isinstance(inp, str):
-            return inp.lower()
+    def string_tolower(cls, inp: str) -> str:
+        """If input is a string, convert it to lowercase. This allows for case-insensitive validation.
 
-        return inp
+        Examples
+        --------
+        BlockMethod(method='DFT')
+        BlockMethod(method='dft')
+        BlockMethod(method='dFT')
+
+        All of these will be accepted if `dft` is valid literal.
+        """
+        return inp.lower()
