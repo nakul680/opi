@@ -1,4 +1,4 @@
-from typing import Literal, Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -27,9 +27,14 @@ class ExternalParam(BaseModel):
     parameters: dict[str, float]
 
     @classmethod
-    def from_string(cls, field_name: str, strings: list[str]) -> "ExternalParam":
+    def from_string(cls, field_name: str | None, strings: str | list[str]) -> "ExternalParam":
+        """Create a `ExternalParam` instance from a string or list of strings such as:
+        '_bt 0.00444' or ['_bt 0.00444', '_alpha 19.823391']"""
         params = {}
+        if isinstance(strings, str):
+            strings = [strings]
         for string in strings:
+            # split string into parameter name and value
             paramname, value = string.rsplit(" ", maxsplit=1)
             params[paramname.strip()] = float(value.strip())
 
@@ -40,8 +45,10 @@ class ExternalParam(BaseModel):
 
         for i, (key, value) in enumerate(self.parameters.items()):
             if i == 0:
+                # when formatting block input for orca, the first line will already include field name
                 lines.append(f'"{key}" {value}')
             else:
+                # lines after first line need to add the field name
                 lines.append(f'    {self.field_name} "{key}" {value}')
 
         return "\n".join(lines)
@@ -138,16 +145,16 @@ class BlockMethod(Block):
 
     @field_validator("extparamx", "extparamc", "extparamxc", mode="before")
     @classmethod
-    def init_ext_param_from_dict(
-        cls, inp: dict[str, float] | ExternalParam, info: ValidationInfo
+    def init_ext_param(
+        cls, inp: str | list[str] | dict[str, float] | ExternalParam, info: ValidationInfo
     ) -> ExternalParam:
         """
-        Allows user to input dict for external parameter attributes, the initialization of `ExternalParam` is done internally.
+        Allows user to input dict or list of strings for external parameter attributes, the initialization of `ExternalParam` is done internally.
         Also sets field name which is required for formatting of external parameters attributes.
 
         Parameters
         ----------
-        inp: dict[str, float]| ExternalParam
+        inp: list[str]| dict[str, float]| ExternalParam
 
         info: ValidationInfo
 
@@ -161,12 +168,15 @@ class BlockMethod(Block):
             if inp.field_name is None:
                 inp.field_name = field_name
             return inp
-        else:
+        elif isinstance(inp, dict):
             return ExternalParam(field_name=field_name, parameters=inp)
+        else:
+            return ExternalParam.from_string(field_name, inp)
 
-    @field_validator("*", mode="before")
+    @field_validator("method", "exchange", "correlation", "ldaopt", mode="before")
     @classmethod
     def string_tolower(cls, inp: Any) -> Any:
+        """If input is a string, convert it to lowercase."""
         if isinstance(inp, str):
             return inp.lower()
 

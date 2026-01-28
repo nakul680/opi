@@ -189,5 +189,3 @@ class Block(BaseModel, ABC):
             return InputFilePath(file=inp)
         else:
             return inp
-
-
