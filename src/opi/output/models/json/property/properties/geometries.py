@@ -40,7 +40,7 @@ from opi.output.models.json.property.properties.population_analysis import (
 from opi.output.models.json.property.properties.quadrupole_moment import (
     QuadrupoleMoment,
 )
-from opi.output.models.json.property.properties.roci_en import RoCiEnergy
+from opi.output.models.json.property.properties.roci_en import RoCisEnergy
 from opi.output.models.json.property.properties.single_point_data import (
     SinglePointData,
 )
@@ -163,5 +163,5 @@ class Geometries(GetItem):
     broken_symmetry: BrokenSym | None = None
     quadrupole_moment: list[QuadrupoleMoment] | None = None
     cipsi_energies: CiPsi | None = None
-    rocis_energies: RoCiEnergy | None = None
+    rocis_energies: RoCisEnergy | None = None
     thermochemistry_energies: list[ThermochemistryEnergy] | None = None
