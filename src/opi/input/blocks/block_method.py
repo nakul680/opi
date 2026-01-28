@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Any
 
 from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -138,10 +138,12 @@ class BlockMethod(Block):
 
     @field_validator("extparamx", "extparamc", "extparamxc", mode="before")
     @classmethod
-    def init_ext_param_from_string(
+    def init_ext_param_from_dict(
         cls, inp: dict[str, float] | ExternalParam, info: ValidationInfo
     ) -> ExternalParam:
         """
+        Allows user to input dict for external parameter attributes, the initialization of `ExternalParam` is done internally.
+        Also sets field name which is required for formatting of external parameters attributes.
 
         Parameters
         ----------
@@ -161,3 +163,11 @@ class BlockMethod(Block):
             return inp
         else:
             return ExternalParam(field_name=field_name, parameters=inp)
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def string_tolower(cls, inp: Any) -> Any:
+        if isinstance(inp, str):
+            return inp.lower()
+
+        return inp

@@ -8,6 +8,7 @@ from opi.input.structures import Structure
 @pytest.mark.orca
 @pytest.mark.slow
 def test_exmp051_libxc(example_input_file, tmp_path) -> None:
+    """Run a DFT calculation and verify successful calculation"""
     # Get input file from example folder
     input_file = example_input_file(run_exmp051)
     structure = Structure.from_xyz(input_file)

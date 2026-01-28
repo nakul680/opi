@@ -190,10 +190,4 @@ class Block(BaseModel, ABC):
         else:
             return inp
 
-    @field_validator("*", mode="before")
-    @classmethod
-    def string_tolower(cls, inp: Any) -> Any:
-        if isinstance(inp, str):
-            return inp.lower()
 
-        return inp
