@@ -16,7 +16,7 @@ def output_object_factory():
         prop_file = matching_files[0]
         gbw_file = matching_files[1]
 
-        output_object = Output("test")
+        output_object = Output("test", version_check=False)
         output_object.property_json_file = prop_file
         output_object.gbw_json_files = [gbw_file]
         output_object.parse()
@@ -27,4 +27,4 @@ def output_object_factory():
 
 @pytest.fixture
 def empty_output_object():
-    return Output("empty")
+    return Output("empty", version_check=False)
