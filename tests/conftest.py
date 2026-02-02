@@ -17,6 +17,15 @@ from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 
+JSON_DIR = Path(__file__).parent / "json_files"
+
+@pytest.fixture(scope="session")
+def json_dir() -> Path:
+    """
+    Path to the JSON directory.
+    """
+    return JSON_DIR
+
 # > Location of modules containing fixtures.
 # >> Searching for Python modules which do no start with an underscore and converting file path to module path.
 pytest_plugins = [
