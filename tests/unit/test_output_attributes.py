@@ -1,7 +1,7 @@
 import inspect
 import shutil
 from pathlib import Path
-from typing import Set, get_args, get_origin, Any
+from typing import Any, Set, get_args, get_origin
 
 import pytest
 from pydantic import BaseModel
@@ -61,20 +61,19 @@ class TestOutputAttributes:
 
             created.add(basename)
 
-            #create output object specific to given basename/task
+            # create output object specific to given basename/task
             output_object = self.make_output_object(basename, tmp_path)
             # collect all loaded attributes
             object_prop_attr = self.collect_non_none_attrs(output_object.results_properties)
             object_gbw_attr = self.collect_non_none_attrs(output_object.results_gbw)
 
             object_attr = object_gbw_attr.union(object_prop_attr)
-            #remove loaded attributes from set
+            # remove loaded attributes from set
             output_attr = output_attr - object_attr
 
             continue
 
         assert not output_attr
-
 
     def get_all_attributes(
         self, model: type[BaseModel], visited: Set[type] = None, prefix: str = ""
@@ -144,7 +143,6 @@ class TestOutputAttributes:
                 attributes.update(nested_attrs)
 
         return attributes
-
 
     def collect_non_none_attrs(
         self,
@@ -280,13 +278,9 @@ class TestOutputAttributes:
 
         # Separate GBW json and property json
         gbw_json = next(
-            f for f in json_files
-            if f.suffix == ".json" and not f.name.endswith(".property.json")
+            f for f in json_files if f.suffix == ".json" and not f.name.endswith(".property.json")
         )
-        property_json = next(
-            f for f in json_files
-            if f.name.endswith(".property.json")
-        )
+        property_json = next(f for f in json_files if f.name.endswith(".property.json"))
 
         # Use pytest-provided temp directory
         temp_dir = tmp_path
@@ -304,4 +298,3 @@ class TestOutputAttributes:
         output_object.parse()
 
         return output_object
-
