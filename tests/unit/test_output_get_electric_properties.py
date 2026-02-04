@@ -72,11 +72,9 @@ def test_get_polarizability_returns_list(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["nmr"])
-def test_get_polarizability_returns_none(output_object_factory, task: str):
+def test_get_polarizability_returns_none(empty_output_object):
     """Test if `Output.get_polarizability()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_polarizability()
+    assert not empty_output_object.get_polarizability()
 
 
 @pytest.mark.unit

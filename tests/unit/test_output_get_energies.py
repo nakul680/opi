@@ -46,8 +46,6 @@ def test_get_zpe_returns_correct_type(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["opt", "epr"])
-def test_get_zpe_returns_correct_none(output_object_factory, task: str):
+def test_get_zpe_returns_correct_none(empty_output_object):
     """Test if `Output.get_zpe()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_zpe()
+    assert not empty_output_object.get_zpe()

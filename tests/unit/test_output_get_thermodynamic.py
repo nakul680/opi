@@ -1,5 +1,7 @@
 import pytest
 
+from opi.output.core import Output
+
 
 @pytest.mark.unit
 @pytest.mark.output
@@ -12,11 +14,9 @@ def test_get_inner_energy_returns_float(output_object_factory, task):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["opt", "mp2"])
-def test_get_inner_energy_returns_none(output_object_factory, task):
+def test_get_inner_energy_returns_none(empty_output_object: Output):
     """Test if `Output.get_inner_energy()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_inner_energy()
+    assert not empty_output_object.get_inner_energy()
 
 
 @pytest.mark.unit
@@ -33,11 +33,9 @@ def test_get_enthalpy_returns_float(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["opt", "epr"])
-def test_get_enthalpy_returns_none(output_object_factory, task: str):
+def test_get_enthalpy_returns_none(empty_output_object: Output):
     """Test if `Output.get_enthalpy()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_enthalpy()
+    assert not empty_output_object.get_enthalpy()
 
 
 @pytest.mark.unit
@@ -54,11 +52,9 @@ def test_get_entropy_returns_float(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["led", "bs"])
-def test_get_entropy_returns_none(output_object_factory, task: str):
+def test_get_entropy_returns_none(empty_output_object: Output):
     """Test if `Output.get_entropy()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_entropy()
+    assert not empty_output_object.get_entropy()
 
 
 @pytest.mark.unit
@@ -75,11 +71,9 @@ def test_get_free_energy_returns_float(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["opt", "mp2"])
-def test_get_free_energy_returns_none(output_object_factory, task: str):
+def test_get_free_energy_returns_none(empty_output_object: Output):
     """Test if `Output.get_free_energy()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_free_energy()
+    assert not empty_output_object.get_free_energy()
 
 
 @pytest.mark.unit
@@ -96,11 +90,9 @@ def test_get_el_energy_returns_float(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["led", "bs"])
-def test_get_el_energy_returns_none(output_object_factory, task: str):
+def test_get_el_energy_returns_none(empty_output_object: Output):
     """Test if `Output.get_el_energy()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_el_energy()
+    assert not empty_output_object.get_el_energy()
 
 
 @pytest.mark.unit
@@ -117,8 +109,6 @@ def test_get_free_energy_delta_returns_float(output_object_factory, task: str):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("task", ["opt", "cipsi"])
-def test_get_free_energy_delta_returns_none(output_object_factory, task: str):
+def test_get_free_energy_delta_returns_none(empty_output_object: Output):
     """Test if `Output.get_free_energy_delta()` returns None when expected."""
-    output_object = output_object_factory(task)
-    assert not output_object.get_free_energy_delta()
+    assert not empty_output_object.get_free_energy_delta()

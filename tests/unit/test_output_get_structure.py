@@ -1,6 +1,7 @@
 import pytest
 
 from opi.input.structures import Structure
+from opi.output.core import Output
 
 
 @pytest.mark.unit
@@ -26,6 +27,13 @@ def test_get_gradient_with_index(output_object_factory, task: str, index: int):
 
 @pytest.mark.unit
 @pytest.mark.output
+def test_get_gradient_returns_none(empty_output_object: Output):
+    """Test if `Output.get_gradient()` returns `None` when expected."""
+    assert not empty_output_object.get_gradient()
+
+
+@pytest.mark.unit
+@pytest.mark.output
 @pytest.mark.parametrize("task", ["opt", "led"])
 def test_get_structure_no_fragments(output_object_factory, task: str):
     """Test to check if `Output.get_structure()` returns `Structure` object."""
@@ -42,3 +50,10 @@ def test_get_structure_with_fragments(output_object_factory, task: str):
     structure = output_object.get_structure(with_fragments=True)
     for atom in structure.atoms:
         assert atom.fragment_id
+
+
+@pytest.mark.unit
+@pytest.mark.output
+def test_get_structure_returns_none(empty_output_object: Output):
+    """Test if `Output.get_structure()` returns `None` when expected."""
+    assert not empty_output_object.get_structure()
