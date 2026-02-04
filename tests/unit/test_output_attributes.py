@@ -10,13 +10,11 @@ from opi.output.core import Output
 from opi.output.models.json.gbw.gbw_results import GbwResults
 from opi.output.models.json.property.property_results import PropertyResults
 
-JSON_DIR = Path(__file__).parent.parent / "json_files"
-
 
 class TestOutputAttributes:
     @pytest.mark.unit
     @pytest.mark.output
-    def test_attributes(self, tmp_path: Path):
+    def test_attributes(self, tmp_path: Path, json_dir: Path):
         """Test to check if all exisiting attributes in `Output` side get loaded into an `Output()` object.
         All output attributes are collected first and then through loading various json files , we remove
         attributes that load correctly.
@@ -52,7 +50,7 @@ class TestOutputAttributes:
             for attr in gbw_attr.union(prop_attr)
             if not any(ign.lower() in attr.lower() for ign in ignore)
         }
-        for file in JSON_DIR.rglob("*.json"):
+        for file in json_dir.rglob("*.json"):
             basename = file.stem
             basename = basename.split(".", 1)[0]
 
@@ -62,7 +60,7 @@ class TestOutputAttributes:
             created.add(basename)
 
             # create output object specific to given basename/task
-            output_object = self.make_output_object(basename, tmp_path)
+            output_object = self.make_output_object(basename, tmp_path, json_dir)
             # collect all loaded attributes
             object_prop_attr = self.collect_non_none_attrs(output_object.results_properties)
             object_gbw_attr = self.collect_non_none_attrs(output_object.results_gbw)
@@ -256,7 +254,7 @@ class TestOutputAttributes:
 
         return result
 
-    def make_output_object(self, basename: str, tmp_path: Path):
+    def make_output_object(self, basename: str, tmp_path: Path, json_dir: Path):
         """
         Create output object and parse json files of a specific basename.
 
@@ -274,7 +272,7 @@ class TestOutputAttributes:
 
         """
         # Look for basename.* in JSON_DIR
-        json_files = list(JSON_DIR.rglob(f"{basename}.*"))
+        json_files = list(json_dir.rglob(f"{basename}.*"))
 
         # Separate GBW json and property json
         gbw_json = next(

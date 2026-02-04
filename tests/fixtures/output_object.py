@@ -1,18 +1,14 @@
-from pathlib import Path
-
 import pytest
 
 from opi.output.core import Output
 
-JSON_DIR = Path(__file__).parent.parent / "json_files"
-
 
 @pytest.fixture
-def output_object_factory():
+def output_object_factory(json_dir) -> Output:
     def _create_instance(identifier):
-        matching_files = list(JSON_DIR.rglob(f"*{identifier}*.json"))
+        matching_files = list(json_dir.rglob(f"*{identifier}*.json"))
         if len(matching_files) == 0:
-            raise FileNotFoundError(f"No matching JSON files found in {JSON_DIR}")
+            raise FileNotFoundError(f"No matching JSON files found in {json_dir}")
 
         # Separate files by type
         prop_file = next((f for f in matching_files if f.name.endswith(".property.json")), None)
