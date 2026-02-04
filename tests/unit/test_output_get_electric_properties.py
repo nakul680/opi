@@ -67,6 +67,7 @@ def test_get_quadrupole_returns_none(output_object_factory, task: str, index: in
 def test_get_polarizability_returns_list(output_object_factory, task: str):
     """Test if `Output.get_polarizability()` returns list."""
     output_object = output_object_factory(task)
+    print(task)
     assert isinstance(output_object.get_polarizability(), list)
 
 
