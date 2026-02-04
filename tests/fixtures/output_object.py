@@ -13,8 +13,15 @@ def output_object_factory():
         matching_files = list(JSON_DIR.rglob(f"*{identifier}*.json"))
         if len(matching_files) == 0:
             raise FileNotFoundError(f"No matching JSON files found in {JSON_DIR}")
-        prop_file = matching_files[0]
-        gbw_file = matching_files[1]
+
+        # Separate files by type
+        prop_file = next((f for f in matching_files if f.name.endswith('.property.json')), None)
+        gbw_file = next((f for f in matching_files if not f.name.endswith('.property.json')), None)
+
+        if prop_file is None:
+            raise FileNotFoundError(f"No .property.json file found for identifier {identifier}")
+        if gbw_file is None:
+            raise FileNotFoundError(f"No GBW JSON file found for identifier {identifier}")
 
         output_object = Output("test", version_check=False)
         output_object.property_json_file = prop_file
