@@ -248,7 +248,6 @@ class Output:
 
         # // read the GBW files
         self.gbw_json_data = self._process_json_files(self.gbw_json_files, continue_on_error=True)
-        print(self.gbw_json_data)
         self.results_gbw = [GbwResults(**data) for data in self.gbw_json_data]
 
     @property

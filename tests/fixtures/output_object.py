@@ -15,8 +15,8 @@ def output_object_factory():
             raise FileNotFoundError(f"No matching JSON files found in {JSON_DIR}")
 
         # Separate files by type
-        prop_file = next((f for f in matching_files if f.name.endswith('.property.json')), None)
-        gbw_file = next((f for f in matching_files if not f.name.endswith('.property.json')), None)
+        prop_file = next((f for f in matching_files if f.name.endswith(".property.json")), None)
+        gbw_file = next((f for f in matching_files if not f.name.endswith(".property.json")), None)
 
         if prop_file is None:
             raise FileNotFoundError(f"No .property.json file found for identifier {identifier}")
