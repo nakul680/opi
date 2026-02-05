@@ -132,7 +132,7 @@ class BlockQmmm(Block):
         mode="before",
     )
     @classmethod
-    def intgroup_from_list(cls, inp: IntGroupEnd | list[int]) -> IntGroupEnd:
+    def intgroupend_from_list(cls, inp: IntGroupEnd | list[int]) -> IntGroupEnd:
         """
         Parameters
         ----------
