@@ -4,7 +4,8 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_validator
 
 from opi.input.blocks import Block
-from opi.input.blocks.util import InputFilePath, IntGroup, NumList
+from opi.input.blocks.util import InputFilePath, NumList
+from opi.models import IntGroup
 from opi.utils.element import Element
 
 __all__ = ("NucleiFlag", "Nuclei", "NmrGroup", "NmrEquiv", "BlockEprnmr")
@@ -190,7 +191,7 @@ class NmrGroup(BaseModel):
     ----------
     groupnumber: int
         Defines group number
-    atoms: `IntGroup`
+    atoms: `IntGroupEnd`
         Defines atoms that are grouped
 
     """
@@ -199,11 +200,11 @@ class NmrGroup(BaseModel):
     atoms: IntGroup
 
     def __str__(self) -> str:
-        return f"{self.groupnumber} {str(self.atoms)} end"
+        return f"{self.groupnumber} {str(self.atoms)}"
 
     @field_validator("atoms", mode="before")
     @classmethod
-    def intgroup_init(cls, inp: str | list[int]) -> IntGroup:
+    def intgroupend_init(cls, inp: str | list[int]) -> IntGroup:
         """
         Parameters
         ----------
