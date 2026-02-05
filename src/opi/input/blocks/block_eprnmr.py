@@ -191,7 +191,7 @@ class NmrGroup(BaseModel):
     ----------
     groupnumber: int
         Defines group number
-    atoms: `IntGroupEnd`
+    atoms: `IntGroup`
         Defines atoms that are grouped
 
     """
@@ -200,11 +200,11 @@ class NmrGroup(BaseModel):
     atoms: IntGroup
 
     def __str__(self) -> str:
-        return f"{self.groupnumber} {str(self.atoms)}"
+        return f"{self.groupnumber} {str(self.atoms)} end"
 
     @field_validator("atoms", mode="before")
     @classmethod
-    def intgroupend_init(cls, inp: str | list[int]) -> IntGroup:
+    def intgroup_init(cls, inp: str | list[int]) -> IntGroup:
         """
         Parameters
         ----------
