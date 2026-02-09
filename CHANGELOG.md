@@ -44,6 +44,7 @@ required version for OPI respectively in #112
 - Added `IrMode` class for keeping IR data in #168.
 - Addition of strict argument to `BaseStructureFile` in #189.
 - `IntGroupEnd` class created to model certain attributes in blocks in #190.
+- Additional functionality for `BlockBasis` added in #43
 
 ### Fixed 
 - Fixed the links on the tutorial start page in #2
@@ -62,6 +63,7 @@ required version for OPI respectively in #112
 - Fixed inconsistency in return type of `_buffer` method in `Structure` in #151. Now it raises `EOFError` instead of returning None.
 - Fixed error in formatting of `QMMM` block attributes in #190.
 - Common ide configuration directories now added to .gitignore, preventing git from tracking them in #192.
+- Fix to `fragproc` attribute in `BlockFrag` in #43
 
 ## Changed
 - Configuration of a path to OPENMPI is now optional in #17.
