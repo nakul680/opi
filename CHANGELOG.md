@@ -38,7 +38,7 @@ required version for OPI respectively in #112
 - `PropertyResults` and `GbwResults` objects can now be initialized from json files with #159.
 - Introduction of OPI unit tests . These tests are marked with marker "unit".
   - Input-side unit tests are marked with marker "input"(#145).
-  - Output-side unit tests are marked with marker "output".
+  - Output-side unit tests are marked with marker "output"(#170).
 - Added `Properties` class for reading (relative) energies from comment line of multi XYZ files in #151.
 - Addition of DFT keywords to method block in #173.
 - Added `IrMode` class for keeping IR data in #168.
