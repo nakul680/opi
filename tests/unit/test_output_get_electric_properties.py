@@ -4,6 +4,15 @@ from opi.output.models.json.property.properties.dipole_moment import DipoleMomen
 from opi.output.models.json.property.properties.polarizability import Polarizability
 from opi.output.models.json.property.properties.quadrupole_moment import QuadrupoleMoment
 
+"""
+Unit tests for Output electric property getters 
+
+This module contains tests for the getters of electric properties such as:
+- Dipole Moments
+- Quadrupole Moments
+- Polarizability
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

@@ -4,6 +4,16 @@ from opi.output.core import Output
 from opi.output.models.json.property.properties.mp2_energy import Mp2Energy
 from opi.output.models.json.property.properties.scf_energy import ScfEnergy
 
+"""
+Unit tests for Output energy property getters.
+
+This module contains tests for the getter methods of energy-related attributes such as :
+- Final energy values at specific geometry indices
+- Energy dictionaries containing multiple energy types (SCF, MP2, etc.)
+- Zero-point energy (ZPE) values
+
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

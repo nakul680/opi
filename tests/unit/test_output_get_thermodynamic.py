@@ -2,6 +2,18 @@ import pytest
 
 from opi.output.core import Output
 
+"""
+Unit test for Output thermodynamic property getters.
+
+This module contains tests for getters related to thermodynamic properties such as:
+- Inner Energy 
+- Enthalpy
+- Entropy
+- Free Energy
+- Electronic Energy
+- Free Energy delta 
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

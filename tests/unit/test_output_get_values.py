@@ -2,6 +2,17 @@ import pytest
 
 from opi.output.core import Output
 
+"""
+Unit tests for Output system property getters. 
+
+This module contsins tests for getter methods of basic system properties such as:
+- Hartree-Fock type
+- Molecular charge 
+- Spin multiplicity
+- Number of electrons
+- Number of basis sets 
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

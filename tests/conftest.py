@@ -37,6 +37,56 @@ pytest_plugins = [
 ]
 
 
+@pytest.fixture(scope="session")
+def json_file_list(json_dir: Path) -> list[Path]:
+    """
+    Provide list of test JSON file paths for Output unit tests.
+
+    Parameters
+    ----------
+    json_dir: Path
+        Path to the JSON directory.
+
+    Returns
+    -------
+    list[Path]
+        List of test JSON file paths.
+
+    """
+    filenames = [
+        "gbw/test_exmp003_opt_job.json",
+        "property/test_exmp003_opt_job.property.json",
+        "gbw/test_exmp006_mp2_job.json",
+        "property/test_exmp006_mp2_job.property.json",
+        "gbw/test_exmp009_rama_job.json",
+        "property/test_exmp009_rama_job.property.json",
+        "gbw/test_exmp010_uvvis_job.json",
+        "property/test_exmp010_uvvis_job.property.json",
+        "gbw/test_exmp011_epr_job.json",
+        "property/test_exmp011_epr_job.property.json",
+        "gbw/test_exmp012_nmr_job.json",
+        "property/test_exmp012_nmr_job.property.json",
+        "gbw/test_exmp013_bs_job.json",
+        "property/test_exmp013_bs_job.property.json",
+        "gbw/test_exmp014_led_job.json",
+        "property/test_exmp014_led_job.property.json",
+        "gbw/test_exmp015_pop_analysis_job.json",
+        "property/test_exmp015_pop_analysis_job.property.json",
+        "gbw/test_exmp016_autoci_job.json",
+        "property/test_exmp016_autoci_job.property.json",
+        "gbw/test_exmp017_roci_job.json",
+        "property/test_exmp017_roci_job.property.json",
+        "gbw/test_exmp018_cipsi_job.json",
+        "property/test_exmp018_cipsi_job.property.json",
+        "gbw/test_exmp028_nevp2_job.json",
+        "property/test_exmp028_nevp2_job.property.json",
+        "gbw/test_exmp038_integrals_job.json",
+        "property/test_exmp038_integrals_job.property.json",
+    ]
+
+    return [json_dir / f for f in filenames]
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(
     item: Item,

@@ -4,6 +4,15 @@ from opi.core import Calculator
 from opi.input.blocks import Block, BlockEprnmr, BlockMethod, BlockScf, Nuclei, NucleiFlag
 from opi.utils.element import Element
 
+"""
+This module contains tests for block-related operations including:
+- Addition of blocks
+- Removal of blocks
+- Getting of blocks
+- Checking whether block exists in a `Calculator` object
+- Clearing all blocks
+"""
+
 
 @pytest.fixture
 def empty_calc():

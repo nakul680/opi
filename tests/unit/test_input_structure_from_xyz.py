@@ -7,6 +7,14 @@ from opi.input.structures import Structure
 from opi.utils.element import Element
 from opi.utils.tracking_text_io import TrackingTextIO
 
+"""
+This module contains tests for functions that initialize `Structure` objects from various sources
+such as:
+- From xyz file
+- From xyz buffer
+- From xyz trajectory file
+"""
+
 
 @pytest.fixture
 def xyz_single_file(tmp_path: Path) -> Path:

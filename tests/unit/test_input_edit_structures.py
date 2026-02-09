@@ -3,6 +3,15 @@ import pytest
 
 from opi.input.structures import Atom, Structure
 
+"""
+This module contains tests for structure-related operations such as:
+- Adding `Atom` to `Structure` object.
+- Deleting `Atom` from `Structure` object.
+- Replacing `Atom` in `Structure` object.
+- Extracting Coordinate information from `Structure` object.
+- Extracting substructure.
+"""
+
 
 @pytest.fixture
 def structure() -> Structure:

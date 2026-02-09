@@ -3,6 +3,14 @@ import pytest
 from opi.core import Calculator
 from opi.input.simple_keywords import BasisSet, Method, SimpleKeyword
 
+"""
+This module contains tests for simple keyword related operations such as:
+- Add `SimpleKeyword` to `Calculator` object
+- Clear all `SimpleKeyword` objects
+- Getting `SimpleKeyword` object
+- Checking whether `Calculator` object has a specific `SimpleKeyword` object
+"""
+
 
 @pytest.fixture()
 def empty_calc() -> Calculator:

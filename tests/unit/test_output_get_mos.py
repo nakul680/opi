@@ -3,6 +3,15 @@ import pytest
 from opi.output.mo_data import MOData
 from opi.output.models.json.gbw.properties.mo import MO
 
+"""
+Unit tests for Output molecular orbital (MO) property getters.
+
+This module contains tests for the getters of MO-related properties such as:
+- Individual MO data
+- HOMO 
+- LUMO
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

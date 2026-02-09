@@ -1,12 +1,15 @@
+from pathlib import Path
+from typing import Callable
+
 import pytest
 
 from opi.output.core import Output
 
 
 @pytest.fixture
-def output_object_factory(json_dir) -> Output:
-    def _create_instance(identifier):
-        matching_files = list(json_dir.rglob(f"*{identifier}*.json"))
+def output_object_factory(json_dir: Path, json_file_list: list[Path]) -> Callable[[str], Output]:
+    def _create_instance(identifier: str) -> Output:
+        matching_files = [path for path in json_file_list if identifier in path.name]
         if len(matching_files) == 0:
             raise FileNotFoundError(f"No matching JSON files found in {json_dir}")
 

@@ -3,6 +3,14 @@ import pytest
 from opi.input.structures import Structure
 from opi.output.core import Output
 
+"""
+Unit tests for Output structure getters.
+
+This module contains tests for structure-related getters for attributes such as:
+- Gradients at either default or specified index
+- Structure data with or without fragments
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

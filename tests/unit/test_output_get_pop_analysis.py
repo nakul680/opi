@@ -13,6 +13,18 @@ from opi.output.models.json.property.properties.population_analysis import (
     MullikenPopulationAnalysis,
 )
 
+"""
+Unit tests for Output population analysis poprerty getters
+
+This module contains tests for the getters of population analysis related properties such as:
+- Mulliken population analysis data
+- Loewdin population analysis data
+- ChelPG population analysis data
+- Mayer population analysis data
+- Hirshfeld population analysis data
+- Mbis population analysis data
+"""
+
 
 @pytest.mark.unit
 @pytest.mark.output

@@ -1,5 +1,4 @@
 import inspect
-import shutil
 from pathlib import Path
 from typing import Any, Set, get_args, get_origin
 
@@ -12,9 +11,25 @@ from opi.output.models.json.property.property_results import PropertyResults
 
 
 class TestOutputAttributes:
+    """
+    Test suite for verifying completeness of Output attribute loading.
+
+    This test class checks whether all attributes defined in `GbwResults` and `PropertyResults` models
+    are correctly loaded when parsing JSON files. IT validates that the object structure matches
+    the expected structure by comparing declared model attributes against the actually populated
+    attributes from test data.
+
+    The check is done by:
+    1. Collecting all attributes from `GbwResults` and `PropertyResults`.
+    2. Loading JSON test files to create `Output` objects.
+    3. Tracking which attributes get populated.
+    4. Asserting all expected attributes have been loaded at least once.
+
+    """
+
     @pytest.mark.unit
     @pytest.mark.output
-    def test_attributes(self, tmp_path: Path, json_dir: Path):
+    def test_attributes(self, tmp_path: Path, json_dir: Path, json_file_list: list[Path]):
         """Test to check if all exisiting attributes in `Output` side get loaded into an `Output()` object.
         All output attributes are collected first and then through loading various json files , we remove
         attributes that load correctly.
@@ -50,7 +65,7 @@ class TestOutputAttributes:
             for attr in gbw_attr.union(prop_attr)
             if not any(ign.lower() in attr.lower() for ign in ignore)
         }
-        for file in json_dir.rglob("*.json"):
+        for file in json_file_list:
             basename = file.stem
             basename = basename.split(".", 1)[0]
 
@@ -60,7 +75,7 @@ class TestOutputAttributes:
             created.add(basename)
 
             # create output object specific to given basename/task
-            output_object = self.make_output_object(basename, tmp_path, json_dir)
+            output_object = self.make_output_object(basename, json_file_list)
             # collect all loaded attributes
             object_prop_attr = self.collect_non_none_attrs(output_object.results_properties)
             object_gbw_attr = self.collect_non_none_attrs(output_object.results_gbw)
@@ -149,7 +164,7 @@ class TestOutputAttributes:
         depth: int = -1,
         prefix: str | None = None,
         _visited=None,
-    ):
+    ) -> Set[str]:
         """
         Collect a set of attribute paths whose values are not None.
         - Accepts a single object or a list of objects
@@ -254,7 +269,7 @@ class TestOutputAttributes:
 
         return result
 
-    def make_output_object(self, basename: str, tmp_path: Path, json_dir: Path):
+    def make_output_object(self, basename: str, json_file_list: list[Path]) -> Output:
         """
         Create output object and parse json files of a specific basename.
 
@@ -262,8 +277,8 @@ class TestOutputAttributes:
         ----------
         basename
             Name of json files to parse
-        tmp_path
-            Temporary directory to store json files for parsing
+        json_file_list
+            List of json files to parse
 
         Returns
         -------
@@ -272,7 +287,7 @@ class TestOutputAttributes:
 
         """
         # Look for basename.* in JSON_DIR
-        json_files = list(json_dir.rglob(f"{basename}.*"))
+        json_files = [path for path in json_file_list if basename in path.name]
 
         # Separate GBW json and property json
         gbw_json = next(
@@ -280,19 +295,12 @@ class TestOutputAttributes:
         )
         property_json = next(f for f in json_files if f.name.endswith(".property.json"))
 
-        # Use pytest-provided temp directory
-        temp_dir = tmp_path
-
-        # Copy files into temp directory
-        shutil.copy(gbw_json, temp_dir / gbw_json.name)
-        shutil.copy(property_json, temp_dir / property_json.name)
-
         output_object = Output(
             basename=basename,
-            working_dir=temp_dir,
             version_check=False,
         )
         output_object.gbw_json_files = [gbw_json]
+        output_object.property_json_file = property_json
         output_object.parse()
 
         return output_object

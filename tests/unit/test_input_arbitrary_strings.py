@@ -3,6 +3,13 @@ import pytest
 from opi.core import Calculator
 from opi.input import ArbitraryString, ArbitraryStringPos
 
+"""
+This module contains tests for operations in relation with arbitrary strings such as:
+- Addition
+- Removal
+- Clearing
+"""
+
 
 @pytest.fixture
 def empty_calc():
