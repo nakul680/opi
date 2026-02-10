@@ -48,12 +48,12 @@ class Coordinates:
 
         self._coordinates = tup3d
 
-    def to_list(self) -> list[np.float64]:
+    def to_list(self) -> list[float]:
         """
         Returns coordinates as list
         """
         coords = self.coordinates.tolist()
-        return cast(list[np.float64], coords)
+        return cast(list[float], coords)
 
     @property
     def x(self) -> np.float64:
