@@ -5,6 +5,7 @@ It's mostly based on the ORCA's two JSONs files.
 
 import json
 from collections.abc import Sequence
+from os import WCONTINUED
 from pathlib import Path
 from typing import Any, Callable, cast
 from warnings import warn
@@ -35,6 +36,7 @@ from opi.output.models.base.strict_types import (
 )
 from opi.output.models.json.gbw.gbw_results import GbwResults
 from opi.output.models.json.gbw.properties.mo import MO
+from opi.output.models.json.out_results import OutResults
 from opi.output.models.json.property.properties.dipole_moment import DipoleMoment
 from opi.output.models.json.property.properties.energy import Energy
 from opi.output.models.json.property.properties.energy_list import EnergyList
@@ -160,7 +162,7 @@ class Output:
         do_create_property_json: bool | None = None,
         do_create_gbw_json: bool | None = None,
         read_prop_json: bool = True,
-        read_gbw_json: bool = True,
+        read_gbw_json: bool = True
     ) -> None:
         """
         Create and read property- and gbw-JSON file(s) (according to `do_create_property_json` and `do_create_gbw_json`).
@@ -196,6 +198,7 @@ class Output:
 
         if read_gbw_json:
             self.parse_gbw(do_create_gbw_json=do_create_gbw_json)
+
 
         # > Redump JSON files
         if self.do_redump_jsons:
@@ -249,6 +252,7 @@ class Output:
         # // read the GBW files
         self.gbw_json_data = self._process_json_files(self.gbw_json_files, continue_on_error=True)
         self.results_gbw = [GbwResults(**data) for data in self.gbw_json_data]
+
 
     @property
     def gbw_json_files(self) -> tuple[Path, ...]:
@@ -2186,3 +2190,25 @@ class Output:
                 break
 
         return ir_dict or None
+
+    def get_free_solvation_energy(self):
+        """
+        Returns the free solvation energy
+
+        Returns
+        -------
+        float
+            Free solvation energy
+        """
+        out_jsonfile = self.get_file('_out.json')
+        if not out_jsonfile:
+            raise FileNotFoundError("No out json file found")
+
+        with open(out_jsonfile, "r") as f:
+            out_dict = json.load(f)
+
+        try:
+            free_solv_energy = out_dict["dGsolv"][0][0][0]
+        except (KeyError, IndexError) as e:
+            raise ValueError(f"Unexpected error in out json file:{e}")
+        return free_solv_energy
