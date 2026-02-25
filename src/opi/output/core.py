@@ -2195,6 +2195,11 @@ class Output:
         -------
         float
             Free solvation energy
+
+        Raises
+        ------
+        ValueError
+            If the free solvation energy cannot be obtained.
         """
         out_jsonfile = self.get_file("_out.json")
         if not out_jsonfile:
