@@ -7,6 +7,7 @@ class LibXC(SimpleKeywordBox):
     """
     Class to model LibXC keywords.
     """
+
     B1LYP = SimpleKeyword("LibXC(B1LYP)")
     B1PBE = SimpleKeyword("LibXC(B1PBE)")
     B1PW = SimpleKeyword("LibXC(B1PW)")
