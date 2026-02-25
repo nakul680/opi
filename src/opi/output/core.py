@@ -2200,6 +2200,8 @@ class Output:
         ------
         ValueError
             If the free solvation energy cannot be obtained.
+        FileNotFoundError
+            If the _out json file cannot be found.
         """
         out_jsonfile = self.get_file("_out.json")
         if not out_jsonfile:
