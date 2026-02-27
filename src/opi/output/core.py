@@ -2187,14 +2187,14 @@ class Output:
 
         return ir_dict or None
 
-    def get_free_solvation_energy(self) -> float:
+    def get_free_solvation_energy_opencosmors(self) -> float | None:
         """
         Returns the free solvation energy
 
         Returns
         -------
-        float
-            Free solvation energy
+        float | None
+            Free solvation energy, or None if it is not found.
 
         Raises
         ------
@@ -2212,6 +2212,6 @@ class Output:
 
         try:
             free_solv_energy = out_dict["dGsolv"][0][0][0]
-        except (KeyError, IndexError) as e:
-            raise ValueError(f"Unexpected error in out json file:{e}")
+        except (KeyError, IndexError):
+            return None
         return float(free_solv_energy)
