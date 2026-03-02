@@ -70,7 +70,7 @@
         "NuclearCharge": 1.0
       }
     ],
-    "BaseName": "/tmp/pytest-of-tite/pytest-5/test_exmp038_integrals0/job",
+    "BaseName": "job",
     "CoordinateUnits": "Angs",
     "Multiplicity": 1,
     "Charge": 0,
