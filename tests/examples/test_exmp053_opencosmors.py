@@ -6,7 +6,7 @@ from opi.input.structures import Structure
 
 @pytest.mark.examples
 @pytest.mark.orca
-def test_exmp052_opencosmors(example_input_file, tmp_path) -> None:
+def test_exmp053_opencosmors(example_input_file, tmp_path) -> None:
     """Run OpenCOSMO-RS task."""
     # Get input file from example folder
     input_file = example_input_file(run_exmp053)
