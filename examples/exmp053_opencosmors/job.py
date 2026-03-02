@@ -8,7 +8,7 @@ from opi.input.structures import Structure
 from opi.output.core import Output
 
 
-def run_exmp052(
+def run_exmp053(
     structure: Structure | None = None, working_dir: Path | None = Path("RUN")
 ) -> Output:
     # > recreate the working dir
@@ -45,4 +45,4 @@ def run_exmp052(
 
 
 if __name__ == "__main__":
-    output = run_exmp052()
+    output = run_exmp053()
