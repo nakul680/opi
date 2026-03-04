@@ -2277,7 +2277,7 @@ class Output:
 
         Returns
         -------
-        float | None
+        free_solvation_energy: float | None
             Free solvation energy, or None if it is not found.
         """
         out_jsonfile = self.get_file("_out.json")
