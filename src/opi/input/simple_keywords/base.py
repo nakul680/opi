@@ -14,15 +14,17 @@ class SimpleKeywordBox:
         cls._registry.append(cls)
 
     @classmethod
-    def registry(cls) -> list:
+    def registry(cls) -> list[type["SimpleKeywordBox"]]:
         return cls._registry
 
     @classmethod
-    def from_string(cls, s):
+    def from_string(cls, s:str) -> "SimpleKeyword":
         norm = s.lower()
         for c in cls._registry:
             for attr, value in vars(c).items():
                 if isinstance(value, SimpleKeyword) and value.keyword.lower() == norm:
+                    return value
+                elif isinstance(value, SimpleKeyword) and attr.lower() == norm:
                     return value
 
         raise ValueError(f"Keyword {s} not found.")
