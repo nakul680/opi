@@ -1,9 +1,12 @@
-__all__ = ("SimpleKeyword",)
+__all__ = ("SimpleKeyword", "SimpleKeywordBox")
+
+from typing import Any
+
 
 class SimpleKeywordBox:
     _registry: list[type["SimpleKeywordBox"]] = []
 
-    def __init_subclass__(cls, **kwargs) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         cls._registry = []
 
@@ -18,7 +21,7 @@ class SimpleKeywordBox:
         return cls._registry
 
     @classmethod
-    def from_string(cls, s:str) -> "SimpleKeyword":
+    def from_string(cls, s: str) -> "SimpleKeyword":
         norm = s.lower()
         for c in cls._registry:
             for attr, value in vars(c).items():
@@ -29,18 +32,12 @@ class SimpleKeywordBox:
 
         raise ValueError(f"Keyword {s} not found.")
 
-
     @classmethod
     def find_keyword(cls, inp: "SimpleKeyword | str") -> "SimpleKeyword":
         if isinstance(inp, SimpleKeyword):
             inp = inp.keyword
 
         return cls.from_string(inp)
-
-
-
-class Method(SimpleKeywordBox):
-    pass
 
 
 class SimpleKeyword:

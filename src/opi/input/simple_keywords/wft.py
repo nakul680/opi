@@ -5,10 +5,8 @@ from opi.input.simple_keywords.base import (
 
 __all__ = ("Wft",)
 
-from opi.input.simple_keywords.function import Function
 
-
-class Wft(Function):
+class Wft(SimpleKeywordBox):
     """Enum to store all simple keywords of type Wft."""
 
     HF = SimpleKeyword("hf")

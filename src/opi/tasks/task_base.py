@@ -1,21 +1,21 @@
 import shutil
 import typing
+from abc import ABC, abstractmethod
+from functools import cached_property, wraps
 from pathlib import Path
-from typing import Any
 
-from pydantic import model_validator, BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from opi.core import Calculator
 from opi.input import Input
-from opi.input.blocks import Block, BlockScf
-from opi.input.simple_keywords import SimpleKeyword, BasisSet, SolvationModel, Solvent
+from opi.input.blocks import Block
+from opi.input.simple_keywords import SolvationModel, Solvent
 from opi.input.structures import Structure
 from opi.output.core import Output
 
 
 class TaskParams(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
 
     def map_to_input(self, input_object: Input) -> Input:
         hints = typing.get_type_hints(self.__class__, include_extras=True)
@@ -26,13 +26,13 @@ class TaskParams(BaseModel):
             args = typing.get_args(field_type)
             metadata = args[1:]
 
-
             match metadata:
-                case (validator, ):
+                case (validator,):
                     if validator == SolvationModel:
-                        if not self.solvent:
+                        solvent = getattr(self, "solvent", None)
+                        if not solvent:
                             raise ValueError("Solvent not set")
-                        new_keyword = value(self.solvent)
+                        new_keyword = value(solvent)
                         input_object.add_simple_keywords(new_keyword)
                     elif validator == Solvent:
                         continue
@@ -52,8 +52,7 @@ class TaskParams(BaseModel):
 
         return input_object
 
-
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def validate(cls, data: dict) -> dict:
         hints = typing.get_type_hints(cls, include_extras=True)
@@ -76,69 +75,78 @@ class TaskParams(BaseModel):
                     instance = block_cls.model_validate({key: value})
                     data[field_name] = getattr(instance, key)
 
-
         return data
 
 
+class Task(ABC):
+    _results_type: type["TaskResults"]
 
-class Task(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    # task_parameters: TaskParams
-    input_object: Input = Input()
+    @property
+    @abstractmethod
+    def task_parameters(self) -> TaskParams:
+        pass
 
-    def __init__(self, /, **data: Any):
-        super().__init__(**data)
+    @property
+    def input_object(self) -> Input:
+        inp = Input()
+        inp = self.task_parameters.map_to_input(input_object=inp)
+        return inp
 
-
-    def run(self, basename: str, struct: Structure, working_dir:Path = Path("RUN"), ncores:int | None = None, memory:int | None = None, moinp: Path | None = None) -> "TaskResults":
+    def run(
+        self,
+        basename: str,
+        struct: Structure,
+        working_dir: Path = Path("RUN"),
+        ncores: int | None = None,
+        memory: int | None = None,
+        moinp: Path | None = None,
+    ) -> "TaskResults":
 
         # > recreate the working dir
         shutil.rmtree(working_dir, ignore_errors=True)
         working_dir.mkdir()
 
-        if ncores:
-            self.input_object.ncores = ncores
+        inp = self.input_object
 
-        if memory:
-            self.input_object.memory = memory
+        if ncores is not None:
+            inp.ncores = ncores
 
-        if moinp:
-            self.input_object.moinp = moinp
+        if memory is not None:
+            inp.memory = memory
 
-
-        self.input_object = self.task_parameters.map_to_input(input_object=self.input_object)
+        if moinp is not None:
+            inp.moinp = moinp
 
         calc = Calculator(basename, working_dir=working_dir)
         calc.structure = struct
-        calc.input = self.input_object
+        calc.input = inp
 
         calc.write_and_run()
 
-        output = calc.get_output()
-
-        print(output.get_final_energy())
-
-        return TaskResults(calc_object=calc)
+        return self._results_type(calc_object=calc)
 
 
-class TaskResults(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    calc_object: Calculator | None = None
-    #
-    # def __init__(self, calc: Calculator, /, **data: Any):
-    #     super().__init__(**data)
-    #     self.calc_object = calc
+class TaskResults(ABC):
+    def __init__(self, calc_object: Calculator):
+        self.calc_object = calc_object
+        self._parsed = False
 
+    @staticmethod
+    def output_parse(
+        func: typing.Callable[["TaskResults"], typing.Any],
+    ) -> typing.Callable[["TaskResults"], typing.Any]:
+        @wraps(func)
+        def wrapper(self: "TaskResults"):
+            if not self._parsed:
+                self.output.parse()
+                self._parsed = True
+            return func(self)
 
-    @property
+        return wrapper
+
+    @cached_property
     def output(self) -> Output:
         if not self.calc_object:
             raise ValueError("calc_object not set")
+
         return self.calc_object.get_output()
-
-
-
-
-
-
-
