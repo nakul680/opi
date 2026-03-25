@@ -370,20 +370,13 @@ class BlockABC(BaseModel, ABC):
 
     @classmethod
     def get_subclass_by_name(cls, name: str) -> type["Block"]:
-        matches = {
-            sub.__name__.lower(): sub
-            for sub in cls.__subclasses__()
-        }
-        name_matches = {
-            sub().name.lower(): sub
-            for sub in cls.__subclasses__()
-        }
+        matches = {sub.__name__.lower(): sub for sub in cls.__subclasses__()}
+        name_matches = {sub().name.lower(): sub for sub in cls.__subclasses__()}
         match = matches.get(name.lower()) or name_matches.get(name.lower())
 
         if match is None:
-            raise ValueError(f"No Block subclass found with name {name!r}. Available: {list(matches.keys())}")
-
+            raise ValueError(
+                f"No Block subclass found with name {name!r}. Available: {list(matches.keys())}"
+            )
 
         return match
-
-
