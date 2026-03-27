@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from functools import cached_property, wraps
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator, field_validator
 
 from opi.core import Calculator
 from opi.input import Input
@@ -52,6 +52,31 @@ class TaskParams(BaseModel):
 
         return input_object
 
+
+    @field_validator('*', mode='before')
+    @classmethod
+    def validate_each_field(cls, value, info):
+        field_name = info.field_name
+        hints = typing.get_type_hints(cls, include_extras=True)
+
+        if field_name not in hints:
+            return value
+
+        hint = hints[field_name]
+        args = typing.get_args(hint)
+        metadata = args[1:] if len(args) > 1 else ()
+
+        match metadata:
+            case (validator, ):
+                return validator.find_keyword(value)
+
+            case (validator, key):
+                block_cls = Block.get_subclass_by_name(validator)
+                instance = block_cls.model_validate({key: value})
+                return getattr(instance, key)
+
+        return value
+
     @model_validator(mode="before")
     @classmethod
     def validate(cls, data: dict) -> dict:
@@ -83,7 +108,7 @@ class Task(ABC):
 
     @property
     @abstractmethod
-    def task_parameters(self) -> TaskParams:
+    def task_parameters(self) -> TaskParams :
         pass
 
     @property
@@ -124,6 +149,10 @@ class Task(ABC):
         calc.write_and_run()
 
         return self._results_type(calc_object=calc)
+
+
+    def change_parameter(self, param: str, value: typing.Any) -> None:
+        setattr(self.task_parameters, param, value)
 
 
 class TaskResults(ABC):
