@@ -2,7 +2,7 @@ import typing
 from pathlib import Path
 
 from opi.input.simple_keywords import BasisSet, Method, SimpleKeyword, SolvationModel, Solvent
-from opi.input.structures import Structure
+from opi.input.structures import Structure, BaseStructureFile
 from opi.tasks.task_base import Task, TaskParams, TaskResults
 
 
@@ -26,36 +26,11 @@ class SinglePointTask(Task):
         )
         self._results_type = SinglePointResults
 
-    @property
-    def task_parameters(self) -> SinglePointParams:
-        return self._task_parameters
-
-    def __getattr__(self, name):
-        """Delegate attribute access to _task_parameters."""
-        if name.startswith('_'):
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-        try:
-            return getattr(self._task_parameters, name)
-        except AttributeError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-    def __setattr__(self, name, value):
-        """Delegate attribute setting to _task_parameters."""
-        # Allow setting private attributes and special attributes normally
-        if name.startswith('_') or name in ('task_parameters', 'run'):
-            super().__setattr__(name, value)
-        else:
-            # Check if _task_parameters exists and has this attribute
-            if hasattr(self, '_task_parameters') and hasattr(self._task_parameters, name):
-                setattr(self._task_parameters, name, value)
-            else:
-                super().__setattr__(name, value)
 
     def run(
         self,
         basename: str,
-        struct: Structure,
+        struct: Structure | BaseStructureFile,
         working_dir: Path = Path("RUN"),
         ncores: int | None = None,
         memory: int | None = None,
@@ -70,7 +45,7 @@ class SinglePointTask(Task):
             moinp=moinp,
         )
 
-        return single_point_result
+        return typing.cast(SinglePointResults ,single_point_result)
 
 
 class SinglePointResults(TaskResults):

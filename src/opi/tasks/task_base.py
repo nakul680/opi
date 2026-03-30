@@ -10,12 +10,38 @@ from opi.core import Calculator
 from opi.input import Input
 from opi.input.blocks import Block
 from opi.input.simple_keywords import SolvationModel, Solvent
-from opi.input.structures import Structure
+from opi.input.structures import Structure, BaseStructureFile
 from opi.output.core import Output
 
 
 class TaskParams(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
+
+    def __str__(self) -> str:
+        lines = ["Task Parameters:"]
+        for field_name, value in self.model_dump().items():
+            lines.append(f"  {field_name}: {value}")
+        return "\n".join(lines)
+
+    @staticmethod
+    def _get_field_metadata(hint: typing.Any) -> tuple:
+        args = typing.get_args(hint)
+        return args[1:] if len(args) > 1 else ()
+
+
+    @staticmethod
+    def _resolve_field_value(value: typing.Any, metadata: tuple) -> typing.Any:
+        match metadata:
+            case (validator,):
+                return validator.find_keyword(value)
+
+            case (validator, key):
+                block_cls = Block.get_subclass_by_name(validator)
+                instance = block_cls.model_validate({key: value})
+                return getattr(instance, key)
+
+            case _:
+                return value
 
     def map_to_input(self, input_object: Input) -> Input:
         hints = typing.get_type_hints(self.__class__, include_extras=True)
@@ -55,27 +81,15 @@ class TaskParams(BaseModel):
 
     @field_validator('*', mode='before')
     @classmethod
-    def validate_each_field(cls, value, info):
-        field_name = info.field_name
+    def validate_field(cls, value, info):
         hints = typing.get_type_hints(cls, include_extras=True)
 
-        if field_name not in hints:
+        if info.field_name not in hints:
             return value
 
-        hint = hints[field_name]
-        args = typing.get_args(hint)
-        metadata = args[1:] if len(args) > 1 else ()
-
-        match metadata:
-            case (validator, ):
-                return validator.find_keyword(value)
-
-            case (validator, key):
-                block_cls = Block.get_subclass_by_name(validator)
-                instance = block_cls.model_validate({key: value})
-                return getattr(instance, key)
-
-        return value
+        hint = hints[info.field_name]
+        metadata = cls._get_field_metadata(hint)
+        return cls._resolve_field_value(value, metadata)
 
     @model_validator(mode="before")
     @classmethod
@@ -83,33 +97,21 @@ class TaskParams(BaseModel):
         hints = typing.get_type_hints(cls, include_extras=True)
 
         for field_name, hint in hints.items():
-            value = data.get(field_name)
             if field_name not in data:
                 continue
 
-            args = typing.get_args(hint)
-            metadata = args[1:]
-
-            match metadata:
-                case (validator,):
-                    keyword = validator.find_keyword(data[field_name])
-                    data[field_name] = keyword
-
-                case (validator, key):
-                    block_cls = Block.get_subclass_by_name(validator)
-                    instance = block_cls.model_validate({key: value})
-                    data[field_name] = getattr(instance, key)
+            metadata = cls._get_field_metadata(hint)
+            data[field_name] = cls._resolve_field_value(data[field_name], metadata)
 
         return data
 
-
 class Task(ABC):
     _results_type: type["TaskResults"]
+    _task_parameters: TaskParams
 
     @property
-    @abstractmethod
     def task_parameters(self) -> TaskParams :
-        pass
+        return self._task_parameters
 
     @property
     def input_object(self) -> Input:
@@ -117,10 +119,30 @@ class Task(ABC):
         inp = self.task_parameters.map_to_input(input_object=inp)
         return inp
 
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+        try:
+            return getattr(self._task_parameters, name)
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+    def __setattr__(self, name, value):
+        # Allow setting private attributes and special attributes normally
+        if name.startswith('_') or name in ('task_parameters', 'run'):
+            super().__setattr__(name, value)
+        else:
+            # Check if _task_parameters exists and has this attribute
+            if hasattr(self, '_task_parameters') and hasattr(self._task_parameters, name):
+                setattr(self._task_parameters, name, value)
+            else:
+                super().__setattr__(name, value)
+
     def run(
         self,
         basename: str,
-        struct: Structure,
+        struct: Structure | BaseStructureFile,
         working_dir: Path = Path("RUN"),
         ncores: int | None = None,
         memory: int | None = None,
@@ -153,6 +175,25 @@ class Task(ABC):
 
     def change_parameter(self, param: str, value: typing.Any) -> None:
         setattr(self.task_parameters, param, value)
+
+
+    def restart(self, previous_results: "TaskResults",
+        basename: str|None = None,
+        struct: Structure| BaseStructureFile| None = None,
+        working_dir: Path | None = None,
+        ncores: int | None = None,
+        memory: int | None = None,
+        moinp: Path | None = None,
+        use_previous_orbitals: bool = False ) -> "TaskResults":
+
+        basename = basename if basename else previous_results.calc_object.basename
+        struct = struct if struct else previous_results.calc_object.structure
+        working_dir = working_dir if working_dir else previous_results.calc_object.working_dir
+        ncores = ncores if ncores else previous_results.calc_object.input.ncores
+        memory = memory if memory else previous_results.calc_object.input.memory
+        moinp = moinp if moinp else previous_results.calc_object.input.moinp
+
+        return self.run(basename, struct, working_dir, ncores, memory, moinp)
 
 
 class TaskResults(ABC):
