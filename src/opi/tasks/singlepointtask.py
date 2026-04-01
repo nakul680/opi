@@ -1,31 +1,33 @@
 import typing
 from pathlib import Path
 
-from opi.input.simple_keywords import BasisSet, Method, SimpleKeyword, SolvationModel, Solvent
-from opi.input.structures import Structure, BaseStructureFile
-from opi.tasks.task_base import Task, TaskParams, TaskResults
+from opi.input.simple_keywords import SimpleKeyword, SolvationModel, Solvent, Task
+from opi.input.structures import BaseStructureFile, Structure
+from opi.tasks.method_settings import DFTSettings
+from opi.tasks.task_base import SimpleTask, TaskResults, TaskSettings
 
 
-class SinglePointParams(TaskParams):
-    method: typing.Annotated[SimpleKeyword, Method]
-    basis_set: typing.Annotated[SimpleKeyword, BasisSet]
-    solvation_model: typing.Annotated[SimpleKeyword, SolvationModel]
-    solvent: typing.Annotated[str, Solvent]
+class SinglePointSettings(TaskSettings):
+    _name: str = "singlepoint"
+    task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.SP
 
 
-class SinglePointTask(Task):
+class SinglePointTask(SimpleTask):
     def __init__(
         self,
         method: str | SimpleKeyword,
         basis_set: str | SimpleKeyword,
         solvation_model: str | SolvationModel,
         solvent: str | Solvent,
+        task: str | SimpleKeyword | None = None,
     ):
-        self._task_parameters = SinglePointParams(
+        self._method_settings = DFTSettings(
             method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
         )
+        self._task_settings = (
+            SinglePointSettings(task_keyword=task) if task else SinglePointSettings()
+        )
         self._results_type = SinglePointResults
-
 
     def run(
         self,
@@ -45,14 +47,10 @@ class SinglePointTask(Task):
             moinp=moinp,
         )
 
-        return typing.cast(SinglePointResults ,single_point_result)
+        return typing.cast(SinglePointResults, single_point_result)
 
 
 class SinglePointResults(TaskResults):
-    @property
-    def status(self) -> bool:
-        return self.output.terminated_normally() and self.output.scf_converged()
-
     @property
     @TaskResults.output_parse
     def final_energy(self) -> float:
