@@ -56,7 +56,12 @@ class Settings(BaseModel):
             Tuple of metadata about the field.
 
         """
+        origin = typing.get_origin(hint)
         args = typing.get_args(hint)
+        if origin is typing.Union:
+            non_none_args = [arg for arg in args if arg is not type(None)]
+            if non_none_args:
+                return Settings._get_field_metadata(non_none_args[0])
         return args[1:] if len(args) > 1 else ()
 
     @staticmethod
@@ -139,9 +144,10 @@ class Settings(BaseModel):
 
         for field_name, field_type in hints.items():
             value = getattr(self, field_name)
+            if value is None:
+                continue
 
-            args = typing.get_args(field_type)
-            metadata = args[1:]
+            metadata = self._get_field_metadata(field_type)
 
             match metadata:
                 case (validator,):
@@ -149,7 +155,8 @@ class Settings(BaseModel):
                         continue
 
                     new_keyword = self._get_simple_keyword(validator, value)
-                    input_object.add_simple_keywords(new_keyword)
+                    if new_keyword:
+                        input_object.add_simple_keywords(new_keyword)
 
                 case (validator, key):
                     block_type = Block.get_subclass_by_name(validator)
@@ -191,6 +198,9 @@ class Settings(BaseModel):
         Any
             User input value processed and converted to OPI compatible types.
         """
+        if value is None:
+            return value
+
         hints = typing.get_type_hints(cls, include_extras=True)
 
         if info.field_name not in hints:
@@ -230,9 +240,9 @@ class TaskSettings(Settings):
 
 class MethodSettings(Settings):
     method: typing.Annotated[SimpleKeyword, Method]
-    basis_set: typing.Annotated[SimpleKeyword, BasisSet]
-    solvation_model: typing.Annotated[SimpleKeyword, SolvationModel]
-    solvent: typing.Annotated[str, Solvent]
+    basis_set: typing.Annotated[SimpleKeyword, BasisSet] | None = None
+    solvation_model: typing.Annotated[SimpleKeyword, SolvationModel] | None = None
+    solvent: typing.Annotated[str, Solvent] | None = None
 
 
 class SimpleTask(ABC):
@@ -332,6 +342,7 @@ class SimpleTask(ABC):
         ncores: int | None = None,
         memory: int | None = None,
         moinp: Path | None = None,
+        strict: bool = False
     ) -> "TaskResults":
         """
         Execute the computational task with the given structure and settings.
@@ -357,6 +368,8 @@ class SimpleTask(ABC):
             value in the input object if provided.
         moinp : pathlib.Path, optional
             Path to a molecular orbital input file. Overrides the default if provided.
+        strict : bool, optional
+            Controls whether working directory will be created/overwritten. Defaults to False.
 
         Returns
         -------
@@ -364,10 +377,20 @@ class SimpleTask(ABC):
             An instance of the configured results type containing the results
             of the calculation.
         """
+        if strict:
+            # Must already exist
+            if not working_dir.exists():
+                raise ValueError(f"Working directory {working_dir.resolve()} does not exist (strict mode)")
 
-        # > recreate the working dir
-        shutil.rmtree(working_dir, ignore_errors=True)
-        working_dir.mkdir()
+            # Must be empty
+            if any(working_dir.iterdir()):
+                raise ValueError(f"Working directory {working_dir.resolve()} is not empty (strict mode)")
+
+        else:
+            # Non-strict: recreate directory
+            if working_dir.exists():
+                shutil.rmtree(working_dir)
+            working_dir.mkdir()
 
         inp = self.input_object
 
@@ -489,3 +512,19 @@ class TaskResults(ABC):
     @abstractmethod
     def primary_property(self) -> typing.Any:
         pass
+
+    def __getattr__(self, name):
+        """
+        First tries to get attribute from the object itself.
+        If not found, tries to get it from self.output.
+        """
+        # Check if 'output' exists to avoid infinite recursion
+        if name == 'output':
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute 'output'")
+
+        # Try to get the attribute from self.output
+        try:
+            return getattr(self.output, name)
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+

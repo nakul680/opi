@@ -24,13 +24,18 @@ class SimpleKeywordBox:
     def from_string(cls, s: str) -> "SimpleKeyword":
         norm = s.lower()
         for c in cls._registry:
-            for attr, value in vars(c).items():
+            for attr in dir(c):
+                if attr.startswith('_'):  # Skip private/magic attributes
+                    continue
+                value = getattr(c, attr)
                 if isinstance(value, SimpleKeyword) and value.keyword.lower() == norm:
                     return value
                 elif isinstance(value, SimpleKeyword) and attr.lower() == norm:
                     return value
+                elif isinstance(value, SimpleKeyword) and value.alias and value.alias.lower() == norm:
+                    return value
 
-        raise ValueError(f"Keyword {s} not found.")
+        raise ValueError(f"Keyword {s} not found in class {cls.__name__}")
 
     @classmethod
     def find_keyword(cls, inp: "SimpleKeyword | str") -> "SimpleKeyword":
@@ -56,12 +61,14 @@ class SimpleKeyword:
     keyword: str
         simple keyword as it will appear in the ORCA .inp file
     """
+    alias: str | None = None
 
-    def __init__(self, keyword: str) -> None:
+    def __init__(self, keyword: str, alias:str|None=None) -> None:
         self._keyword: str = ""
         self.keyword = keyword
         self._name: str = ""
         # self.name = name
+        self.alias = alias
 
     @property
     def keyword(self) -> str:

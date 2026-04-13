@@ -1,7 +1,7 @@
 import typing
 from pathlib import Path
 
-from opi.input.simple_keywords import SimpleKeyword, SolvationModel, Solvent, Task
+from opi.input.simple_keywords import SimpleKeyword, Solvent, Task
 from opi.input.structures import BaseStructureFile, Structure
 from opi.tasks.method_settings import DFTSettings
 from opi.tasks.task_base import SimpleTask, TaskResults, TaskSettings
@@ -16,17 +16,18 @@ class SinglePointTask(SimpleTask):
     def __init__(
         self,
         method: str | SimpleKeyword,
-        basis_set: str | SimpleKeyword,
-        solvation_model: str | SolvationModel,
-        solvent: str | Solvent,
+        basis_set: str | SimpleKeyword | None = None,
+        solvation_model: str | SimpleKeyword | None = None,
+        solvent: str | Solvent | None = None,
         task: str | SimpleKeyword | None = None,
     ):
         self._method_settings = DFTSettings(
             method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
         )
         self._task_settings = (
-            SinglePointSettings(task_keyword=task) if task else SinglePointSettings()
-        )
+            SinglePointSettings(task_keyword=task)
+        ) if task else SinglePointSettings()
+
         self._results_type = SinglePointResults
 
     def run(
@@ -37,6 +38,7 @@ class SinglePointTask(SimpleTask):
         ncores: int | None = None,
         memory: int | None = None,
         moinp: Path | None = None,
+        strict: bool = False
     ) -> "SinglePointResults":
         single_point_result = super().run(
             basename=basename,
@@ -45,6 +47,7 @@ class SinglePointTask(SimpleTask):
             ncores=ncores,
             memory=memory,
             moinp=moinp,
+            strict=strict
         )
 
         return typing.cast(SinglePointResults, single_point_result)
