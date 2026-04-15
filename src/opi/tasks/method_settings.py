@@ -3,6 +3,7 @@ import warnings
 
 from pydantic import field_validator, model_validator
 
+from opi.input import Input
 from opi.input.simple_keywords import Dft, SimpleKeyword, Grid, DispersionCorrection
 from opi.input.simple_keywords.scf import ScfThreshold, ScfSolver, Scf, ScfConvergence
 from opi.tasks.task_base import MethodSettings
@@ -15,18 +16,13 @@ class DFTSettings(MethodSettings):
     scf_maxiter: typing.Annotated[int, "BlockScf", "maxiter"] | None = None
     scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
     scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
-    scf_stab: typing.Annotated[SimpleKeyword, Scf] | None = None
+    scf_stab: bool = False
     scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
 
 
     @field_validator("*", mode="before")
     @classmethod
     def validate_fields(cls, value: typing.Any, info):
-        if info.field_name == "scf_stab":
-            if value:
-                return Scf.SCFSTAB
-            else:
-                return None
         if info.field_name == "method":
             try:
                 new_keyword = Dft.find_keyword(value)
@@ -62,6 +58,14 @@ class DFTSettings(MethodSettings):
             data.basis_set = None
 
         return data
+
+    def map_to_input(self, input_object: Input) -> Input:
+        input_object = super().map_to_input(input_object)
+
+        if self.scf_stab:
+            input_object.add_simple_keywords(Scf.SCFSTAB)
+
+        return input_object
 
     @classmethod
     def _find_dft_disp_keyword(cls, value: str | SimpleKeyword) -> SimpleKeyword:

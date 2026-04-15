@@ -4,6 +4,10 @@ from typing import Any
 
 
 class SimpleKeywordBox:
+    """
+    TODO:
+    - rework registry to account for latest changes.
+    """
     _registry: list[type["SimpleKeywordBox"]] = []
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
