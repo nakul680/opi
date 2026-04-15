@@ -22,6 +22,10 @@ from opi.output.core import Output
 
 
 class Settings(BaseModel):
+    """
+    TODO:
+    - add checking for Solvent and SolvationModel now that they are optional.
+    """
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
     _name: str
 
@@ -235,7 +239,7 @@ class Settings(BaseModel):
 
 
 class TaskSettings(Settings):
-    pass
+    task_keyword: typing.Annotated[SimpleKeyword, SimpleKeywordBox]
 
 
 class MethodSettings(Settings):
