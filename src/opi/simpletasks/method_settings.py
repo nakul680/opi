@@ -2,16 +2,26 @@ import typing
 import warnings
 
 from pydantic import field_validator, model_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from opi.input import Input
-from opi.input.simple_keywords import Dft, SimpleKeyword, Grid, DispersionCorrection
+from opi.input.simple_keywords import Dft, SimpleKeyword, Grid, DispersionCorrection, Sqm, Wft, Method, ForceField, \
+    BasisSet, SolvationModel, Solvent
 from opi.input.simple_keywords.scf import ScfThreshold, ScfSolver, Scf, ScfConvergence
-from opi.tasks.task_base import MethodSettings
+from opi.simpletasks.settings import Settings
+
+
+
+class MethodSettings(Settings):
+    method: typing.Annotated[SimpleKeyword, Method] | None = None
+    basis_set: typing.Annotated[SimpleKeyword, BasisSet] | None = None
+    solvation_model: typing.Annotated[SimpleKeyword, SolvationModel] | None = None
+    solvent: typing.Annotated[str, Solvent] | None = None
 
 
 class DFTSettings(MethodSettings):
     _name: str = "dft"
-    method: typing.Annotated[SimpleKeyword, Dft]
+    method: typing.Annotated[SimpleKeyword, Dft] | None = None
     grid: typing.Annotated[SimpleKeyword, Grid] | None = None
     scf_maxiter: typing.Annotated[int, "BlockScf", "maxiter"] | None = None
     scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
@@ -22,7 +32,7 @@ class DFTSettings(MethodSettings):
 
     @field_validator("*", mode="before")
     @classmethod
-    def validate_fields(cls, value: typing.Any, info):
+    def validate_fields(cls, value: typing.Any, info: ValidationInfo) -> typing.Any:
         if info.field_name == "method":
             try:
                 new_keyword = Dft.find_keyword(value)
@@ -35,8 +45,7 @@ class DFTSettings(MethodSettings):
 
 
     @model_validator(mode="after")
-    @classmethod
-    def cross_validate(cls, data: "DFTSettings") -> "DFTSettings":
+    def cross_validate(self) -> "DFTSettings":
         """
         Cross-validation for `DftSettings`.
         If the method keyword contains '3c', the `basis_set` attribute will be set to `None`.
@@ -53,11 +62,11 @@ class DFTSettings(MethodSettings):
             Cross-validated `DFTSettings` object.
 
         """
-        if "3c" in data.method.keyword and data.basis_set:
+        if (self.method and "3c" in self.method.keyword) and self.basis_set:
             warnings.warn("Basis Set will be ignored due to selection of Method", UserWarning)
-            data.basis_set = None
+            self.basis_set = None
 
-        return data
+        return self
 
     def map_to_input(self, input_object: Input) -> Input:
         input_object = super().map_to_input(input_object)
@@ -105,6 +114,24 @@ class DFTSettings(MethodSettings):
                 raise ValueError(f"Invalid Dft keyword or dispersion correction given: {value}")
         else:
             raise ValueError(f"Invalid Dft keyword '{value}'")
+
+
+class SQMSettings(MethodSettings):
+    _name: str = "sqm"
+    method: typing.Annotated[SimpleKeyword, Sqm]
+
+
+class WftSettings(MethodSettings):
+    _name: str = "wft"
+    method: typing.Annotated[SimpleKeyword, Wft]
+
+class HFSettings(MethodSettings):
+    _name: str = "hf"
+    method: typing.Annotated[SimpleKeyword, Method]
+
+class ForceFieldSettings(MethodSettings):
+    _name: str = "forcefield"
+    method: typing.Annotated[SimpleKeyword, ForceField]
 
 
 

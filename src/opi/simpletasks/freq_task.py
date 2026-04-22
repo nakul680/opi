@@ -2,8 +2,8 @@ import typing
 from functools import cached_property
 
 from opi.input.simple_keywords import Task, SimpleKeyword, Solvent
-from opi.tasks.method_settings import DFTSettings
-from opi.tasks.task_base import TaskSettings, TaskResults, SimpleTask
+from opi.simpletasks.base_task import TaskSettings, TaskResults, SimpleTask
+from opi.simpletasks.method_settings import MethodSettings
 
 
 class FreqSettings(TaskSettings):
@@ -12,18 +12,13 @@ class FreqSettings(TaskSettings):
 
 
 class FreqTask(SimpleTask):
-    def __init__(self,
-                 method: str | SimpleKeyword,
-                 basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None,
-                 solvent: str | Solvent | None = None,
-                 task: str | SimpleKeyword | None = None):
-        self._method_settings = DFTSettings(
-            method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
-        )
-        self._task_settings = (
-            FreqSettings(task_keyword=task)
-        ) if task else FreqSettings()
+    _task_settings: FreqSettings
+
+    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
+                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
+                 task_settings: FreqSettings | None = None, method_settings: MethodSettings | None = None):
+        self._task_settings_type = FreqSettings
+        super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
 
         self._results_type = FreqResults
 
@@ -45,5 +40,5 @@ class FreqResults(TaskResults):
 
     @property
     def primary_property(self) -> float:
-        return self.free_energy_delta
+        return float(self.free_energy_delta)
 
