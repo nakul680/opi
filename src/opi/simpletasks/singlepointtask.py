@@ -3,8 +3,8 @@ from pathlib import Path
 
 from opi.input.simple_keywords import SimpleKeyword, Solvent, Task
 from opi.input.structures import BaseStructureFile, Structure
-from opi.tasks.method_settings import DFTSettings
-from opi.tasks.task_base import SimpleTask, TaskResults, TaskSettings
+from opi.simpletasks.method_settings import DFTSettings
+from opi.simpletasks.base_task import SimpleTask, TaskResults, TaskSettings
 
 
 class SinglePointSettings(TaskSettings):
@@ -13,22 +13,15 @@ class SinglePointSettings(TaskSettings):
 
 
 class SinglePointTask(SimpleTask):
-    def __init__(
-        self,
-        method: str | SimpleKeyword,
-        basis_set: str | SimpleKeyword | None = None,
-        solvation_model: str | SimpleKeyword | None = None,
-        solvent: str | Solvent | None = None,
-        task: str | SimpleKeyword | None = None,
-    ):
-        self._method_settings = DFTSettings(
-            method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
-        )
-        self._task_settings = (
-            SinglePointSettings(task_keyword=task)
-        ) if task else SinglePointSettings()
+    _task_settings: SinglePointSettings
 
-        self._results_type = SinglePointResults
+    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
+                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
+                 task_settings: SinglePointSettings | None = None, method_settings: DFTSettings | None = None):
+         self._task_settings_type = SinglePointSettings
+         super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
+
+         self._results_type = SinglePointResults
 
     def run(
         self,

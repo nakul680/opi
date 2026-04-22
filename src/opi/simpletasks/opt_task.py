@@ -4,8 +4,8 @@ from opi.input import Input
 from opi.input.simple_keywords import Task, SimpleKeyword, Solvent
 from opi.input.simple_keywords.opt import OptThreshold, Opt
 from opi.input.structures import Structure
-from opi.tasks.method_settings import DFTSettings
-from opi.tasks.task_base import TaskSettings, TaskResults, SimpleTask
+from opi.simpletasks.base_task import TaskSettings, TaskResults, SimpleTask
+from opi.simpletasks.method_settings import MethodSettings
 
 
 class OptSettings(TaskSettings):
@@ -37,20 +37,57 @@ class OptSettings(TaskSettings):
 
 
 class OptTask(SimpleTask):
-    def __init__(self,
-                 method: str | SimpleKeyword,
-                 basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None,
-                 solvent: str | Solvent | None = None,
-                 task: str | SimpleKeyword | None = None):
-        self._method_settings = DFTSettings(
-            method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
-        )
-        self._task_settings = (
-            OptSettings(task_keyword=task)
-        ) if task else OptSettings()
+    _task_settings: OptSettings
+
+    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
+                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
+                 task_settings: OptSettings | None = None, method_settings: MethodSettings | None = None):
+        self._task_settings_type = OptSettings
+        super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
 
         self._results_type = OptResults
+
+
+    @property
+    def opt_threshold(self) -> SimpleKeyword | None:
+        return self._task_settings.opt_threshold
+
+    @opt_threshold.setter
+    def opt_threshold(self, new_value: SimpleKeyword | str) -> None:
+        self._task_settings.opt_threshold = new_value #type:ignore
+
+    @property
+    def optrigid(self) -> bool:
+        return self._task_settings.optrigid
+
+    @optrigid.setter
+    def optrigid(self, new_value: bool) -> None:
+        self._task_settings.optrigid = new_value
+
+    @property
+    def opt_h(self) -> bool:
+        return self._task_settings.opt_h
+
+    @opt_h.setter
+    def opt_h(self, new_value: bool) -> None:
+        self._task_settings.opt_h = new_value
+
+    @property
+    def lopt(self) -> bool:
+        return self._task_settings.lopt
+
+    @lopt.setter
+    def lopt(self, new_value: bool) -> None:
+        self._task_settings.lopt = new_value
+
+    @property
+    def opt_maxiter(self) -> int | None:
+        return self._task_settings.opt_maxiter
+
+    @opt_maxiter.setter
+    def opt_maxiter(self, new_value: int | None) -> None:
+        self._task_settings.opt_maxiter = new_value
+
 
 
 class OptResults(TaskResults):

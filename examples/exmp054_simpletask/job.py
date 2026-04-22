@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from opi.input.structures import Structure
-from opi.tasks.singlepointtask import SinglePointTask, SinglePointResults
+from opi.simpletasks.singlepointtask import SinglePointTask, SinglePointResults
 
 
 def run_exmp054(
