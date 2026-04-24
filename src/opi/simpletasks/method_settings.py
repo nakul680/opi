@@ -5,11 +5,21 @@ from pydantic import field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from opi.input import Input
-from opi.input.simple_keywords import Dft, SimpleKeyword, Grid, DispersionCorrection, Sqm, Wft, Method, ForceField, \
-    BasisSet, SolvationModel, Solvent
-from opi.input.simple_keywords.scf import ScfThreshold, ScfSolver, Scf, ScfConvergence
+from opi.input.simple_keywords import (
+    BasisSet,
+    Dft,
+    DispersionCorrection,
+    ForceField,
+    Grid,
+    Method,
+    SimpleKeyword,
+    SolvationModel,
+    Solvent,
+    Sqm,
+    Wft,
+)
+from opi.input.simple_keywords.scf import Scf, ScfConvergence, ScfSolver, ScfThreshold
 from opi.simpletasks.settings import Settings
-
 
 
 class MethodSettings(Settings):
@@ -29,7 +39,6 @@ class DFTSettings(MethodSettings):
     scf_stab: bool = False
     scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
 
-
     @field_validator("*", mode="before")
     @classmethod
     def validate_fields(cls, value: typing.Any, info: ValidationInfo) -> typing.Any:
@@ -41,8 +50,6 @@ class DFTSettings(MethodSettings):
             return new_keyword
         else:
             return super().validate_fields(value, info)
-
-
 
     @model_validator(mode="after")
     def cross_validate(self) -> "DFTSettings":
@@ -103,9 +110,9 @@ class DFTSettings(MethodSettings):
         if isinstance(value, SimpleKeyword):
             value = value.keyword
 
-        if '-' in value:
+        if "-" in value:
             try:
-                keywords = value.split('-')
+                keywords = value.split("-")
                 Dft.find_keyword(keywords[0])
                 DispersionCorrection.find_keyword(keywords[1])
 
@@ -125,13 +132,12 @@ class WftSettings(MethodSettings):
     _name: str = "wft"
     method: typing.Annotated[SimpleKeyword, Wft]
 
+
 class HFSettings(MethodSettings):
     _name: str = "hf"
     method: typing.Annotated[SimpleKeyword, Method]
 
+
 class ForceFieldSettings(MethodSettings):
     _name: str = "forcefield"
     method: typing.Annotated[SimpleKeyword, ForceField]
-
-
-

@@ -1,20 +1,20 @@
 import typing
 
 from opi.input import Input
-from opi.input.simple_keywords import Task, SimpleKeyword, Solvent
-from opi.input.simple_keywords.opt import OptThreshold, Opt
+from opi.input.simple_keywords import SimpleKeyword, Solvent, Task
+from opi.input.simple_keywords.opt import Opt, OptThreshold
 from opi.input.structures import Structure
-from opi.simpletasks.base_task import TaskSettings, TaskResults, SimpleTask
+from opi.simpletasks.base_task import SimpleTask, TaskResults, TaskSettings
 from opi.simpletasks.method_settings import MethodSettings
 
 
 class OptSettings(TaskSettings):
-    _name:str = "opt"
+    _name: str = "opt"
     task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.OPT
     opt_threshold: typing.Annotated[SimpleKeyword, OptThreshold] | None = None
     optrigid: bool = False
     opt_h: bool = False
-    lopt:bool = False
+    lopt: bool = False
     opt_maxiter: typing.Annotated[int, "BlockGeom", "maxiter"] | None = None
 
     def map_to_input(self, input_object: Input) -> Input:
@@ -39,14 +39,21 @@ class OptSettings(TaskSettings):
 class OptTask(SimpleTask):
     _task_settings: OptSettings
 
-    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
-                 task_settings: OptSettings | None = None, method_settings: MethodSettings | None = None):
+    def __init__(
+        self,
+        method: str | SimpleKeyword,
+        basis_set: str | SimpleKeyword | None = None,
+        solvation_model: str | SimpleKeyword | None = None,
+        solvent: str | Solvent | None = None,
+        task_settings: OptSettings | None = None,
+        method_settings: MethodSettings | None = None,
+    ):
         self._task_settings_type = OptSettings
-        super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
+        super().__init__(
+            method, basis_set, solvation_model, solvent, task_settings, method_settings
+        )
 
         self._results_type = OptResults
-
 
     @property
     def opt_threshold(self) -> SimpleKeyword | None:
@@ -54,7 +61,7 @@ class OptTask(SimpleTask):
 
     @opt_threshold.setter
     def opt_threshold(self, new_value: SimpleKeyword | str) -> None:
-        self._task_settings.opt_threshold = new_value #type:ignore
+        self._task_settings.opt_threshold = new_value  # type:ignore
 
     @property
     def optrigid(self) -> bool:
@@ -89,7 +96,6 @@ class OptTask(SimpleTask):
         self._task_settings.opt_maxiter = new_value
 
 
-
 class OptResults(TaskResults):
     @property
     @TaskResults.output_parse
@@ -101,7 +107,6 @@ class OptResults(TaskResults):
 
         return final_energy
 
-
     @property
     @TaskResults.output_parse
     def structure(self) -> Structure:
@@ -111,11 +116,6 @@ class OptResults(TaskResults):
 
         return structure
 
-
     @property
     def primary_property(self) -> tuple[float, Structure]:
         return self.final_energy, self.structure
-
-
-
-

@@ -1,7 +1,7 @@
 import typing
 
-from opi.input.simple_keywords import Task, SimpleKeyword, Solvent
-from opi.simpletasks.base_task import SimpleTask, TaskSettings, TaskResults
+from opi.input.simple_keywords import SimpleKeyword, Solvent, Task
+from opi.simpletasks.base_task import SimpleTask, TaskResults, TaskSettings
 from opi.simpletasks.method_settings import MethodSettings
 
 
@@ -13,11 +13,19 @@ class EngradSettings(TaskSettings):
 class EngradTask(SimpleTask):
     _task_settings: EngradSettings
 
-    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
-                 task_settings: EngradSettings | None = None, method_settings: MethodSettings | None = None):
+    def __init__(
+        self,
+        method: str | SimpleKeyword,
+        basis_set: str | SimpleKeyword | None = None,
+        solvation_model: str | SimpleKeyword | None = None,
+        solvent: str | Solvent | None = None,
+        task_settings: EngradSettings | None = None,
+        method_settings: MethodSettings | None = None,
+    ):
         self._task_settings_type = EngradSettings
-        super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
+        super().__init__(
+            method, basis_set, solvation_model, solvent, task_settings, method_settings
+        )
 
         self._results_type = EngradResults
 
