@@ -8,6 +8,7 @@ class SimpleKeywordBox:
     TODO:
     - rework registry to account for latest changes.
     """
+
     _registry: list[type["SimpleKeywordBox"]] = []
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -29,14 +30,16 @@ class SimpleKeywordBox:
         norm = s.lower()
         for c in cls._registry:
             for attr in dir(c):
-                if attr.startswith('_'):  # Skip private/magic attributes
+                if attr.startswith("_"):  # Skip private/magic attributes
                     continue
                 value = getattr(c, attr)
                 if isinstance(value, SimpleKeyword) and value.keyword.lower() == norm:
                     return value
                 elif isinstance(value, SimpleKeyword) and attr.lower() == norm:
                     return value
-                elif isinstance(value, SimpleKeyword) and value.alias and value.alias.lower() == norm:
+                elif (
+                    isinstance(value, SimpleKeyword) and value.alias and value.alias.lower() == norm
+                ):
                     return value
 
         raise ValueError(f"Keyword {s} not found in class {cls.__name__}")
@@ -61,9 +64,10 @@ class SimpleKeyword:
     keyword: str
         simple keyword as it will appear in the ORCA .inp file
     """
+
     alias: str | None = None
 
-    def __init__(self, keyword: str, alias:str|None=None) -> None:
+    def __init__(self, keyword: str, alias: str | None = None) -> None:
         self._keyword: str = ""
         self.keyword = keyword
         self._name: str = ""

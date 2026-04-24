@@ -5,7 +5,7 @@ from pydantic_core.core_schema import ValidationInfo
 
 from opi.input import Input
 from opi.input.blocks import Block
-from opi.input.simple_keywords import SimpleKeywordBox, SimpleKeyword, SolvationModel, Solvent
+from opi.input.simple_keywords import SimpleKeyword, SimpleKeywordBox, SolvationModel, Solvent
 from opi.input.simple_keywords.solvation_model import SolvationModelAndSolvent
 
 
@@ -14,6 +14,7 @@ class Settings(BaseModel):
     TODO:
     - add checking for Solvent and SolvationModel now that they are optional.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
     _name: str
 
@@ -33,7 +34,7 @@ class Settings(BaseModel):
         return "\n".join(lines)
 
     @staticmethod
-    def _get_field_metadata(hint: typing.Any) -> tuple:
+    def _get_field_metadata(hint: typing.Any) -> tuple[typing.Any, ...]:
         """
         Function to return the metadata of the type annotation of a field.
         The type hints are first retrieved after which the metadata is extracted and then returned.
@@ -94,14 +95,15 @@ class Settings(BaseModel):
         match metadata:
             case (validator,):
                 # Case 1: Simple keyword
+
+                if isinstance(validator, type) and issubclass(validator, Solvent):
+                    return value
                 if not isinstance(validator, type) or not issubclass(validator, SimpleKeywordBox):
                     raise TypeError(f"Expected SimpleKeywordBox subclass, got {validator}")
                 return validator.find_keyword(value)
 
             case (validator, key):
                 # Case 2: Block option
-                if not isinstance(validator, type) or not issubclass(validator, Block):
-                    raise TypeError(f"Expected Block subclass, got {validator}")
                 if not isinstance(key, str):
                     raise TypeError(f"Expected str key, got {type(key)}")
 
@@ -112,12 +114,16 @@ class Settings(BaseModel):
             case _:
                 return value
 
-    def _get_simple_keyword(self, validator: type[SimpleKeywordBox], value: str | SimpleKeyword | SolvationModelAndSolvent) -> SimpleKeyword:
+    def _get_simple_keyword(
+        self,
+        validator: type[SimpleKeywordBox],
+        value: str | SimpleKeyword | SolvationModelAndSolvent,
+    ) -> SimpleKeyword:
         if validator == SolvationModel:
             solvent_value = getattr(self, "solvent", None)
             if solvent_value is None:
                 raise ValueError("solvent is required for SolvationModel")
-            solvent = Solvent(str(solvent_value))
+            solvent = Solvent(Solvent.find_keyword(str(solvent_value)))
             if not isinstance(value, SolvationModelAndSolvent):
                 raise TypeError("Wrong type for solvent or solvation model")
 
@@ -127,15 +133,11 @@ class Settings(BaseModel):
 
         return new_keyword
 
-
     def __or__(self, other: "Settings") -> "Settings":
-        if not type(self) == type(other):
+        if type(self) is not type(other):
             return NotImplemented
 
-        combined_data = {
-            **self.model_dump(),
-            **other.model_dump(exclude_unset=True)
-        }
+        combined_data = {**self.model_dump(), **other.model_dump(exclude_unset=True)}
         return self.__class__(**combined_data)
 
     def map_to_input(self, input_object: Input) -> Input:
@@ -169,7 +171,7 @@ class Settings(BaseModel):
 
             match metadata:
                 case (validator,):
-                    if validator == Solvent:
+                    if issubclass(validator, Solvent):
                         continue
 
                     new_keyword = self._get_simple_keyword(validator, value)
@@ -180,7 +182,7 @@ class Settings(BaseModel):
                     block_type = Block.get_subclass_by_name(validator)
                     block_class = block_type(**{key: value})
 
-                    block_exists, *_ = input_object.has_blocks(block_type) #type:ignore
+                    block_exists, *_ = input_object.has_blocks(block_type)  # type:ignore
                     if not block_exists:
                         input_object.add_blocks(block_class)
                     else:

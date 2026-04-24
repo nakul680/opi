@@ -7,10 +7,14 @@ from pathlib import Path
 from opi.core import Calculator
 from opi.input import Input
 from opi.input.simple_keywords import (
+    Dft,
+    ForceField,
     Method,
     SimpleKeyword,
     SimpleKeywordBox,
-    Solvent, ForceField, Dft, Sqm, Wft,
+    Solvent,
+    Sqm,
+    Wft,
 )
 from opi.input.structures import BaseStructureFile, Structure
 from opi.output.core import Output
@@ -24,20 +28,28 @@ class TaskSettings(Settings):
 
 class SimpleTask(ABC):
     _results_type: type["TaskResults"]
-    _task_settings_type: type[TaskSettings]
+    _task_settings_type: typing.Callable[[], TaskSettings]
     _task_settings: TaskSettings
     _method_settings: MethodSettings
 
     @classmethod
-    def resolve_method_settings_type(cls, method: str | SimpleKeyword) -> typing.Type[MethodSettings]:
-        from opi.simpletasks.method_settings import DFTSettings, SQMSettings, WftSettings, HFSettings, ForceFieldSettings
+    def resolve_method_settings_type(
+        cls, method: str | SimpleKeyword
+    ) -> typing.Type[MethodSettings]:
+        from opi.simpletasks.method_settings import (
+            DFTSettings,
+            ForceFieldSettings,
+            HFSettings,
+            SQMSettings,
+            WftSettings,
+        )
 
         enum_to_settings = {
-            Dft : DFTSettings,
-            Sqm : SQMSettings,
-            Wft : WftSettings,
-            Method : HFSettings,
-            ForceField : ForceFieldSettings
+            Dft: DFTSettings,
+            Sqm: SQMSettings,
+            Wft: WftSettings,
+            Method: HFSettings,
+            ForceField: ForceFieldSettings,
         }
         for enum_class, settings_type in enum_to_settings.items():
             try:
@@ -48,20 +60,24 @@ class SimpleTask(ABC):
 
         raise ValueError(f"Keyword {method} not found in any of the valid groupings")
 
-    def __init__(self, method: str | SimpleKeyword,
-                 basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None,
-                 solvent: str | Solvent | None = None,
-                 task_settings: TaskSettings | None = None,
-                 method_settings: MethodSettings | None = None):
+    def __init__(
+        self,
+        method: str | SimpleKeyword,
+        basis_set: str | SimpleKeyword | None = None,
+        solvation_model: str | SimpleKeyword | None = None,
+        solvent: str | Solvent | None = None,
+        task_settings: TaskSettings | None = None,
+        method_settings: MethodSettings | None = None,
+    ):
         resolved_methods_settings_type = self.resolve_method_settings_type(method)
-        user_method_settings = resolved_methods_settings_type(method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent)
+        user_method_settings = resolved_methods_settings_type(
+            method=method, basis_set=basis_set, solvation_model=solvation_model, solvent=solvent
+        )
         self._task_settings = task_settings or self._task_settings_type()
         if method_settings:
-            self._method_settings = method_settings | user_method_settings  #type:ignore
+            self._method_settings = method_settings | user_method_settings  # type:ignore
         else:
             self._method_settings = user_method_settings
-
 
     @property
     def task_settings(self) -> TaskSettings:
@@ -103,7 +119,7 @@ class SimpleTask(ABC):
     def method(self, new_value: str | SimpleKeyword | None) -> None:
         if not hasattr(self._method_settings, "method"):
             raise AttributeError("method is not defined in method_settings object")
-        self._method_settings.method = new_value #type:ignore
+        self._method_settings.method = new_value  # type:ignore
 
     @property
     def basis_set(self) -> SimpleKeyword | None:
@@ -115,7 +131,7 @@ class SimpleTask(ABC):
     def basis_set(self, new_value: str | SimpleKeyword | None) -> None:
         if not hasattr(self._method_settings, "basis_set"):
             raise AttributeError("basis_set is not defined in method_settings object")
-        self._method_settings.basis_set = new_value #type:ignore
+        self._method_settings.basis_set = new_value  # type:ignore
 
     @property
     def solvent(self) -> str | None:
@@ -139,7 +155,7 @@ class SimpleTask(ABC):
     def solvation_model(self, new_value: str | SimpleKeyword | None) -> None:
         if not hasattr(self._method_settings, "solvation_model"):
             raise AttributeError("solvation_model is not defined in method_settings object")
-        self._method_settings.solvation_model = new_value #type:ignore
+        self._method_settings.solvation_model = new_value  # type:ignore
 
     @property
     def grid(self) -> SimpleKeyword | None:
@@ -180,7 +196,7 @@ class SimpleTask(ABC):
     @property
     def scf_solver(self) -> SimpleKeyword | None:
         if hasattr(self._method_settings, "scf_solver"):
-            return typing.cast(SimpleKeyword| None, self._method_settings.scf_solver)
+            return typing.cast(SimpleKeyword | None, self._method_settings.scf_solver)
         return None
 
     @scf_solver.setter
@@ -221,7 +237,7 @@ class SimpleTask(ABC):
         ncores: int | None = None,
         memory: int | None = None,
         moinp: Path | None = None,
-        strict: bool = False
+        strict: bool = False,
     ) -> "TaskResults":
         """
         Execute the computational task with the given structure and settings.
@@ -259,11 +275,15 @@ class SimpleTask(ABC):
         if strict:
             # Must already exist
             if not working_dir.exists():
-                raise ValueError(f"Working directory {working_dir.resolve()} does not exist (strict mode)")
+                raise ValueError(
+                    f"Working directory {working_dir.resolve()} does not exist (strict mode)"
+                )
 
             # Must be empty
             if any(working_dir.iterdir()):
-                raise ValueError(f"Working directory {working_dir.resolve()} is not empty (strict mode)")
+                raise ValueError(
+                    f"Working directory {working_dir.resolve()} is not empty (strict mode)"
+                )
 
         else:
             # Non-strict: recreate directory
@@ -323,6 +343,10 @@ class SimpleTask(ABC):
 
         basename = basename if basename else prev_calc.basename
         struct = struct if struct else prev_calc.structure
+        if struct is None:
+            raise ValueError(
+                "No structure available for restart: previous calculation had no structure set"
+            )
         working_dir = working_dir if working_dir else prev_calc.working_dir
         ncores = ncores if ncores else prev_calc.input.ncores
         memory = memory if memory else prev_calc.input.memory
@@ -391,5 +415,3 @@ class TaskResults(ABC):
     @abstractmethod
     def primary_property(self) -> typing.Any:
         pass
-
-

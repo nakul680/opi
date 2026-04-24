@@ -5,6 +5,7 @@ from opi.input.simple_keywords.base import (
 
 __all__ = ("Scf",)
 
+
 class ScfThreshold(SimpleKeywordBox):
     SLOPPYSCF = SimpleKeyword("sloppyscf", alias="sloppy")
     """SimpleKeyword: SCF convergence threshold settings."""

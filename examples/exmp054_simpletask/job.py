@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from opi.input.structures import Structure
-from opi.simpletasks.singlepointtask import SinglePointTask, SinglePointResults
+from opi.simpletasks.singlepointtask import SinglePointResults, SinglePointTask
 
 
 def run_exmp054(
@@ -18,10 +18,9 @@ def run_exmp054(
         structure = Structure.from_xyz("inp.xyz")
 
     # > set up the task
-    simple_task = SinglePointTask(method = "b3lyp",
-                                  basis_set="def2-svp",
-                                  solvation_model="cpcm",
-                                  solvent="water")
+    simple_task = SinglePointTask(
+        method="b3lyp", basis_set="def2-svp", solvation_model="cpcm", solvent="water"
+    )
     # > there are task and method-specific settings, these can be set through kwargs
 
     # > run the calculation with given data

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from opi.input.simple_keywords import SimpleKeyword, Solvent, Task
 from opi.input.structures import BaseStructureFile, Structure
-from opi.simpletasks.method_settings import DFTSettings
 from opi.simpletasks.base_task import SimpleTask, TaskResults, TaskSettings
+from opi.simpletasks.method_settings import MethodSettings
 
 
 class SinglePointSettings(TaskSettings):
@@ -15,13 +15,21 @@ class SinglePointSettings(TaskSettings):
 class SinglePointTask(SimpleTask):
     _task_settings: SinglePointSettings
 
-    def __init__(self, method: str | SimpleKeyword, basis_set: str | SimpleKeyword | None = None,
-                 solvation_model: str | SimpleKeyword | None = None, solvent: str | Solvent | None = None,
-                 task_settings: SinglePointSettings | None = None, method_settings: DFTSettings | None = None):
-         self._task_settings_type = SinglePointSettings
-         super().__init__(method, basis_set, solvation_model, solvent, task_settings, method_settings)
+    def __init__(
+        self,
+        method: str | SimpleKeyword,
+        basis_set: str | SimpleKeyword | None = None,
+        solvation_model: str | SimpleKeyword | None = None,
+        solvent: str | Solvent | None = None,
+        task_settings: SinglePointSettings | None = None,
+        method_settings: MethodSettings | None = None,
+    ):
+        self._task_settings_type = SinglePointSettings
+        super().__init__(
+            method, basis_set, solvation_model, solvent, task_settings, method_settings
+        )
 
-         self._results_type = SinglePointResults
+        self._results_type = SinglePointResults
 
     def run(
         self,
@@ -31,7 +39,7 @@ class SinglePointTask(SimpleTask):
         ncores: int | None = None,
         memory: int | None = None,
         moinp: Path | None = None,
-        strict: bool = False
+        strict: bool = False,
     ) -> "SinglePointResults":
         single_point_result = super().run(
             basename=basename,
@@ -40,7 +48,7 @@ class SinglePointTask(SimpleTask):
             ncores=ncores,
             memory=memory,
             moinp=moinp,
-            strict=strict
+            strict=strict,
         )
 
         return typing.cast(SinglePointResults, single_point_result)
