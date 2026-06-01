@@ -687,8 +687,8 @@ class Output:
 
         Returns
         -------
-        list[str] | None
-            List of error message strings if any errors were detected, else None.
+        list[str]
+            List of error message strings if any errors were detected, else an empty list.
         """
         outfile = self.get_outfile()
         try:
@@ -703,8 +703,8 @@ class Output:
 
         Returns
         -------
-        str | None
-            Error message string if an error was detected, else None.
+        str
+            Error message string if an error was detected, else an empty string.
         """
         outfile = self.get_outfile()
         try:
@@ -1087,9 +1087,17 @@ class Output:
         else:
             return None
 
-    def get_charge(self) -> StrictInt | None:
+    def get_charge(self, *, fallback: bool = True) -> StrictInt | None:
         """
-        Get the molecular charge from the json properties file.
+        Get the molecular charge.
+
+        Parameters
+        ----------
+        fallback : bool, default: True
+            If True and the JSON output is unavailable, attempt to parse the charge from the
+            plain-text `.out` file by grepping for "Total Charge           Charge".
+            This line is present in standard ORCA output but not for external methods
+            such as GFN-FF, where None is returned.
 
         Returns
         -------
@@ -1098,13 +1106,27 @@ class Output:
         charge = self._safe_get("results_properties", "calculation_info", "charge")
 
         if charge is not None:
-            charge = cast(StrictInt, charge)
+            return cast(StrictInt, charge)
 
-        return charge
+        if not fallback:
+            return None
 
-    def get_mult(self) -> StrictPositiveInt | None:
+        raw = get_float_from_line(
+            self.get_outfile(), "Total Charge           Charge", 0, -1, strict=False
+        )
+        return int(raw) if raw is not None else None
+
+    def get_mult(self, *, fallback: bool = True) -> StrictPositiveInt | None:
         """
-        Get the molecular electron multiplicity from the json properties file.
+        Get the molecular electron multiplicity.
+
+        Parameters
+        ----------
+        fallback : bool, default: True
+            If True and the JSON output is unavailable, attempt to parse the multiplicity
+            from the plain-text `.out` file by grepping for "Multiplicity           Mult".
+            This line is present in standard ORCA output but not for external methods
+            such as GFN-FF, where None is returned.
 
         Returns
         -------
@@ -1113,9 +1135,15 @@ class Output:
         mult = self._safe_get("results_properties", "calculation_info", "mult")
 
         if mult is not None:
-            mult = cast(StrictPositiveInt, mult)
+            return cast(StrictPositiveInt, mult)
 
-        return mult
+        if not fallback:
+            return None
+
+        raw = get_float_from_line(
+            self.get_outfile(), "Multiplicity           Mult", 0, -1, strict=False
+        )
+        return int(raw) if raw is not None else None
 
     def get_nelectrons(
         self, *, spin_resolved: bool = False
@@ -1180,7 +1208,9 @@ class Output:
 
         return nbf
 
-    def get_final_energy(self, *, index: int = -1) -> StrictFiniteFloat | None:
+    def get_final_energy(
+        self, *, index: int = -1, fallback: bool = True
+    ) -> StrictFiniteFloat | None:
         """
         Easy access to the final single point energy.
 
@@ -1189,6 +1219,9 @@ class Output:
         index : int, default: -1
             Index of the geometry for which the energy should be returned. The default -1 refers to the final geometry.
             Silently ignores if the requested index is not available and returns None.
+        fallback : bool, default: True
+            If True and the JSON output is unavailable, attempt to parse the energy from the plain-text
+            `.out` file by grepping for "FINAL SINGLE POINT ENERGY".
 
         Returns
         ----------
@@ -1203,8 +1236,14 @@ class Output:
 
         if final_energy is not None:
             final_energy = cast(StrictFiniteFloat, final_energy)
+            return final_energy
 
-        return final_energy
+        if not fallback:
+            return None
+
+        return get_float_from_line(
+            self.get_outfile(), "FINAL SINGLE POINT ENERGY", index, -1, strict=False
+        )
 
     def get_energies(self, *, index: int = -1) -> dict[str, Energy] | None:
         """
@@ -1259,7 +1298,9 @@ class Output:
 
         return energy_dict
 
-    def get_gradient(self, *, index: int = -1) -> list[StrictFiniteFloat] | None:
+    def get_gradient(
+        self, *, index: int = -1, fallback: bool = True
+    ) -> list[StrictFiniteFloat] | None:
         """
         Easy access to the nuclear gradient
 
@@ -1271,6 +1312,9 @@ class Output:
             geometry, so the default index will return None. You can request the gradient for the structure one step
             before the final one with the index -2. For most intents and purposes, the last and second to last
             geometries, energies and gradients are the same within the given tolerances.
+        fallback : bool, default: True
+            If True and the JSON output is unavailable, attempt to parse the gradient from the plain-text
+            `.out` file by grepping for "CARTESIAN GRADIENT".
 
         Returns
         ----------
@@ -1290,11 +1334,16 @@ class Output:
                 gradient,
             )
             flat = [inner[0] for inner in gradient]
-            gradient = flat
+            return flat
 
-        return gradient
+        if not fallback:
+            return None
 
-    def get_structure(self, *, index: int = -1, with_fragments: bool = True) -> Structure | None:
+        return self._grep_gradient(index)
+
+    def get_structure(
+        self, *, index: int = -1, with_fragments: bool = True, fallback: bool = True
+    ) -> Structure | None:
         """
         Returns structure from ORCA job as Structure object (by default the final structure).
         Silently returns None of no structure is available.
@@ -1305,6 +1354,10 @@ class Output:
             index of geometry to return. The default -1 refers to the final geometry.
         with_fragments : bool, default: True
             whether the fragment IDs should be added as well to the structure (if available)
+        fallback : bool, default: True
+            If True and the JSON output is unavailable, attempt to parse the structure from the plain-text
+            `.out` file by grepping for "CARTESIAN COORDINATES (ANGSTROEM)". This is useful for recovering
+            structures from failed or incomplete geometry optimisations where no JSON was written.
 
         Returns
         ----------
@@ -1317,7 +1370,9 @@ class Output:
         cartesians = self._get_cartesians(index)
 
         if cartesians is None:
-            return None
+            if not fallback:
+                return None
+            return self._grep_structure(index)
 
         for line in cartesians:
             elem, x_au, y_au, z_au = line
@@ -1405,6 +1460,82 @@ class Output:
             )
 
         return fragments
+
+    def _grep_structure(self, index: int, /) -> Structure | None:
+        """Parse structure from "CARTESIAN COORDINATES (ANGSTROEM)" block in the .out file."""
+        # > Get geometry block in the output file
+        lines = get_lines_from_block(
+            self.get_outfile(),
+            "CARTESIAN COORDINATES (ANGSTROEM)",
+            index=index,
+            offset=2,
+        )
+
+        # > If we found nothing we return None
+        if not lines:
+            return None
+
+        # > Collect the atoms from the block
+        atoms: list[Atom] = []
+        for line in lines:
+            parts = line.split()
+            if len(parts) != 4:
+                continue
+            try:
+                elem = parts[0]
+                x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+            except ValueError:
+                continue
+            atoms.append(Atom(element=elem, coordinates=Coordinates((x, y, z))))
+
+        # > If no atoms were collected return None
+        if not atoms:
+            return None
+
+        # > Assemble the structure
+        structure = Structure(atoms)
+
+        # > Add molecular charge if present
+        charge = self.get_charge()
+        if charge is not None:
+            structure.charge = charge
+
+        # > Add molecular multiplicity if present
+        mult = self.get_mult()
+        if mult is not None:
+            structure.multiplicity = mult
+
+        return structure
+
+    def _grep_gradient(self, index: int, /) -> list[StrictFiniteFloat] | None:
+        """Parse gradient from "CARTESIAN GRADIENT" block in the .out file (Eh/Bohr)."""
+        # > Get gradient block from the output file
+        lines = get_lines_from_block(
+            self.get_outfile(),
+            "CARTESIAN GRADIENT",
+            index=index,
+            offset=3,
+        )
+
+        # > Return None if no block was found
+        if not lines:
+            return None
+
+        # > Collect gradient line by line
+        gradient: list[StrictFiniteFloat] = []
+        for line in lines:
+            parts = line.split()
+            # format: "1  O  :  x  y  z"
+            if len(parts) < 6 or parts[2] != ":":
+                continue
+            try:
+                x, y, z = float(parts[3]), float(parts[4]), float(parts[5])
+            except ValueError:
+                continue
+            gradient.extend(cast(list[StrictFiniteFloat], [x, y, z]))
+
+        # > Return gradient or None
+        return gradient if gradient else None
 
     def get_mos(self, gbw_index: int = 0) -> dict[str, list[MO]] | None:
         """
