@@ -8,6 +8,15 @@
 - Added `scalmp2c` to `BlockMethod` (#212)
 - Add SCF (spin-)density matrix to `Output` (#204)
 - Add version check attribute to Calculator, which is parsed to get_output (#225)
+- Added `output.error_message()` which retrieves the most important error message from the ORCA output file (#222).
+- Added `output.error_messages()` which retrieves all error messages from known strings from the ORCA output file (#222).
+- Added `output.cc_converged` and `output.casscf_converged` to check cc and casscf convergence (#222).
+- Added `z_maxiter` to method block for setting the number of CP-SCF iterations (#222).
+- The function output `get_s2` now returns values for RHF/RKS and ROHF/ROKS (#241).
+- Added `t_matrix`, `v_matrix`, `hmo`, `twoelintegrals` parameters to `Molecule` class (#243)
+- Added `get_int_kinetic`, `get_int_nuc_attr`, `get_int_hmo` getters for one electron integrals (#243)
+- Added `TwoElectronIntegralElement`, `MOTwoElectronIntegral` and `TwoElectronIntegrals` for structuring two electron integral information (#243)
+- Add the keyword `dumpactints` to `BlockOutput` (#245).
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
@@ -16,6 +25,7 @@
 ### Removed
 ### Fixed
 - Updated deprecated `typing` types to be compliant with Python >=3.11 guidelines (#216)
+- Fixed a typo in the badge for the OPI paper (#222).
 
 ## [2.0.0] - 2026-02-10
 
