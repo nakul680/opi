@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Sequence
 
 from pydantic import (
     Field,
@@ -726,12 +726,13 @@ class BlockGeom(Block):
 
     @field_validator("ts_active_atoms", "ts_active_atoms2", mode="before")
     @classmethod
-    def ts_active_atoms_init(cls, inp: list[int] | IntGroupEnd) -> IntGroupEnd:
+    def ts_active_atoms_init(cls, inp: Sequence[int] | IntGroupEnd) -> IntGroupEnd:
         """
         Creates IntGroupEnd object by parsing given list of integers
+
         Parameters
         ----------
-        inp : list[int] | IntGroupEnd
+        inp : Sequence[int] | IntGroupEnd
 
         Returns
         -------
