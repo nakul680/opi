@@ -118,8 +118,11 @@ class Input:
         ----------
         value : int | None
         """
-        if value is not None and value < 0:
-            raise ValueError(f"{self.__class__.__name__}.ncores must be a positive integer.")
+        if value is not None:
+            if not isinstance(value, int):
+                raise TypeError(f"{self.__class__.__name__}.ncores must be an integer.")
+            elif value < 0:
+                raise ValueError(f"{self.__class__.__name__}.ncores must be a positive integer.")
         # << END OF IF
         self._ncores = value
 
@@ -134,8 +137,11 @@ class Input:
         ----------
         value : int | None
         """
-        if value is not None and value < 0:
-            raise ValueError(f"{self.__class__.__name__}.memory must be a positive integer.")
+        if value is not None:
+            if not isinstance(value, int):
+                raise TypeError(f"{self.__class__.__name__}.memory must be an integer.")
+            elif value < 0:
+                raise ValueError(f"{self.__class__.__name__}.memory must be a positive integer.")
         # << END OF IF
         self._memory = value
 
