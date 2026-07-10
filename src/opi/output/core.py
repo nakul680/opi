@@ -4,7 +4,7 @@ It's mostly based on the ORCA's two JSONs files.
 """
 
 import json
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, cast
 from warnings import warn
@@ -512,6 +512,53 @@ class Output:
         if not basename:
             basename = self.basename
         return self.working_dir / (basename + suffix)
+
+    def _delete_files(self, basename: str | None, *, suffixes: Sequence[str] | None = None) -> None:
+        """
+        Delete files in `working_dir` belonging to the job with the given basename.
+
+        Parameters
+        ----------
+        basename : str | None
+            Basename of the job whose files should be deleted.
+            If not given, `self.basename` is used.
+        suffixes : Sequence[str] | None, default: None
+            If given, only files with these suffixes are deleted.
+            If None, all files matching the basename are deleted.
+        """
+        basename = basename if basename is not None else self.basename
+        files: Iterable[Path]
+        if suffixes is None:
+            files = self.working_dir.glob(f"{basename}*")
+        else:
+            files = (self.get_file(suffix, basename=basename) for suffix in suffixes)
+        for file in files:
+            file.unlink(missing_ok=True)
+
+    def cleanup_files(self, basename: str | None = None) -> None:
+        """
+        Delete all files in `working_dir` belonging to the job with the given basename.
+
+        Parameters
+        ----------
+        basename : str | None, default: None
+            Basename of the job whose files should be deleted.
+            If not given, `self.basename` is used.
+        """
+        self._delete_files(basename)
+
+    def cleanup_temp_files(self, basename: str | None = None) -> None:
+        """
+        Delete temporary files in `working_dir` belonging to the job with the given basename.
+
+        Parameters
+        ----------
+        basename : str | None, default: None
+            Basename of the job whose temporary files should be deleted.
+            If not given, `self.basename` is used.
+        """
+        temp_file_suffixes: tuple[str, ...] = (".tmp", ".proc")
+        self._delete_files(basename, suffixes=temp_file_suffixes)
 
     def _get_version(self) -> "OrcaVersion":
         """Gets the ORCA version from the property-JSON file."""
