@@ -114,7 +114,7 @@ class Input:
     @ncores.setter
     def ncores(self, value: int | None) -> None:
         """
-        Setter for the ncores property. Value given must be a positive integer.
+        Setter for the ncores property. Value given must be a non-negative integer.
 
         Parameters
         ----------
@@ -143,7 +143,7 @@ class Input:
     @memory.setter
     def memory(self, value: int | None) -> None:
         """
-        Setter for the memory property. Value given must be a positive integer.
+        Setter for the memory property. Value given must be a non-negative integer.
 
         Parameters
         ----------
