@@ -114,9 +114,19 @@ class Input:
     @ncores.setter
     def ncores(self, value: int | None) -> None:
         """
+        Setter for the ncores property. Value given must be a positive integer.
+
         Parameters
         ----------
         value : int | None
+
+        Raises
+        ------
+        TypeError
+            If the given value is not an integer.
+
+        ValueError
+            If the given value is negative.
         """
         if value is not None:
             if not isinstance(value, int):
@@ -133,9 +143,19 @@ class Input:
     @memory.setter
     def memory(self, value: int | None) -> None:
         """
+        Setter for the memory property. Value given must be a positive integer.
+
         Parameters
         ----------
         value : int | None
+
+        Raises
+        ------
+        TypeError
+            If the given value is not an integer.
+
+        ValueError
+            If the given value is negative.
         """
         if value is not None:
             if not isinstance(value, int):
