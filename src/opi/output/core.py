@@ -527,6 +527,8 @@ class Output:
             If None, all files matching the basename are deleted.
         """
         basename = basename if basename is not None else self.basename
+        if basename is None:
+            raise ValueError("No basename specified")
         files: Iterable[Path]
         if suffixes is None:
             files = self.working_dir.glob(f"{basename}*")
