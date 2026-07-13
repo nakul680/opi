@@ -19,6 +19,7 @@
 - Add the keyword `dumpactints` to `BlockOutput` (#245).
 - Added fallback keyword argument for `get_final_energy`, `get_gradient`, and `get_structure` that allows to parse these properties from the `.out` file if no JSON output is available (#237).
 - Added `get_frequencies`, `get_imaginary_frequencies`, `is_pes_minimum`, and `is_pes_transition_state` to the `Output` class (#247).
+- Add `functions to clean up files created by ORCA jobs.(#262)
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
