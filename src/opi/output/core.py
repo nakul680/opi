@@ -523,23 +523,31 @@ class Output:
             Basename of the job whose files should be deleted.
             If not given, `self.basename` is used.
         suffixes : Sequence[str] | None, default: None
-            If given, only files with these suffixes are deleted.
+            If given, treated as glob patterns matched against `{basename}*{suffix}`;
+            only matching files are deleted.
             If None, all files matching the basename are deleted.
         """
         basename = basename if basename is not None else self.basename
-        if basename is None:
+        if not basename:
             raise ValueError("No basename specified")
         files: Iterable[Path]
         if suffixes is None:
             files = self.working_dir.glob(f"{basename}*")
         else:
-            files = (self.get_file(suffix, basename=basename) for suffix in suffixes)
+            files = (
+                file
+                for suffix in suffixes
+                for file in self.working_dir.glob(f"{basename}*{suffix}*")
+            )
         for file in files:
-            file.unlink(missing_ok=True)
+            if file.is_file():
+                file.unlink(missing_ok=True)
 
     def cleanup_files(self, basename: str | None = None) -> None:
         """
-        Delete all files in `working_dir` belonging to the job with the given basename.
+        Delete all files in `working_dir` belonging to the job with the given basename. This will also include files whose
+        names contain the basename, for example, if the basename is `job` and there exists files with basename 'job_1',
+        the files will be deleted.
 
         Parameters
         ----------
