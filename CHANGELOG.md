@@ -23,7 +23,7 @@
 - Added `rmsd` and `rmsd_kabsch` to calculate RMSD without and with rotational alignment to `Structure` class (#230). 
 - Added `calc_rotational_constants` to calculate molecular rotational constants to `Structure` class (#230).
 - Added `calc_rotor_type` to classify a molecule's rotor type to `Structure` class (#230).
-- Add type checks for ncores and memory setters in `Output` and checks for invalid negative values (#261).
+- Add type checks for ncores and memory setters in `Input` and checks for invalid negative values (#261).
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
