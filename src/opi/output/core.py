@@ -536,13 +536,15 @@ class Output:
             basename = self.basename
         return self.working_dir / (basename + suffix)
 
-    def _delete_files(self, basename: str | None, *, suffixes: Sequence[str] | None = None) -> None:
+    def _delete_files(
+        self, basename: str | None = None, *, suffixes: Sequence[str] = tuple()
+    ) -> None:
         """
         Delete files in `working_dir` belonging to the job with the given basename.
 
         Parameters
         ----------
-        basename : str | None
+        basename : str | None, default: None
             Basename of the job whose files should be deleted.
             If not given, `self.basename` is used.
         suffixes : Sequence[str] | None, default: None
@@ -550,17 +552,19 @@ class Output:
             only matching files are deleted.
             If None, all files matching the basename are deleted.
         """
-        basename = basename if basename is not None else self.basename
+        basename = basename if basename else self.basename
         if not basename:
             raise ValueError("No basename specified")
+        if "/" in basename or "\\" in basename:
+            raise ValueError(f"Basename must not contain path separators: {basename!r}")
         files: Iterable[Path]
-        if suffixes is None:
+        if not suffixes:
             files = self.working_dir.glob(f"{basename}*")
         else:
             files = (
                 file
                 for suffix in suffixes
-                for file in self.working_dir.glob(f"{basename}*{suffix}*")
+                for file in self.working_dir.glob(f"{basename}*{suffix}")
             )
         for file in files:
             if file.is_file():
@@ -590,7 +594,7 @@ class Output:
             Basename of the job whose temporary files should be deleted.
             If not given, `self.basename` is used.
         """
-        temp_file_suffixes: tuple[str, ...] = (".tmp", ".proc")
+        temp_file_suffixes: tuple[str, ...] = (".tmp", ".proc", ".tmp.*", ".proc.*")
         self._delete_files(basename, suffixes=temp_file_suffixes)
 
     def _get_version(self) -> "OrcaVersion":
