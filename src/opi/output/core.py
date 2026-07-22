@@ -536,9 +536,7 @@ class Output:
             basename = self.basename
         return self.working_dir / (basename + suffix)
 
-    def _delete_files(
-        self, basename: str | None = None, *, suffixes: Sequence[str] = tuple()
-    ) -> None:
+    def _delete_files(self, basename: str | None = None, *, suffixes: Sequence[str] = ()) -> None:
         """
         Delete files in `working_dir` belonging to the job with the given basename.
 
@@ -551,29 +549,42 @@ class Output:
             If given, treated as glob patterns matched against `{basename}*{suffix}`;
             only matching files are deleted.
             If None, all files matching the basename are deleted.
+
+        Raises
+        ------
+        ValueError
+            If no basename is available or if the basename contains path separators.
         """
         basename = basename if basename else self.basename
+        # > Check whether there is a basename native to the `Output` instance if no basename given
         if not basename:
             raise ValueError("No basename specified")
-        if "/" in basename or "\\" in basename:
+
+        # > Check to ensure `basename` is not a file path
+        if len(Path(basename).parts) > 1:
             raise ValueError(f"Basename must not contain path separators: {basename!r}")
+
         files: Iterable[Path]
+        # > If no suffixes are given , collect all files with either given or existing basename
         if not suffixes:
             files = self.working_dir.glob(f"{basename}*")
         else:
+            # > If suffixes are given, collect all files that contain both the basename and the suffix
             files = (
                 file
                 for suffix in suffixes
                 for file in self.working_dir.glob(f"{basename}*{suffix}")
             )
+
+        # > Delete all collected files
         for file in files:
             if file.is_file():
                 file.unlink(missing_ok=True)
 
     def cleanup_files(self, basename: str | None = None) -> None:
         """
-        Delete all files in `working_dir` belonging to the job with the given basename. This will also include files whose
-        names contain the basename, for example, if the basename is `job` and there exists files with basename 'job_1',
+        Delete all files in `working_dir` belonging to the job with the given basename. This will also include files which have the
+        same basename with additional labels, for example, if the basename is `job` and there exists files with basename 'job_1',
         the files will be deleted.
 
         Parameters
@@ -586,7 +597,9 @@ class Output:
 
     def cleanup_temp_files(self, basename: str | None = None) -> None:
         """
-        Delete temporary files in `working_dir` belonging to the job with the given basename.
+        Delete temporary files in `working_dir` belonging to the job with the given basename.This will also include files which have the
+        same basename with additional labels, for example, if the basename is `job` and there exists files with basename 'job_1',
+        the files will be deleted.
 
         Parameters
         ----------

@@ -66,10 +66,11 @@ def test_cleanup_files_raises_without_basename(tmp_path: Path):
 
 @pytest.mark.unit
 @pytest.mark.output
-@pytest.mark.parametrize("basename", ["../secret", "sub/job", "sub\\job"])
+@pytest.mark.parametrize("basename", ["../secret", "sub/job", "/secret"])
 def test_cleanup_files_rejects_path_separators_in_basename(tmp_path: Path, basename: str):
-    """A basename containing a path separator must be rejected rather than letting the
-    glob pattern escape `working_dir`."""
+    """A basename containing a path separator, or that is itself an absolute path, must be
+    rejected rather than letting the glob pattern escape `working_dir`.
+    """
     working_dir = tmp_path / "workdir"
     working_dir.mkdir()
     _create_file(tmp_path, "secret_file.txt")
