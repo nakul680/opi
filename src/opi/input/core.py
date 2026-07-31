@@ -543,7 +543,8 @@ class Input:
         overwrite: bool = False,
     ) -> None:
         """
-        Add one or more blocks to the Calculator's `blocks` attribute.
+        Add one or more blocks to the Calculator's `blocks` attribute. If the block exists in `Input._blocks` already,
+        the existing block will be merged with the new block, with the values from new block taking precedence.
 
         Parameters
         ----------
@@ -553,7 +554,7 @@ class Input:
             If True, raise a ValueError if a block has already been added.
             If False (default), does nothing if a block has already been added.
         overwrite : bool, default: False
-            If True, blocks that are already present will be overwritten (strict is ignored)
+            If True, blocks that are already present will be overwritten completely, replacing the existing block.
             If False (default), existing blocks are not overwritten
 
         Example
@@ -569,10 +570,15 @@ class Input:
         for block in blocks:
             if type(block) not in self._blocks:
                 self._blocks[type(block)] = block
-            elif overwrite:
-                self._blocks[type(block)] = block
-            elif strict:
-                raise ValueError(f"Strict: Block for {block.name} has already been added")
+            else:
+                if strict:
+                    raise ValueError(f"Strict: Block for {block.name} has already been added")
+                elif overwrite:
+                    self._blocks[type(block)] = block
+                else:
+                    existing_block = next(iter(self.get_blocks(type(block)).values()))
+                    self._blocks[type(block)] = existing_block | block
+
 
     def remove_blocks(self, *blocks: Block, strict: bool = False) -> None:
         """
