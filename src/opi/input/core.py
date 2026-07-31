@@ -579,7 +579,6 @@ class Input:
                     existing_block = next(iter(self.get_blocks(type(block)).values()))
                     self._blocks[type(block)] = existing_block | block
 
-
     def remove_blocks(self, *blocks: Block, strict: bool = False) -> None:
         """
         Remove one or more blocks from the Calculator's `blocks` attribute.
