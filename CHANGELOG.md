@@ -29,9 +29,11 @@
 - Added `calculate_molbar()` and `calculate_molbar_data()` to get Molbar from `Structure` (#227)
 - Added `Fcidump.from_arrays()` for constructing a `Fcidump` from numpy arrays and `Fcidump.to_file()` for writing FCIDUMP files (#267).
 - `Fcidump` now raises a `ValueError` if the one- or two-electron integrals contain symmetry-equivalent keys (#267).
+- add merge logic for two `Block` instants of same type.(#274)
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
+- change `Input.add_blocks()` to merge two block instants of same type by default, instead of being a no-op.(#274)
 
 ### Deprecated
 ### Removed
