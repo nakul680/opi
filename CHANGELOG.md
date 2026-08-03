@@ -29,6 +29,8 @@
 - Added `calculate_molbar()` and `calculate_molbar_data()` to get Molbar from `Structure` (#227)
 - Added `Fcidump.from_arrays()` for constructing a `Fcidump` from numpy arrays and `Fcidump.to_file()` for writing FCIDUMP files (#267).
 - `Fcidump` now raises a `ValueError` if the one- or two-electron integrals contain symmetry-equivalent keys (#267).
+- - Add `ORCABlock` to allow for creation of arbitrary blocks.(#276)
+- Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
