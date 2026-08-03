@@ -2,6 +2,7 @@
 Modules that hold Python objects representing the most common block options.
 """
 
+from opi.input.blocks.arbitrary_block import ORCABlock
 from opi.input.blocks.base import Block
 from opi.input.blocks.block_autoci import BlockAutoCI
 from opi.input.blocks.block_basis import (
@@ -131,4 +132,5 @@ __all__ = [
     "Frags",
     "Internal",
     "Internals",
+    "ORCABlock",
 ]

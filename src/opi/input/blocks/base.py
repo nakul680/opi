@@ -1,6 +1,6 @@
 from abc import ABC
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -26,12 +26,73 @@ class Block(BaseModel, ABC):
         _arbitrary: dict[str, str]
             A dictionary storing arbitrary key-value options for the ORCA input that are not implemented natively.
             Both key and value are stored as strings.
+        _registry: ClassVar[dict[str, type[Block]]]
+            Registry that maps the name of an ORCA block to the `Block` subclass implementing it.
+            Only subclasses with a class-level `_name` are registered, so subclasses that receive
+            their name at runtime (like `ORCABlock`) are absent.
+            Used to recognize that a runtime-named block refers to an already implemented block.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     _name: str
     aftercoord: bool = False
     _arbitrary: NoCaseDict = NoCaseDict()
+
+    # > Registry of the subclasses of `Block`.
+    # > Being a `ClassVar`, it is a single object shared by the whole class hierarchy.
+    # > It is filled by `__pydantic_init_subclass__()`, hence it only contains the
+    # > subclasses whose defining module has been imported.
+    _registry: ClassVar[dict[str, type["Block"]]] = {}
+
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        """
+        Register a subclass of `Block` in `Block._registry` under its block name.
+        Called by pydantic once a subclass has been fully initialized.
+
+        Parameters
+        ----------
+        **kwargs : Any
+            Class keyword arguments, passed on to pydantic.
+        """
+        super().__pydantic_init_subclass__(**kwargs)
+        name = cls.get_block_name()
+        # > Subclasses without a class-level `_name` are named at runtime and cannot be registered.
+        if name is not None:
+            # > The first registration wins, so a subclass cannot displace the block class it derives from.
+            Block._registry.setdefault(name, cls)
+
+    @classmethod
+    def get_block_name(cls) -> str | None:
+        """
+        Get the ORCA block name defined by this class.
+
+        Returns
+        -------
+        str | None
+            The class-level block name, or None if the class does not define one.
+        """
+        name = getattr(cls.__private_attributes__.get("_name"), "default", None)
+        if isinstance(name, str) and name.strip():
+            return name.strip().lower()
+        return None
+
+    @classmethod
+    def get_block_class(cls, name: str) -> type["Block"] | None:
+        """
+        Get the `Block` subclass that implements the given ORCA block name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the ORCA block, case-insensitive.
+
+        Returns
+        -------
+        type[Block] | None
+            The `Block` subclass for that name, or None if no subclass implements it.
+        """
+        return Block._registry.get(name.strip().lower())
 
     def add_option(self, name: str, val: str) -> None:
         """

@@ -24,8 +24,8 @@ class Input:
     _simple_keywords | simple_keywords: list[SimpleKeyword]
         List of simple keywords to be put into the ORCA input.
         Access to this attribute should be done through the respective `add_simple_keywords/remove_.../clear_...` methods.
-    _blocks | blocks: dict[type[Block], Block]
-        Dict of blocks to be put into the ORCA input.
+    _blocks | blocks: dict[type[Block] | str, Block]
+        Dict of blocks to be put into the ORCA input, keyed as described in `Input._block_key()`.
         Access to this attribute should be done through the respective `add_blocks/remove_.../clear_...` methods.
     _arbitrary_strings | arbitrary_strings: list[ArbitraryString]
         List of arbitrary string to be put into the ORCA input.
@@ -45,7 +45,7 @@ class Input:
         # // Simple Keywords
         self._simple_keywords: list[SimpleKeyword] = []
         # // Block options
-        self._blocks: dict[type[Block], Block] = {}
+        self._blocks: dict[type[Block] | str, Block] = {}
         # // Arbitrary strings
         self._arbitrary_strings: list[ArbitraryString] = []
 
@@ -78,15 +78,15 @@ class Input:
         )
 
     @property
-    def blocks(self) -> dict[type[Block], Block] | None:
+    def blocks(self) -> dict[type[Block] | str, Block] | None:
         return self._blocks
 
     @blocks.setter
-    def blocks(self, value: dict[type[Block], Block] | None) -> None:
+    def blocks(self, value: dict[type[Block] | str, Block] | None) -> None:
         """
         Parameters
         ----------
-        value : dict[type[Block] | Block] | None
+        value : dict[type[Block] | str, Block] | None
         """
         raise AttributeError(
             "blocks is private, use the add_blocks/get_blocks function for access."
@@ -536,6 +536,48 @@ class Input:
     # ----------------------------------------------------------------------
     # > BLOCKS
     # ----------------------------------------------------------------------
+    @staticmethod
+    def _block_key(block: Block | type[Block] | str, /) -> type[Block] | str:
+        """
+        Determine the key under which a block is stored in `Input._blocks`.
+
+        A block is identified by the name of the ORCA block it models, and keyed by the `Block`
+        subclass implementing that name, or by the name itself if no subclass implements it.
+        Hence `%scf` cannot be added twice, not even through a subclass of `BlockScf` or through
+        an `ORCABlock`, while blocks that are named at runtime stay separate per name.
+
+        Parameters
+        ----------
+        block : Block | type[Block] | str
+            A block, a block class or the name of an ORCA block.
+
+        Returns
+        -------
+        type[Block] | str
+            The key of the block within `Input._blocks`.
+
+        Raises
+        ------
+        ValueError
+            If `block` is a class that is named at runtime, as such a class does not identify
+            a single block.
+        """
+        if isinstance(block, str):
+            name = block
+        elif isinstance(block, type):
+            block_name = block.get_block_name()
+            if block_name is None:
+                raise ValueError(
+                    f"'{block.__name__}' is named at runtime: pass one of its instances or a block name instead."
+                )
+            name = block_name
+        else:
+            # > `get_block_name()` is None for blocks that are named at runtime.
+            name = block.get_block_name() or block.name
+
+        name = name.strip().lower()
+        return Block.get_block_class(name) or name
+
     def add_blocks(
         self,
         *blocks: Block,
@@ -567,21 +609,23 @@ class Input:
         Variables without assigned value will be assigned default value (usually None)
         """
         for block in blocks:
-            if type(block) not in self._blocks:
-                self._blocks[type(block)] = block
+            key = self._block_key(block)
+            if key not in self._blocks:
+                self._blocks[key] = block
             elif overwrite:
-                self._blocks[type(block)] = block
+                self._blocks[key] = block
             elif strict:
                 raise ValueError(f"Strict: Block for {block.name} has already been added")
 
-    def remove_blocks(self, *blocks: Block, strict: bool = False) -> None:
+    def remove_blocks(self, *blocks: Block | type[Block] | str, strict: bool = False) -> None:
         """
-        Remove one or more blocks from the Calculator's `blocks` attribute.
+        Remove one or more blocks from the Calculator's `blocks` attribute. If the block to be removed is arbitrary and has been initialized through `ORCABlock`,
+        pass its name or instance instead.
 
         Parameters
         ----------
-        *blocks : Block
-            One or more blocks to remove.
+        *blocks : Block | type[Block] | str
+            One or more blocks to remove, given as block, block class or block name.
         strict : bool, default: False
             If True, raise a ValueError if block was not found in the Calculator.
             If False (default), silently ignore blocks that are not present.
@@ -598,49 +642,43 @@ class Input:
                 return
 
         for block in blocks:
-            t_block = type(block)
-            if t_block in self._blocks:
-                self._blocks.pop(t_block)
+            key = self._block_key(block)
+            if key in self._blocks:
+                self._blocks.pop(key)
             elif strict:
-                raise ValueError(
-                    f"Strict: Block '{block.name}' does not exist so it cannot be removed."
-                )
+                label = key if isinstance(key, str) else key.__name__
+                raise ValueError(f"Strict: Block '{label}' does not exist so it cannot be removed.")
 
-    def _has_block(self, block: Block | type[Block], /) -> bool:
+    def _has_block(self, block: Block | type[Block] | str, /) -> bool:
         """
         Check whether a block has been added to the Calculator.
 
         Parameters
         ----------
-        block : Block | type[Block]
-            The block or block type to check
+        block : Block | type[Block] | str
+            The block, block class or block name to check
 
         Returns
         -------
         bool
             True if the block is present in the Calculator, False otherwise.
+
+        Raises
+        ------
+        ValueError
+            If `block` is a class that is named at runtime, see `Input._block_key()`.
         """
-        if not self._blocks:
-            return False
+        return self._block_key(block) in self._blocks
 
-        if isinstance(block, Block):
-            block_type = type(block)
-        else:
-            block_type = block
-
-        if self._blocks:
-            return block_type in self._blocks
-        else:
-            return False
-
-    def has_blocks(self, *blocks: Block) -> tuple[bool, ...]:
+    def has_blocks(self, *blocks: Block | type[Block] | str) -> tuple[bool, ...]:
         """
-        Check whether one or more blocks have been added to the Calculator.
+        Check whether one or more blocks have been added to the Calculator. If the block to be removed is arbitrary and has been initialized through `ORCABlock`,
+        pass its name or instance instead.
 
         Parameters
         ----------
-        *blocks : Block
-            One or more blocks to check.
+        *blocks : Block | type[Block] | str
+            One or more blocks to check, given as block, block class or block name.
 
         Returns
         -------
@@ -649,14 +687,16 @@ class Input:
         """
         return tuple(self._has_block(block) for block in blocks)
 
-    def _get_block(self, block: type[Block], /, *, create_missing: bool = False) -> Block | None:
+    def _get_block(
+        self, block: type[Block] | str, /, *, create_missing: bool = False
+    ) -> Block | None:
         """
         Retrieve a block that has been added to the Calculator.
 
         Parameters
         ----------
-        block : type[Block]
-            The block to retrieve
+        block : type[Block] | str
+            The block class or block name to retrieve
         create_missing : bool, default: False
             If True and the block is missing, add it and return it.
             If False (default), return None if the block is missing.
@@ -665,42 +705,44 @@ class Input:
         -------
         Block | None
             The requested block if it exists, or if it was created.
-            None if the block is missing and `create_missing` is False.
+            None if the block is missing and `create_missing` is False,
+            or if it is requested by a name that no block class implements.
         """
-        if self._blocks:
-            if block in self._blocks:
-                return self._blocks[block]
-            elif create_missing:
-                created_block = block()
-                self.add_blocks(created_block)
-                return created_block
-            else:
-                return None
-        elif create_missing:
-            created_block = block()
-            self.add_blocks(created_block)
-            return created_block
-        else:
+        key = self._block_key(block)
+        if key in self._blocks:
+            return self._blocks[key]
+
+        if not create_missing:
             return None
 
+        # > A name is only creatable if a block class implements it.
+        block_class = Block.get_block_class(block) if isinstance(block, str) else block
+        if block_class is None:
+            return None
+
+        created_block = block_class()
+        self.add_blocks(created_block)
+        return created_block
+
     def get_blocks(
-        self, *blocks: type[Block], create_missing: bool = False
-    ) -> dict[type[Block], Block]:
+        self, *blocks: type[Block] | str, create_missing: bool = False
+    ) -> dict[type[Block] | str, Block]:
         """
         Retrieve one or more blocks that have been added to the Calculator.
 
         Parameters
         ----------
-        *blocks : type[Block]
-            One or more block to retrieve.
+        *blocks : type[Block] | str
+            One or more blocks to retrieve, given as block class or block name.
         create_missing : bool, default: False
             If True and a block is missing, add it and return it.
             If False (default), missing blocks will be skipped.
 
         Returns
         -------
-        dict[type[Block], Block]
-            A Dictionary with the requested Blocks if they existed or were generated.
+        dict[type[Block] | str, Block]
+            A Dictionary with the requested Blocks if they existed or were generated,
+            keyed by the block class or block name they were requested with.
         """
         blocks_to_return = {}
         for block in blocks:
