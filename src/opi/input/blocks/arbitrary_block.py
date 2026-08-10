@@ -16,6 +16,9 @@ class ORCABlock(Block):
     Class used to create arbitrary blocks that have not yet been implemented in OPI. The key-value pairs for an arbitrary
     block option are stored as arbitrary options, hence both must be strings.
 
+    Within an `Input`, blocks are keyed by their name, so an arbitrary block cannot be added
+    twice under the same name.
+
     Examples
     --------
 
@@ -29,25 +32,30 @@ class ORCABlock(Block):
 
         Parameters
         ----------
-        name: Name of arbitrary block
+        name: str
+            Name of arbitrary block
 
-        values: Values to be added to the block. They will be added as arbitrary options, so both key and value must be strings.
+        values: dict[str, str] | None
+            Values to be added to the block. They will be added as arbitrary options, so both key and value must be strings.
 
-        aftercoord: Sets whether block will appear before or after coordinates in the ORCA .inp file.
+        aftercoord: bool, default: False
+            Sets whether block will appear before or after coordinates in the ORCA .inp file.
         """
         super().__init__(aftercoord=aftercoord)
 
-        name = self.normalize(name)
+        name = self._normalize(name)
         self._name = name
         if values:
             self._arbitrary = NoCaseDict(values)
 
-    def normalize(self, name: str) -> str:
+    def _normalize(self, name: str) -> str:
         """
-        Normalize the arbitrary block name. Strips leading '%' and whitespaces.
+        Normalize the arbitrary block name with `Block.normalize_name()` and validate it.
+
         Parameters
         ----------
-        name: User-given name of arbitrary block.
+        name: str
+            User-given name of arbitrary block.
 
         Returns
         -------
@@ -57,9 +65,9 @@ class ORCABlock(Block):
         Raises
         ------
         ValueError
-            If user-given name is invalid, or an ORCa block with that name is already implemented.
+            If user-given name is invalid, or an ORCA block with that name is already implemented.
         """
-        name = name.strip("% ").lower()
+        name = self.normalize_name(name)
 
         if not _NAME_PATTERN.fullmatch(name):
             raise ValueError("Invalid name for ORCA block")

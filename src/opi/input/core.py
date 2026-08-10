@@ -24,8 +24,8 @@ class Input:
     _simple_keywords | simple_keywords: list[SimpleKeyword]
         List of simple keywords to be put into the ORCA input.
         Access to this attribute should be done through the respective `add_simple_keywords/remove_.../clear_...` methods.
-    _blocks | blocks: dict[type[Block] | str, Block]
-        Dict of blocks to be put into the ORCA input, keyed as described in `Input._block_key()`.
+    _blocks | blocks: dict[str, Block]
+        Dict of blocks to be put into the ORCA input, keyed as described in `Input._block_name()`.
         Access to this attribute should be done through the respective `add_blocks/remove_.../clear_...` methods.
     _arbitrary_strings | arbitrary_strings: list[ArbitraryString]
         List of arbitrary string to be put into the ORCA input.
@@ -45,7 +45,7 @@ class Input:
         # // Simple Keywords
         self._simple_keywords: list[SimpleKeyword] = []
         # // Block options
-        self._blocks: dict[type[Block] | str, Block] = {}
+        self._blocks: dict[str, Block] = {}
         # // Arbitrary strings
         self._arbitrary_strings: list[ArbitraryString] = []
 
@@ -78,15 +78,15 @@ class Input:
         )
 
     @property
-    def blocks(self) -> dict[type[Block] | str, Block] | None:
+    def blocks(self) -> dict[str, Block] | None:
         return self._blocks
 
     @blocks.setter
-    def blocks(self, value: dict[type[Block] | str, Block] | None) -> None:
+    def blocks(self, value: dict[str, Block] | None) -> None:
         """
         Parameters
         ----------
-        value : dict[type[Block] | str, Block] | None
+        value : dict[str, Block] | None
         """
         raise AttributeError(
             "blocks is private, use the add_blocks/get_blocks function for access."
@@ -537,14 +537,15 @@ class Input:
     # > BLOCKS
     # ----------------------------------------------------------------------
     @staticmethod
-    def _block_key(block: Block | type[Block] | str, /) -> type[Block] | str:
+    def _block_name(block: Block | type[Block] | str, /) -> str:
         """
-        Determine the key under which a block is stored in `Input._blocks`.
+        Determine the name under which a block is stored in `Input._blocks`.
 
-        A block is identified by the name of the ORCA block it models, and keyed by the `Block`
-        subclass implementing that name, or by the name itself if no subclass implements it.
-        Hence `%scf` cannot be added twice, not even through a subclass of `BlockScf` or through
-        an `ORCABlock`, while blocks that are named at runtime stay separate per name.
+        A block is identified by the name of the ORCA block it models. Hence `%scf` cannot be
+        added twice, not even through a subclass of `BlockScf` or through an `ORCABlock`, while
+        blocks that are named at runtime stay separate per name.
+        Names are normalized with `Block.normalize_name()`, so that a block can be looked up by
+        the same spellings it can be created with.
 
         Parameters
         ----------
@@ -553,8 +554,8 @@ class Input:
 
         Returns
         -------
-        type[Block] | str
-            The key of the block within `Input._blocks`.
+        str
+            The normalized name of the block within `Input._blocks`.
 
         Raises
         ------
@@ -575,8 +576,7 @@ class Input:
             # > `get_block_name()` is None for blocks that are named at runtime.
             name = block.get_block_name() or block.name
 
-        name = name.strip().lower()
-        return Block.get_block_class(name) or name
+        return Block.normalize_name(name)
 
     def add_blocks(
         self,
@@ -609,11 +609,11 @@ class Input:
         Variables without assigned value will be assigned default value (usually None)
         """
         for block in blocks:
-            key = self._block_key(block)
-            if key not in self._blocks:
-                self._blocks[key] = block
+            name = self._block_name(block)
+            if name not in self._blocks:
+                self._blocks[name] = block
             elif overwrite:
-                self._blocks[key] = block
+                self._blocks[name] = block
             elif strict:
                 raise ValueError(f"Strict: Block for {block.name} has already been added")
 
@@ -642,12 +642,11 @@ class Input:
                 return
 
         for block in blocks:
-            key = self._block_key(block)
-            if key in self._blocks:
-                self._blocks.pop(key)
+            name = self._block_name(block)
+            if name in self._blocks:
+                self._blocks.pop(name)
             elif strict:
-                label = key if isinstance(key, str) else key.__name__
-                raise ValueError(f"Strict: Block '{label}' does not exist so it cannot be removed.")
+                raise ValueError(f"Strict: Block '{name}' does not exist so it cannot be removed.")
 
     def _has_block(self, block: Block | type[Block] | str, /) -> bool:
         """
@@ -666,9 +665,9 @@ class Input:
         Raises
         ------
         ValueError
-            If `block` is a class that is named at runtime, see `Input._block_key()`.
+            If `block` is a class that is named at runtime, see `Input._block_name()`.
         """
-        return self._block_key(block) in self._blocks
+        return self._block_name(block) in self._blocks
 
     def has_blocks(self, *blocks: Block | type[Block] | str) -> tuple[bool, ...]:
         """
@@ -687,7 +686,7 @@ class Input:
         """
         return tuple(self._has_block(block) for block in blocks)
 
-    def _get_block(
+    def get_block(
         self, block: type[Block] | str, /, *, create_missing: bool = False
     ) -> Block | None:
         """
@@ -706,17 +705,18 @@ class Input:
         Block | None
             The requested block if it exists, or if it was created.
             None if the block is missing and `create_missing` is False,
-            or if it is requested by a name that no block class implements.
+            or if it is requested by the name of a block that no block class implements.
         """
-        key = self._block_key(block)
-        if key in self._blocks:
-            return self._blocks[key]
+        name = self._block_name(block)
+        if name in self._blocks:
+            return self._blocks[name]
 
         if not create_missing:
             return None
 
-        # > A name is only creatable if a block class implements it.
-        block_class = Block.get_block_class(block) if isinstance(block, str) else block
+        # > A name is only creatable if a block class implements it. Arbitrary blocks are never
+        # > registered, so they cannot be created from their name alone.
+        block_class = Block.get_block_class(name) if isinstance(block, str) else block
         if block_class is None:
             return None
 
@@ -726,7 +726,7 @@ class Input:
 
     def get_blocks(
         self, *blocks: type[Block] | str, create_missing: bool = False
-    ) -> dict[type[Block] | str, Block]:
+    ) -> dict[str, Block]:
         """
         Retrieve one or more blocks that have been added to the Calculator.
 
@@ -740,16 +740,23 @@ class Input:
 
         Returns
         -------
-        dict[type[Block] | str, Block]
+        dict[str, Block]
             A Dictionary with the requested Blocks if they existed or were generated,
-            keyed by the block class or block name they were requested with.
+            keyed by the name of the ORCA block they model.
+
+        Example
+        -------
+        ::
+
+         >>c.input.get_blocks(BlockScf)
+         {'scf': BlockScf(...)}
         """
-        blocks_to_return = {}
+        blocks_to_return: dict[str, Block] = {}
         for block in blocks:
-            block_to_return = self._get_block(block, create_missing=create_missing)
+            block_to_return = self.get_block(block, create_missing=create_missing)
             # > check if block was found/created
             if block_to_return:
-                blocks_to_return[block] = block_to_return
+                blocks_to_return[self._block_name(block)] = block_to_return
         return blocks_to_return
 
     def clear_blocks(self, *, strict: bool = False) -> None:

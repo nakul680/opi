@@ -41,6 +41,7 @@ def calc(arbitrary_block):
         "MyBlock",
         "  myblock  ",
         "%myblock",
+        "  % MyBlock  ",
     ],
 )
 def test_arbitrary_block_name(name: str):
@@ -127,15 +128,32 @@ def test_add_arbitrary_blocks_same_name_strict(calc: Calculator):
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_get_arbitrary_block(calc: Calculator, arbitrary_block: ORCABlock):
-    """Test for `Input.get_blocks()` with the name of an arbitrary block."""
-    assert calc.input.get_blocks("MyBlock") == {"MyBlock": arbitrary_block}
+def test_add_arbitrary_blocks_same_name_overwrite(calc: Calculator):
+    """Test for `Input.add_blocks()` with `overwrite=True` and an already added arbitrary block."""
+    calc.input.add_blocks(ORCABlock("myblock", {"opt3": "val3"}), overwrite=True)
+
+    assert len(calc.input.blocks) == 2
+    assert calc.input.blocks["myblock"].get_option("opt3") == "val3"
 
 
 @pytest.mark.unit
 @pytest.mark.input
-@pytest.mark.parametrize("remove_param", ["myblock", ORCABlock("myblock")])
+def test_get_arbitrary_block(calc: Calculator, arbitrary_block: ORCABlock):
+    """Test for `Input.get_blocks()` with the name of an arbitrary block."""
+    assert calc.input.get_blocks("MyBlock") == {"myblock": arbitrary_block}
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize("remove_param", ["myblock", "%MyBlock", ORCABlock("myblock")])
 def test_remove_arbitrary_block(calc: Calculator, remove_param: str | ORCABlock):
     """Test for `Input.remove_blocks()` with the name or an instance of an arbitrary block."""
     calc.input.remove_blocks(remove_param)
     assert calc.input.has_blocks("myblock", "otherblock") == (False, True)
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_get_arbitrary_block_create_missing(empty_calc: Calculator):
+    """Test that an arbitrary block cannot be created from its name, as no class implements it."""
+    assert empty_calc.input.get_blocks("myblock", create_missing=True) == {}

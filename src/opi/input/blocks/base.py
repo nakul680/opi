@@ -47,7 +47,8 @@ class Block(BaseModel, ABC):
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
         """
-        Register a subclass of `Block` in `Block._registry` under its block name.
+        Register a subclass of `Block` in `Block._registry` under its block name. The registry allows OPI to keep track of all blocks
+        that are natively implemented in OPI. so that there is no collision when the user attempts to initialize an arbitrary block.
         Called by pydantic once a subclass has been fully initialized.
 
         Parameters
@@ -62,6 +63,24 @@ class Block(BaseModel, ABC):
             # > The first registration wins, so a subclass cannot displace the block class it derives from.
             Block._registry.setdefault(name, cls)
 
+    @staticmethod
+    def normalize_name(name: str) -> str:
+        """
+        Normalize the name of an ORCA block, so that the same block is always referred to by the
+        same name. Strips surrounding whitespace and the leading '%', and lowers the case.
+
+        Parameters
+        ----------
+        name : str
+            Name of an ORCA block, e.g. "%SCF".
+
+        Returns
+        -------
+        str
+            The normalized name, e.g. "scf".
+        """
+        return name.strip().removeprefix("%").strip().lower()
+
     @classmethod
     def get_block_name(cls) -> str | None:
         """
@@ -74,7 +93,7 @@ class Block(BaseModel, ABC):
         """
         name = getattr(cls.__private_attributes__.get("_name"), "default", None)
         if isinstance(name, str) and name.strip():
-            return name.strip().lower()
+            return Block.normalize_name(name)
         return None
 
     @classmethod
@@ -92,7 +111,7 @@ class Block(BaseModel, ABC):
         type[Block] | None
             The `Block` subclass for that name, or None if no subclass implements it.
         """
-        return Block._registry.get(name.strip().lower())
+        return Block._registry.get(Block.normalize_name(name))
 
     def add_option(self, name: str, val: str) -> None:
         """

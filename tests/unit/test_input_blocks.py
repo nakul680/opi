@@ -103,7 +103,7 @@ def test_add_blocks_overwrite(calc: Calculator):
     should be overwritten if it exists."""
     calc.input.add_blocks(BlockMethod(d3s6=0.75), overwrite=True)
 
-    assert calc.input.blocks[BlockMethod].d3s6 == 0.75
+    assert calc.input.blocks["method"].d3s6 == 0.75
 
 
 @pytest.mark.unit
@@ -164,9 +164,9 @@ def test_get_block_empty(empty_calc: Calculator):
 @pytest.mark.unit
 @pytest.mark.input
 def test_get_block(calc_with_test_block: Calculator, empty_test_block: Block):
-    """Test for `Input.get_blocks()`."""
+    """Test for `Input.get_blocks()`. Blocks are keyed by the name of the ORCA block."""
     type_instance = type(empty_test_block)
-    assert calc_with_test_block.input.get_blocks(type_instance) == {type_instance: empty_test_block}
+    assert calc_with_test_block.input.get_blocks(type_instance) == {"scf": empty_test_block}
 
 
 @pytest.mark.unit
@@ -175,7 +175,29 @@ def test_get_blocks_create_missing(empty_calc: Calculator, empty_test_block: Blo
     """Test for `Input.get_blocks()` with `create_missing=True`."""
     type_instance = type(empty_test_block)
     returned_blocks = empty_calc.input.get_blocks(type_instance, create_missing=True)
-    assert BlockScf in returned_blocks
+    assert "scf" in returned_blocks
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize("name", ["scf", "SCF", "%scf", "  % SCF  "])
+def test_normalize_block_name(name: str):
+    """Test that `Block.normalize_name()` normalizes the spellings of an ORCA block name."""
+    assert Block.normalize_name(name) == "scf"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_blocks_keyed_by_name(calc: Calculator):
+    """Test that blocks are stored under the name of the ORCA block they model."""
+    assert list(calc.input.blocks) == ["method", "eprnmr"]
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_get_block_by_name(calc_with_test_block: Calculator, empty_test_block: Block):
+    """Test that a block can be looked up by any spelling of its ORCA block name."""
+    assert calc_with_test_block.input.get_blocks("  %SCF ") == {"scf": empty_test_block}
 
 
 @pytest.mark.unit
