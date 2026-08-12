@@ -643,6 +643,9 @@ class Input:
                 self._blocks[name] = block
             elif strict:
                 raise ValueError(f"Strict: Block for {block.name} has already been added")
+            else:
+                existing_block = self._blocks[name]
+                self._blocks[name] = existing_block | block
 
     def remove_blocks(self, *blocks: BlockABC | type[BlockABC] | str, strict: bool = False) -> None:
         """

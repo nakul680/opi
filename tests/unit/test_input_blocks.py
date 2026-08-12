@@ -1,7 +1,15 @@
 import pytest
 
 from opi.core import Calculator
-from opi.input.blocks import BlockABC, BlockEprnmr, BlockMethod, BlockScf, Nuclei, NucleiFlag
+from opi.input.blocks import (
+    Block,
+    BlockABC,
+    BlockEprnmr,
+    BlockMethod,
+    BlockScf,
+    Nuclei,
+    NucleiFlag,
+)
 from opi.utils.element import Element
 
 """
@@ -356,17 +364,49 @@ def test_block_or_nested_block_field_is_replaced_wholesale():
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_block_or_arbitrary_options_are_not_preserved():
+def test_block_or_combines_arbitrary_options():
     """Test for `Block.__or__()`: arbitrary options added via `add_option()` live on a private,
-    non-model attribute and are dropped by the merge (`model_dump()` does not include them), even
-    if only one side ever set them."""
+    non-model attribute, but are still carried over into the merge from both sides."""
     left = BlockScf(maxiter=100)
     left.add_option("foo", "bar")
     right = BlockScf(convergence="tight")
+    right.add_option("baz", "qux")
 
     merged = left | right
 
-    assert not merged.has_option("foo")
+    assert merged.get_option("foo") == "bar"
+    assert merged.get_option("baz") == "qux"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_block_or_other_option_takes_precedence_on_conflict():
+    """Test for `Block.__or__()`: when both sides set the same arbitrary option, `other`'s value
+    wins, just as it does for fields."""
+    left = BlockScf()
+    left.add_option("foo", "bar")
+    right = BlockScf()
+    right.add_option("foo", "qux")
+
+    merged = left | right
+
+    assert merged.get_option("foo") == "qux"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_block_or_does_not_mutate_operand_options():
+    """Test for `Block.__or__()`: the merged options are held by a dictionary of their own, so
+    adding an option to the merged block does not leak back into either operand."""
+    left = BlockScf()
+    left.add_option("foo", "bar")
+    right = BlockScf()
+
+    merged = left | right
+    merged.add_option("baz", "qux")
+
+    assert not left.has_option("baz")
+    assert not right.has_option("baz")
 
 
 @pytest.mark.unit
@@ -383,6 +423,93 @@ def test_block_or_other_default_overrides_self_explicit_value():
     assert merged.aftercoord is False
 
 
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize(
+    "left,right",
+    [
+        (BlockScf(maxiter=100), BlockMethod(d3s6=0.64)),
+        (Block(name="arbit"), Block(name="other_arbit")),
+        (BlockScf(maxiter=100), Block(name="arbit")),
+    ],
+    ids=["two_implemented", "two_arbitrary", "implemented_and_arbitrary"],
+)
+def test_block_or_rejects_blocks_of_different_names(left: BlockABC, right: BlockABC):
+    """Test for `Block.__or__()`: merging blocks that model different ORCA blocks raises a
+    `ValueError`, as the merged block could only carry one of the two names."""
+    with pytest.raises(ValueError):
+        left | right
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_block_or_rejects_non_block():
+    """Test for `Block.__or__()`: merging with something that is not a block at all is not
+    implemented, so Python raises a `TypeError` for the unsupported operand."""
+    with pytest.raises(TypeError):
+        BlockScf(maxiter=100) | "scf"
+
+
+# ---------------------------------------------------------------------------
+# `Block.__or__` (merging two arbitrary blocks, which are named at runtime)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_arbitrary_block_or_combines_options_of_both_sides():
+    """Test for `Block.__or__()` on arbitrary blocks: an arbitrary block keeps everything it holds
+    in arbitrary options, so merging two of them combines those options."""
+    left = Block(name="arbit", values={"first": "1"})
+    right = Block(name="arbit", values={"second": "2"})
+
+    merged = left | right
+
+    assert merged.get_option("first") == "1"
+    assert merged.get_option("second") == "2"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_arbitrary_block_or_preserves_runtime_name():
+    """Test for `Block.__or__()` on arbitrary blocks: the name of an arbitrary block is assigned at
+    runtime rather than at class level, and survives the merge."""
+    left = Block(name="arbit", values={"first": "1"})
+    right = Block(name="ARBIT", values={"second": "2"})
+
+    merged = left | right
+
+    assert isinstance(merged, Block)
+    assert merged.name == "arbit"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_arbitrary_block_or_result_is_writable_to_orca_input():
+    """Test for `Block.__or__()` on arbitrary blocks: the merged block still formats itself for the
+    ORCA input, carrying the options of both sides under the shared block name."""
+    left = Block(name="arbit", values={"first": "1"})
+    right = Block(name="arbit", values={"second": "2"})
+
+    merged = left | right
+
+    assert merged.format_orca() == "%arbit\n    first 1\n    second 2\nend"
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_add_blocks_merges_existing_arbitrary_block(empty_calc: Calculator):
+    """Test for `Input.add_blocks()`: an arbitrary block added twice under the same name is merged
+    like any implemented block, combining the options of both."""
+    empty_calc.input.add_blocks(Block(name="arbit", values={"first": "1"}))
+    empty_calc.input.add_blocks(Block(name="arbit", values={"second": "2"}))
+
+    assert len(empty_calc.input.blocks) == 1
+    merged = empty_calc.input.get_block("arbit")
+    assert merged.get_option("first") == "1"
+    assert merged.get_option("second") == "2"
+
+
 # ---------------------------------------------------------------------------
 # `Input.add_blocks()` merge-on-add default behavior
 # ---------------------------------------------------------------------------
@@ -395,7 +522,7 @@ def test_add_blocks_merges_existing_block_by_default(calc: Calculator):
     `strict` or `overwrite`, merges it into the existing block instead of replacing it wholesale."""
     calc.input.add_blocks(BlockMethod(d3s6=0.75))
 
-    merged = calc.input.blocks[BlockMethod]
+    merged = calc.input.get_block("method")
     assert merged.d3s6 == 0.75  # new value takes precedence
     assert merged.d3a1 == 0.3065  # preserved from the previously-added block
     assert merged.d3s8 == 0.9147
@@ -410,7 +537,7 @@ def test_add_blocks_merge_combines_multiple_new_blocks_of_same_type(empty_calc: 
     empty_calc.input.add_blocks(BlockMethod(d3s6=0.64), BlockMethod(d3a1=0.3065))
 
     assert len(empty_calc.input.blocks) == 1
-    merged = empty_calc.input.blocks[BlockMethod]
+    merged = empty_calc.input.get_block("method")
     assert merged.d3s6 == 0.64
     assert merged.d3a1 == 0.3065
 
@@ -424,7 +551,7 @@ def test_add_blocks_merge_produces_object_distinct_from_both_inputs(empty_calc: 
     second = BlockMethod(d3a1=0.3065)
     empty_calc.input.add_blocks(first, second)
 
-    merged = empty_calc.input.blocks[BlockMethod]
+    merged = empty_calc.input.get_block("method")
     assert merged is not first
     assert merged is not second
 
@@ -434,9 +561,9 @@ def test_add_blocks_merge_produces_object_distinct_from_both_inputs(empty_calc: 
 def test_add_blocks_merge_does_not_mutate_previously_stored_block(calc: Calculator):
     """Test for `Input.add_blocks()`: merging on add replaces the stored block with a new
     instance; the block object that was stored before does not get its fields mutated in place."""
-    previously_stored = calc.input.blocks[BlockMethod]
+    previously_stored = calc.input.get_block("method")
 
     calc.input.add_blocks(BlockMethod(d3s6=0.75))
 
     assert previously_stored.d3s6 == 0.64
-    assert calc.input.blocks[BlockMethod] is not previously_stored
+    assert calc.input.blocks["method"] is not previously_stored

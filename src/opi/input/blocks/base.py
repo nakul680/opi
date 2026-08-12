@@ -283,7 +283,10 @@ class BlockABC(BaseModel, ABC):
 
     def __or__(self, other: "BlockABC") -> "BlockABC":
         """
-        Merges two instances of `BlockABC`. If a common attribute exists in both `self` and `other`, the value in `other` will be given precedence.
+        Merges two instances of `BlockABC` that model the same ORCA block. If a common attribute or
+        arbitrary option exists in both `self` and `other`, the value in `other` will be given
+        precedence. Neither operand is modified.
+
         Parameters
         ----------
         other: BlockABC
@@ -292,12 +295,32 @@ class BlockABC(BaseModel, ABC):
         Returns
         -------
         BlockABC
-            New instance of `BlockABC` with attributes of `self` and `other`.
+            New instance of `BlockABC` with attributes and arbitrary options of `self` and `other`.
 
+        Raises
+        ------
+        ValueError
+            If `self` and `other` model different ORCA blocks, as the merged block could only
+            carry one of the two names.
         """
-        new_block = self.__class__.model_validate(
-            {**self.model_dump(exclude_none=True), **other.model_dump(exclude_none=True)}
-        )
+        if not isinstance(other, BlockABC):
+            return NotImplemented
+        if self.name != other.name:
+            raise ValueError(
+                f"Cannot merge blocks that model different ORCA blocks: "
+                f"'%{self.name}' and '%{other.name}'."
+            )
+
+        # > Merge by copying `self` and overlaying `other`, rather than by revalidating a dump of
+        # > both: the block name and the arbitrary options live on private attributes, which
+        # > `model_dump()` does not include.
+        new_block = self.model_copy(deep=True)
+        # > `__dict__` holds the field values as they are, so nested blocks and arbitrary types
+        # > (e.g. `SimpleKeyword`) are carried over untouched instead of being serialized.
+        for key, value in other.__dict__.items():
+            if value is not None:
+                setattr(new_block, key, value)
+        new_block._arbitrary = NoCaseDict({**self._arbitrary, **other._arbitrary})
         return new_block
 
     @property

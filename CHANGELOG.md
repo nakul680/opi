@@ -36,7 +36,7 @@
 - `Structure.from_ase()` now falls back to the `charge` and `spin` entries of `Atoms.info` if ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays are unset (#273)
 - Add `Block` to allow for creation of arbitrary blocks. (#276)
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
-- add merge logic for two `Block` instants of same type.(#274)
+- Add merge logic for two blocks that model the same ORCA block, via `BlockABC.__or__()`: fields and arbitrary options of both blocks are combined, with the right-hand block taking precedence. Merging two blocks that model different ORCA blocks raises a `ValueError`. 
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
