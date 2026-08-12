@@ -7,14 +7,14 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from opi.input.blocks.util import InputFilePath, NoCaseDict
 from opi.input.simple_keywords import SimpleKeyword, Solvent
 
-__all__ = ["Block"]
+__all__ = ["BlockABC"]
 
 
-class Block(BaseModel, ABC):
+class BlockABC(BaseModel, ABC):
     """
     Base Class for Block.
     Each ORCA input block is defined in the module block_<block_name>.py
-    Every class defined for a block is derived from this base Block class ,
+    Every class defined for a block is derived from this base BlockABC class ,
     which defines attributes, methods and properties shared by all blocks.
 
     Attributes
@@ -26,10 +26,10 @@ class Block(BaseModel, ABC):
         _arbitrary: dict[str, str]
             A dictionary storing arbitrary key-value options for the ORCA input that are not implemented natively.
             Both key and value are stored as strings.
-        _registry: ClassVar[dict[str, type[Block]]]
-            Registry that maps the name of an ORCA block to the `Block` subclass implementing it.
+        _registry: ClassVar[dict[str, type[BlockABC]]]
+            Registry that maps the name of an ORCA block to the `BlockABC` subclass implementing it.
             Only subclasses with a class-level `_name` are registered, so subclasses that receive
-            their name at runtime (like `ORCABlock`) are absent.
+            their name at runtime (like `Block`) are absent.
             Used to recognize that a runtime-named block refers to an already implemented block.
     """
 
@@ -38,16 +38,16 @@ class Block(BaseModel, ABC):
     aftercoord: bool = False
     _arbitrary: NoCaseDict = NoCaseDict()
 
-    # > Registry of the subclasses of `Block`.
+    # > Registry of the subclasses of `BlockABC`.
     # > Being a `ClassVar`, it is a single object shared by the whole class hierarchy.
     # > It is filled by `__pydantic_init_subclass__()`, hence it only contains the
     # > subclasses whose defining module has been imported.
-    _registry: ClassVar[dict[str, type["Block"]]] = {}
+    _registry: ClassVar[dict[str, type["BlockABC"]]] = {}
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
         """
-        Register a subclass of `Block` in `Block._registry` under its block name. The registry allows OPI to keep track of all blocks
+        Register a subclass of `BlockABC` in `BlockABC._registry` under its block name. The registry allows OPI to keep track of all blocks
         that are natively implemented in OPI. so that there is no collision when the user attempts to initialize an arbitrary block.
         Called by pydantic once a subclass has been fully initialized.
 
@@ -61,7 +61,7 @@ class Block(BaseModel, ABC):
         # > Subclasses without a class-level `_name` are named at runtime and cannot be registered.
         if name is not None:
             # > The first registration wins, so a subclass cannot displace the block class it derives from.
-            Block._registry.setdefault(name, cls)
+            BlockABC._registry.setdefault(name, cls)
 
     @staticmethod
     def normalize_name(name: str) -> str:
@@ -93,13 +93,13 @@ class Block(BaseModel, ABC):
         """
         name = getattr(cls.__private_attributes__.get("_name"), "default", None)
         if isinstance(name, str) and name.strip():
-            return Block.normalize_name(name)
+            return BlockABC.normalize_name(name)
         return None
 
     @classmethod
-    def get_block_class(cls, name: str) -> type["Block"] | None:
+    def get_block_class(cls, name: str) -> type["BlockABC"] | None:
         """
-        Get the `Block` subclass that implements the given ORCA block name.
+        Get the `BlockABC` subclass that implements the given ORCA block name.
 
         Parameters
         ----------
@@ -108,10 +108,10 @@ class Block(BaseModel, ABC):
 
         Returns
         -------
-        type[Block] | None
-            The `Block` subclass for that name, or None if no subclass implements it.
+        type[BlockABC] | None
+            The `BlockABC` subclass for that name, or None if no subclass implements it.
         """
-        return Block._registry.get(Block.normalize_name(name))
+        return BlockABC._registry.get(BlockABC.normalize_name(name))
 
     def add_option(self, name: str, val: str) -> None:
         """
@@ -228,7 +228,7 @@ class Block(BaseModel, ABC):
 
     def format_orca(self) -> str:
         """
-        Method to convert a Block instance into string for the ORCA input file.
+        Method to convert a BlockABC instance into string for the ORCA input file.
         Returns the string representation of the respective class it is called by.
         """
         s = f"%{self.name}\n"

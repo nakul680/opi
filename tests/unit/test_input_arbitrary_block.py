@@ -1,10 +1,10 @@
 import pytest
 
 from opi.core import Calculator
-from opi.input.blocks import Block, BlockScf, ORCABlock
+from opi.input.blocks import BlockABC, BlockScf, Block
 
 """
-This module contains tests for arbitrary blocks (`ORCABlock`) such as:
+This module contains tests for arbitrary blocks (`Block`) such as:
 - Naming of an arbitrary block
 - Options of an arbitrary block
 - Formatting for the ORCA input file
@@ -20,15 +20,15 @@ def empty_calc():
 
 @pytest.fixture
 def arbitrary_block():
-    """An instance of `ORCABlock` with a single option."""
-    return ORCABlock("myblock", {"opt1": "val1"})
+    """An instance of `Block` with a single option."""
+    return Block("myblock", {"opt1": "val1"})
 
 
 @pytest.fixture
 def calc(arbitrary_block):
     """An instance of `Calculator` with two arbitrary blocks."""
     calc = Calculator("test", version_check=False)
-    calc.input.add_blocks(arbitrary_block, ORCABlock("otherblock", {"opt2": "val2"}))
+    calc.input.add_blocks(arbitrary_block, Block("otherblock", {"opt2": "val2"}))
     return calc
 
 
@@ -45,8 +45,8 @@ def calc(arbitrary_block):
     ],
 )
 def test_arbitrary_block_name(name: str):
-    """Test that the name of an `ORCABlock` is normalized."""
-    assert ORCABlock(name).name == "myblock"
+    """Test that the name of an `Block` is normalized."""
+    assert Block(name).name == "myblock"
 
 
 @pytest.mark.unit
@@ -61,9 +61,9 @@ def test_arbitrary_block_name(name: str):
     ],
 )
 def test_arbitrary_block_invalid_name(name: str):
-    """Test that an invalid name for an `ORCABlock` raises a `ValueError`."""
+    """Test that an invalid name for an `Block` raises a `ValueError`."""
     with pytest.raises(ValueError):
-        ORCABlock(name)
+        Block(name)
 
 
 @pytest.mark.unit
@@ -77,26 +77,26 @@ def test_arbitrary_block_invalid_name(name: str):
     ],
 )
 def test_arbitrary_block_implemented_name(name: str):
-    """Test that an `ORCABlock` cannot take the name of an implemented block."""
+    """Test that an `Block` cannot take the name of an implemented block."""
     with pytest.raises(ValueError):
-        ORCABlock(name)
+        Block(name)
 
 
 @pytest.mark.unit
 @pytest.mark.input
 def test_arbitrary_block_registry():
-    """Test that implemented blocks are registered by name, while `ORCABlock` is not."""
-    assert Block.get_block_class("scf") is BlockScf
-    assert ORCABlock.get_block_name() is None
+    """Test that implemented blocks are registered by name, while `Block` is not."""
+    assert BlockABC.get_block_class("scf") is BlockScf
+    assert Block.get_block_name() is None
 
-    ORCABlock("myblock")
-    assert Block.get_block_class("myblock") is None
+    Block("myblock")
+    assert BlockABC.get_block_class("myblock") is None
 
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_arbitrary_block_options(arbitrary_block: ORCABlock):
-    """Test that options of an `ORCABlock` are accessible case-insensitively."""
+def test_arbitrary_block_options(arbitrary_block: Block):
+    """Test that options of an `Block` are accessible case-insensitively."""
     arbitrary_block.add_option("Opt2", "val2")
 
     assert arbitrary_block.get_option("OPT1") == "val1"
@@ -105,8 +105,8 @@ def test_arbitrary_block_options(arbitrary_block: ORCABlock):
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_arbitrary_block_format_orca(arbitrary_block: ORCABlock):
-    """Test for `Block.format_orca()` of an `ORCABlock`."""
+def test_arbitrary_block_format_orca(arbitrary_block: Block):
+    """Test for `BlockABC.format_orca()` of an `Block`."""
     assert arbitrary_block.format_orca() == "%myblock\n    opt1 val1\nend"
 
 
@@ -123,14 +123,14 @@ def test_add_arbitrary_blocks(calc: Calculator):
 def test_add_arbitrary_blocks_same_name_strict(calc: Calculator):
     """Test for `Input.add_blocks()` with `strict=True` and an already added arbitrary block."""
     with pytest.raises(ValueError):
-        calc.input.add_blocks(ORCABlock("myblock"), strict=True)
+        calc.input.add_blocks(Block("myblock"), strict=True)
 
 
 @pytest.mark.unit
 @pytest.mark.input
 def test_add_arbitrary_blocks_same_name_overwrite(calc: Calculator):
     """Test for `Input.add_blocks()` with `overwrite=True` and an already added arbitrary block."""
-    calc.input.add_blocks(ORCABlock("myblock", {"opt3": "val3"}), overwrite=True)
+    calc.input.add_blocks(Block("myblock", {"opt3": "val3"}), overwrite=True)
 
     assert len(calc.input.blocks) == 2
     assert calc.input.blocks["myblock"].get_option("opt3") == "val3"
@@ -138,15 +138,15 @@ def test_add_arbitrary_blocks_same_name_overwrite(calc: Calculator):
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_get_arbitrary_block(calc: Calculator, arbitrary_block: ORCABlock):
+def test_get_arbitrary_block(calc: Calculator, arbitrary_block: Block):
     """Test for `Input.get_blocks()` with the name of an arbitrary block."""
     assert calc.input.get_blocks("MyBlock") == {"myblock": arbitrary_block}
 
 
 @pytest.mark.unit
 @pytest.mark.input
-@pytest.mark.parametrize("remove_param", ["myblock", "%MyBlock", ORCABlock("myblock")])
-def test_remove_arbitrary_block(calc: Calculator, remove_param: str | ORCABlock):
+@pytest.mark.parametrize("remove_param", ["myblock", "%MyBlock", Block("myblock")])
+def test_remove_arbitrary_block(calc: Calculator, remove_param: str | Block):
     """Test for `Input.remove_blocks()` with the name or an instance of an arbitrary block."""
     calc.input.remove_blocks(remove_param)
     assert calc.input.has_blocks("myblock", "otherblock") == (False, True)

@@ -1,17 +1,17 @@
 import re
 
-from opi.input.blocks.base import Block
+from opi.input.blocks.base import BlockABC
 from opi.input.blocks.util import NoCaseDict
 
 __all__ = [
-    "ORCABlock",
+    "Block",
 ]
 
 
 _NAME_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z_0-9]*$")
 
 
-class ORCABlock(Block):
+class Block(BlockABC):
     """
     Class used to create arbitrary blocks that have not yet been implemented in OPI. The key-value pairs for an arbitrary
     block option are stored as arbitrary options, hence both must be strings.
@@ -22,7 +22,7 @@ class ORCABlock(Block):
     Examples
     --------
 
-    >> arbit_block = ORCABlock(name='arbitrary_block', values = {'arbitrary_key': 'arbitrary_value'})
+    >> arbit_block = Block(name='arbitrary_block', values = {'arbitrary_key': 'arbitrary_value'})
 
 
     """
@@ -72,7 +72,7 @@ class ORCABlock(Block):
         if not _NAME_PATTERN.fullmatch(name):
             raise ValueError("Invalid name for ORCA block")
 
-        block_class = Block.get_block_class(name)
+        block_class = BlockABC.get_block_class(name)
 
         if block_class:
             raise ValueError(
