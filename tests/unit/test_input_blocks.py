@@ -202,6 +202,65 @@ def test_get_block_by_name(calc_with_test_block: Calculator, empty_test_block: B
 
 @pytest.mark.unit
 @pytest.mark.input
+def test_block_abc_is_abstract():
+    """Test that the abstract `BlockABC` cannot be instantiated, as it models no ORCA block.
+    `ABC` alone would not prevent it, since `BlockABC` defines no abstract method."""
+    with pytest.raises(TypeError):
+        BlockABC()
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_block_abc_class_rejected(calc: Calculator):
+    """Test that the abstract `BlockABC` does not identify a block when passed as a class."""
+    with pytest.raises(ValueError):
+        calc.input.has_blocks(BlockABC)
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_block_without_name(empty_calc: Calculator):
+    """Test that a subclass which defines no `_name` reports so instead of failing on a
+    missing private attribute."""
+
+    class BlockWithoutName(BlockABC):
+        pass
+
+    block = BlockWithoutName()
+
+    with pytest.raises(AttributeError, match="does not define the name of an ORCA block"):
+        block.name
+    with pytest.raises(AttributeError, match="does not define the name of an ORCA block"):
+        empty_calc.input.add_blocks(block)
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize("not_a_block", [dict, Element, 42, None, BlockScf])
+def test_add_blocks_not_a_block(empty_calc: Calculator, not_a_block):
+    """Test that `Input.add_blocks()` rejects anything but a block instance, block classes included."""
+    with pytest.raises(TypeError):
+        empty_calc.input.add_blocks(not_a_block)
+
+    assert not empty_calc.input.blocks
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize("not_a_block", [dict, Element, 42, None])
+def test_blocks_not_a_block(calc: Calculator, not_a_block):
+    """Test that anything but a block, a block class or a block name raises a `TypeError`.
+    Since every class is an instance of `type`, unrelated classes must be rejected as well."""
+    with pytest.raises(TypeError):
+        calc.input.has_blocks(not_a_block)
+    with pytest.raises(TypeError):
+        calc.input.remove_blocks(not_a_block)
+    with pytest.raises(TypeError):
+        calc.input.get_blocks(not_a_block)
+
+
+@pytest.mark.unit
+@pytest.mark.input
 def test_clear_blocks(calc: Calculator):
     """Test for `Input.clear_blocks()`."""
     calc.input.clear_blocks()

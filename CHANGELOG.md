@@ -39,6 +39,8 @@
 ### Deprecated
 ### Removed
 ### Fixed
+- The block methods of `Input` now raise a `TypeError` when passed something that is neither a block, a block class nor a block name, instead of failing with an `AttributeError`. `Input.add_blocks()` also rejects block classes, as only an instance carries the options of a block (#276).
+- `BlockABC` can no longer be instantiated, as it is abstract and models no ORCA block. `BlockABC.name` now reports that a block defines no ORCA block name instead of failing on the missing private attribute `_name` (#276).
 - Updated deprecated `typing` types to be compliant with Python >=3.11 guidelines (#216)
 - Fixed a typo in the badge for the OPI paper (#222).
 

@@ -17,6 +17,11 @@ class BlockABC(BaseModel, ABC):
     Every class defined for a block is derived from this base BlockABC class ,
     which defines attributes, methods and properties shared by all blocks.
 
+    This class is abstract and cannot be instantiated: it models no ORCA block of its own.
+    Every subclass must name the ORCA block it models, either by defining `_name` at class level
+    (as the implemented blocks do, e.g. `_name: str = "scf"`) or by assigning `self._name` during
+    initialization (as `Block` does for blocks that are named at runtime).
+
     Attributes
     ----------
         aftercoord: bool
@@ -43,6 +48,30 @@ class BlockABC(BaseModel, ABC):
     # > It is filled by `__pydantic_init_subclass__()`, hence it only contains the
     # > subclasses whose defining module has been imported.
     _registry: ClassVar[dict[str, type["BlockABC"]]] = {}
+
+    def __init__(self, /, **data: Any) -> None:
+        """
+        Initialize a block.
+
+        Parameters
+        ----------
+        **data : Any
+            Fields of the block, passed on to pydantic.
+
+        Raises
+        ------
+        TypeError
+            If `BlockABC` itself is instantiated.
+        """
+        # > `ABC` alone does not prevent instantiation, as `BlockABC` defines no abstract method.
+        # > Without this guard, a bare `BlockABC` would be a block without a name, and every
+        # > access to `BlockABC.name` would fail with an `AttributeError`.
+        if type(self) is BlockABC:
+            raise TypeError(
+                "'BlockABC' is abstract and models no ORCA block: use the class of the block, "
+                "e.g. 'BlockScf', or 'Block' for a block that OPI does not implement."
+            )
+        super().__init__(**data)
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
@@ -251,7 +280,27 @@ class BlockABC(BaseModel, ABC):
 
     @property
     def name(self) -> str:
-        return self._name
+        """
+        Name of the ORCA block modelled by this block.
+
+        Returns
+        -------
+        str
+            The name of the ORCA block, as defined by `_name`.
+
+        Raises
+        ------
+        AttributeError
+            If the subclass neither defines `_name` at class level nor assigns it during
+            initialization, as such a block cannot be written to the ORCA input.
+        """
+        name = getattr(self, "_name", None)
+        if not isinstance(name, str) or not name.strip():
+            raise AttributeError(
+                f"'{type(self).__name__}' does not define the name of an ORCA block: "
+                "subclasses of 'BlockABC' must set the private attribute '_name'."
+            )
+        return name
 
     @name.setter
     def name(self, name: str) -> None:

@@ -2,8 +2,8 @@
 Modules that hold Python objects representing the most common block options.
 """
 
-from opi.input.blocks.block import Block
 from opi.input.blocks.base import BlockABC
+from opi.input.blocks.block import Block
 from opi.input.blocks.block_autoci import BlockAutoCI
 from opi.input.blocks.block_basis import (
     BlockBasis,

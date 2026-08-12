@@ -559,22 +559,37 @@ class Input:
 
         Raises
         ------
+        TypeError
+            If `block` is neither a `BlockABC`, a subclass of `BlockABC` nor a string.
         ValueError
-            If `block` is a class that is named at runtime, as such a class does not identify
-            a single block.
+            If `block` is a class that does not define an ORCA block name, as such a class does
+            not identify a single block. This is the case for the abstract `BlockABC` and for
+            classes that are named at runtime, like `Block`.
+        AttributeError
+            If `block` is an instance of a subclass that defines no ORCA block name at all,
+            see `BlockABC.name`.
         """
         if isinstance(block, str):
             name = block
-        elif isinstance(block, type):
+        # > Every class is an instance of `type`, so the subclass check is required: without it,
+        # > any other class would reach `get_block_name()` and fail with an `AttributeError`.
+        elif isinstance(block, type) and issubclass(block, BlockABC):
             block_name = block.get_block_name()
             if block_name is None:
+                # > `get_block_name()` is None for `BlockABC` itself, which is abstract, and for
+                # > classes like `Block`, whose instances are named individually.
                 raise ValueError(
-                    f"'{block.__name__}' is named at runtime: pass one of its instances or a block name instead."
+                    f"'{block.__name__}' does not define the name of an ORCA block: "
+                    "pass a block instance or a block name instead."
                 )
             name = block_name
-        else:
+        elif isinstance(block, BlockABC):
             # > `get_block_name()` is None for blocks that are named at runtime.
             name = block.get_block_name() or block.name
+        else:
+            # > Classes are reported as themselves, as `type()` of a class is only its metaclass.
+            got = block if isinstance(block, type) else type(block)
+            raise TypeError(f"Expected a block, a block class or a block name, got {got}")
 
         return BlockABC.normalize_name(name)
 
@@ -598,6 +613,14 @@ class Input:
             If True, blocks that are already present will be overwritten (strict is ignored)
             If False (default), existing blocks are not overwritten
 
+        Raises
+        ------
+        TypeError
+            If one of the `blocks` is not an instance of `BlockABC`. Block classes are rejected as
+            well, as only an instance carries the options of a block.
+        ValueError
+            If `strict` is True and one or more of the specified blocks are already present.
+
         Example
         -------
         ::
@@ -609,6 +632,10 @@ class Input:
         Variables without assigned value will be assigned default value (usually None)
         """
         for block in blocks:
+            if not isinstance(block, BlockABC):
+                # > Classes are reported as themselves, as `type()` of a class is only its metaclass.
+                got = block if isinstance(block, type) else type(block)
+                raise TypeError(f"Expected an instance of a block, got {got}")
             name = self._block_name(block)
             if name not in self._blocks:
                 self._blocks[name] = block
@@ -632,8 +659,11 @@ class Input:
 
         Raises
         -------
+        TypeError
+            If one of the `blocks` is neither a `BlockABC`, a subclass of `BlockABC` nor a string.
         ValueError
-            If `strict` is True and one or more of the specified blocks are not present.
+            If `strict` is True and one or more of the specified blocks are not present, or if one
+            of the `blocks` is a class that is named at runtime, see `Input._block_name()`.
         """
         if not self._blocks:
             if strict:
@@ -664,6 +694,8 @@ class Input:
 
         Raises
         ------
+        TypeError
+            If `block` is neither a `BlockABC`, a subclass of `BlockABC` nor a string.
         ValueError
             If `block` is a class that is named at runtime, see `Input._block_name()`.
         """
@@ -683,6 +715,13 @@ class Input:
         -------
         tuple[bool, ...]
             A tuple of bools which are True if the block are present in the Calculator, False otherwise.
+
+        Raises
+        ------
+        TypeError
+            If one of the `blocks` is neither a `BlockABC`, a subclass of `BlockABC` nor a string.
+        ValueError
+            If one of the `blocks` is a class that is named at runtime, see `Input._block_name()`.
         """
         return tuple(self._has_block(block) for block in blocks)
 
@@ -706,6 +745,13 @@ class Input:
             The requested block if it exists, or if it was created.
             None if the block is missing and `create_missing` is False,
             or if it is requested by the name of a block that no block class implements.
+
+        Raises
+        ------
+        TypeError
+            If `block` is neither a subclass of `BlockABC` nor a string.
+        ValueError
+            If `block` is a class that is named at runtime, see `Input._block_name()`.
         """
         name = self._block_name(block)
         if name in self._blocks:
@@ -743,6 +789,13 @@ class Input:
         dict[str, BlockABC]
             A Dictionary with the requested Blocks if they existed or were generated,
             keyed by the name of the ORCA block they model.
+
+        Raises
+        ------
+        TypeError
+            If one of the `blocks` is neither a subclass of `BlockABC` nor a string.
+        ValueError
+            If one of the `blocks` is a class that is named at runtime, see `Input._block_name()`.
 
         Example
         -------

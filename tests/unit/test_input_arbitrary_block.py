@@ -1,7 +1,7 @@
 import pytest
 
 from opi.core import Calculator
-from opi.input.blocks import BlockABC, BlockScf, Block
+from opi.input.blocks import Block, BlockABC, BlockScf
 
 """
 This module contains tests for arbitrary blocks (`Block`) such as:
@@ -150,6 +150,14 @@ def test_remove_arbitrary_block(calc: Calculator, remove_param: str | Block):
     """Test for `Input.remove_blocks()` with the name or an instance of an arbitrary block."""
     calc.input.remove_blocks(remove_param)
     assert calc.input.has_blocks("myblock", "otherblock") == (False, True)
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_arbitrary_block_class_rejected(calc: Calculator):
+    """Test that the `Block` class itself does not identify a block, as it is named at runtime."""
+    with pytest.raises(ValueError):
+        calc.input.has_blocks(Block)
 
 
 @pytest.mark.unit
