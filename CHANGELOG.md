@@ -29,7 +29,7 @@
 - Added `calculate_molbar()` and `calculate_molbar_data()` to get Molbar from `Structure` (#227)
 - Added `Fcidump.from_arrays()` for constructing a `Fcidump` from numpy arrays and `Fcidump.to_file()` for writing FCIDUMP files (#267).
 - `Fcidump` now raises a `ValueError` if the one- or two-electron integrals contain symmetry-equivalent keys (#267).
-- Add `ORCABlock` to allow for creation of arbitrary blocks.(#276)
+- Add `Block` to allow for creation of arbitrary blocks.(#276)
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
 
 ### Changed
@@ -43,6 +43,10 @@
 - `BlockABC` can no longer be instantiated, as it is abstract and models no ORCA block. `BlockABC.name` now reports that a block defines no ORCA block name instead of failing on the missing private attribute `_name` (#276).
 - Updated deprecated `typing` types to be compliant with Python >=3.11 guidelines (#216)
 - Fixed a typo in the badge for the OPI paper (#222).
+
+
+### Breaking Changes 
+- Refactor base `Block` class to `BlockABC` - also cannot be initialized anymore. `Block` is now used to create an arbitrary block.(#276)
 
 ## [2.0.0] - 2026-02-10
 
