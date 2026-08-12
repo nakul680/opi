@@ -2,6 +2,9 @@
 
 ## [Unreleased] - ReleaseDate
 
+### Breaking Changes
+- Refactor base `Block` class to `BlockABC` - also cannot be initialized anymore. `Block` is now used to create an arbitrary block.(#276)
+
 ### Added
 - Improve support for OpenCOSMO-RS (#205)
 - Add missing pydantic fields for calculation timings (#211)
@@ -30,16 +33,15 @@
 - `Structure.from_ase()` now falls back to the `charge` and `multiplicity` entries of `Atoms.info` if ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays are unset (#273)
 - Added `Fcidump.from_arrays()` for constructing a `Fcidump` from numpy arrays and `Fcidump.to_file()` for writing FCIDUMP files (#267).
 - `Fcidump` now raises a `ValueError` if the one- or two-electron integrals contain symmetry-equivalent keys (#267).
-- - Added `to_ase()` to convert a `Structure` into an ASE `Atoms` object (#273)
+- Added `to_ase()` to convert a `Structure` into an ASE `Atoms` object (#273)
 - `Structure.from_ase()` now falls back to the `charge` and `spin` entries of `Atoms.info` if ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays are unset (#273)
-- Add `Block` to allow for creation of arbitrary blocks.(#276)
+- Add `Block` to allow for creation of arbitrary blocks. (#276)
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
 - Updated unit conversion constants to be consistent with ORCA (#269).
-- `Input` now stores blocks under the name of the ORCA block they model instead of under their `Block` class. Hence `Input.blocks` and the dictionary returned by `Input.get_blocks()` are keyed by that name, e.g. `calc.input.get_blocks(BlockScf)["scf"]` (#276).
-
+- `Input` now stores blocks under the name of the ORCA block they model instead of under their `BlockABC` class. Hence `Input.blocks` and the dictionary returned by `Input.get_blocks()` are keyed by that name, e.g. `calc.input.get_blocks(BlockScf)["scf"]`. (#276)
 
 ### Deprecated
 ### Removed
@@ -49,10 +51,6 @@
 - Updated deprecated `typing` types to be compliant with Python >=3.11 guidelines (#216)
 - Fixed a typo in the badge for the OPI paper (#222).
 - Fixed `Structure.nelectrons` for structures containing ghost atoms (#268).
-
-
-### Breaking Changes 
-- Refactor base `Block` class to `BlockABC` - also cannot be initialized anymore. `Block` is now used to create an arbitrary block.(#276)
 
 ## [2.0.0] - 2026-02-10
 

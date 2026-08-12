@@ -298,7 +298,8 @@ class BlockABC(BaseModel, ABC):
             initialization, as such a block cannot be written to the ORCA input.
         """
         name = getattr(self, "_name", None)
-        if not isinstance(name, str) or not name.strip():
+        name = BlockABC.normalize_name(name) if isinstance(name, str) else None
+        if not name:
             raise AttributeError(
                 f"'{type(self).__name__}' does not define the name of an ORCA block: "
                 "subclasses of 'BlockABC' must set the private attribute '_name'."

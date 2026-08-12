@@ -584,8 +584,7 @@ class Input:
                 )
             name = block_name
         elif isinstance(block, BlockABC):
-            # > `get_block_name()` is None for blocks that are named at runtime.
-            name = block.get_block_name() or block.name
+            name = block.name
         else:
             # > Classes are reported as themselves, as `type()` of a class is only its metaclass.
             got = block if isinstance(block, type) else type(block)
@@ -626,7 +625,7 @@ class Input:
         ::
 
          >>c = Calculator(basename = input)
-         >>b = Block(d3s6=0.64,d3a1=0.3065)
+         >>b = BlockMethod(d3s6=0.64,d3a1=0.3065)
          >>c.input.add_blocks(b)
 
         Variables without assigned value will be assigned default value (usually None)
