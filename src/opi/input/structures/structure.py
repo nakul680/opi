@@ -20,6 +20,7 @@ from opi.input.structures.atom import (
     PointCharge,
 )
 from opi.input.structures.coordinates import Coordinates
+from opi.utils.ase import requires_ase
 from opi.utils.element import ATOMIC_MASSES_FROM_ELEMENT, Element
 from opi.utils.molbar import MolBarMode, call_molbar, requires_molbar
 from opi.utils.rotconst import (
@@ -117,6 +118,13 @@ class Structure:
         return [a for a in self.atoms if type(a) is Atom]
 
     @property
+    def real_atom_indices(self) -> list[int]:
+        """
+        Return the indices of real `Atom` instances as provided by `real_atoms`.
+        """
+        return [i for i, a in enumerate(self.atoms) if type(a) is Atom]
+
+    @property
     def charge(self) -> int:
         return self._charge
 
@@ -161,9 +169,8 @@ class Structure:
             Returns the number of electrons for the structure. Can be negative!
         """
         nelectrons = 0
-        for atom in self.atoms:
-            if isinstance(atom, Atom):
-                nelectrons += atom.element.atomic_number
+        for atom in self.real_atoms:
+            nelectrons += atom.element.atomic_number
         nelectrons -= self.charge
         return nelectrons
 
@@ -244,8 +251,7 @@ class Structure:
             New `Structure` with centered coordinates.
         """
         new_structure = copy.deepcopy(self)
-        real_indices = [i for i, a in enumerate(new_structure.atoms) if type(a) is Atom]
-        centroid = new_structure.get_coordinates(only_atoms=real_indices).mean(axis=0)
+        centroid = new_structure.get_coordinates(only_atoms=self.real_atom_indices).mean(axis=0)
         new_structure.set_coordinates(new_structure.get_coordinates() - centroid)
         return new_structure
 
@@ -973,6 +979,16 @@ class Structure:
         Function to generate Structure from `Atoms` object from the Atomic Simulation Environment (ASE).
         Since ORCA and OPI do not support structures with periodic boundary conditions these are ignored.
 
+        Charge and multiplicity are resolved in this order, independently of each other:
+
+        1. the *charge* and *multiplicity* arguments, if given;
+        2. ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays, if they
+           have been set. The charge is their sum, the multiplicity is the rounded
+           absolute total magnetization plus one;
+        3. the molecular metadata in `Atoms.info` under the keys `"charge"` and
+           `"spin"`, which is where `to_ase` stores them;
+        4. a neutral closed-shell default, i.e. `charge=0` and `multiplicity=1`.
+
         Parameters
         ----------
         ase_atoms : AseAtoms
@@ -1051,19 +1067,79 @@ class Structure:
                 )
             )
 
-        # > Get charge if not supplied
+        # > Get charge if not supplied. ASE's per-atom `initial_charges` array takes
+        # > precedence, as it is what ASE calculators actually consume. Only if that
+        # > array was never set do we fall back to the molecular metadata in
+        # > `Atoms.info`, which is where `to_ase` stores the charge, and finally to a
+        # > neutral default. ASE creates the array lazily, so membership in
+        # > `Atoms.arrays` distinguishes "never set" from "explicitly set to zero".
         if charge is None:
-            charges = ase_atoms.get_initial_charges()
-            charge = int(round(np.sum(charges)))
+            if "initial_charges" in ase_atoms.arrays:
+                charges = ase_atoms.get_initial_charges()
+                charge = int(round(np.sum(charges)))
+            else:
+                charge = int(ase_atoms.info.get("charge", 0))
 
-        # > Get magnetic moment if no multiplicity supplied
+        # > Get magnetic moment if no multiplicity supplied. Same precedence as for the
+        # > charge above; note that ASE stores the moments under the key `initial_magmoms`.
         if multiplicity is None:
-            magmoms = ase_atoms.get_initial_magnetic_moments()
-            total_magnetization = np.sum(magmoms)
-            spin = int(round(abs(total_magnetization)))
-            multiplicity = spin + 1
+            if "initial_magmoms" in ase_atoms.arrays:
+                magmoms = ase_atoms.get_initial_magnetic_moments()
+                total_magnetization = np.sum(magmoms)
+                spin = int(round(abs(total_magnetization)))
+                multiplicity = spin + 1
+            else:
+                multiplicity = int(ase_atoms.info.get("spin", 1))
 
         return cls(atoms=atoms, charge=charge, multiplicity=multiplicity)
+
+    @requires_ase
+    def to_ase(self) -> "AseAtoms":
+        """
+        Convert this `Structure` into an `Atoms` object of the Atomic Simulation Environment (ASE).
+
+        Only real `Atom` entries are converted; `EmbeddingPotential`, `GhostAtom`,
+        and `PointCharge` instances are silently skipped.
+
+        Coordinates are passed through unchanged: `Structure` stores Cartesian
+        coordinates in Ångström, which is also the unit ASE expects.
+
+        Charge and multiplicity are transported via `Atoms.info` under the keys
+        `"charge"` and `"spin"`. They are deliberately not written to ASE's
+        per-atom `initial_charges` and `initial_magnetic_moments` arrays, because OPI
+        has no per-atom partitioning of these molecular quantities.
+
+        Returns
+        -------
+        AseAtoms
+            ASE `Atoms` object holding the elements and coordinates of all real atoms,
+            with `charge` and `spin` stored in `Atoms.info`.
+
+        Raises
+        ------
+        ImportError
+            If ASE is not installed.
+        ValueError
+            If this structure contains no real atoms.
+        """
+        if not self.real_atoms:
+            raise ValueError(
+                f"{self.__class__.__name__}: structure contains no real atoms; "
+                "cannot build ASE Atoms object."
+            )
+
+        elements = [atom.element for atom in self.real_atoms]
+        coordinates = self.get_coordinates(only_atoms=self.real_atom_indices)
+
+        # > Convert OPI-native types to the plain types ASE understands.
+        element_symbols: list[str] = [Element(e).value for e in elements]
+        coords = np.asarray(coordinates, dtype=np.float64)
+
+        return AseAtoms(
+            symbols=element_symbols,
+            positions=coords,
+            info={"charge": self.charge, "spin": self.multiplicity},
+        )
 
     @classmethod
     def from_lists(
@@ -1599,11 +1675,9 @@ class Structure:
 
         # > OPI-native types (Element instances, NumPy array) are passed as-is;
         # > `call_molbar` handles the conversion to MolBar's expected format.
-        real_indices = [i for i, a in enumerate(self.atoms) if type(a) is Atom]
-
         return call_molbar(
             elements=[atom.element for atom in self.real_atoms],
-            coordinates=self.get_coordinates(only_atoms=real_indices),
+            coordinates=self.get_coordinates(only_atoms=self.real_atom_indices),
             total_charge=self.charge,
             mode=mode,
             return_data=return_data,
