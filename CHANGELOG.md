@@ -36,13 +36,13 @@
 - `Structure.from_ase()` now falls back to the `charge` and `spin` entries of `Atoms.info` if ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays are unset (#273)
 - Add `Block` to allow for creation of arbitrary blocks. (#276)
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
-- Add merge logic for two blocks that model the same ORCA block, via `BlockABC.__or__()`: fields and arbitrary options of both blocks are combined, with the right-hand block taking precedence. Merging two blocks that model different ORCA blocks raises a `ValueError`. 
+- Add merge logic for two blocks that model the same ORCA block, via `BlockABC.__or__()`: fields and arbitrary options of both blocks are combined, with the right-hand block taking precedence. Merging two blocks that model different ORCA blocks raises a `ValueError`. (#274)
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
 - Updated unit conversion constants to be consistent with ORCA (#269).
 - `Input` now stores blocks under the name of the ORCA block they model instead of under their `BlockABC` class. Hence `Input.blocks` and the dictionary returned by `Input.get_blocks()` are keyed by that name, e.g. `calc.input.get_blocks(BlockScf)["scf"]`. (#276)
-- change `Input.add_blocks()` to merge two block instants of same type by default, instead of being a no-op.(#274)
+- Change `Input.add_blocks()` to merge two block instances of same type by default, instead of being a no-op. (#274)
 
 ### Deprecated
 ### Removed

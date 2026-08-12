@@ -608,10 +608,10 @@ class Input:
             One or more blocks to add
         strict : bool, default: False
             If True, raise a ValueError if a block has already been added.
-            If False (default), does nothing if a block has already been added.
+            If False (default), does not raise an error and instead merges the blocks.
         overwrite : bool, default: False
             If True, blocks that are already present will be overwritten completely, replacing the existing block.
-            If False (default), existing blocks are not overwritten
+            If False (default), existing blocks are not overwritten and instead merged
 
         Raises
         ------
