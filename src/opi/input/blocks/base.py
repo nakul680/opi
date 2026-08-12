@@ -281,18 +281,18 @@ class BlockABC(BaseModel, ABC):
 
         return s
 
-    def __or__(self, other: "Block") -> "Block":
+    def __or__(self, other: "BlockABC") -> "BlockABC":
         """
-        Merges two instances of `Block`. If a common attribute exists in both `self` and `other`, the value in `other` will be given precedence.
+        Merges two instances of `BlockABC`. If a common attribute exists in both `self` and `other`, the value in `other` will be given precedence.
         Parameters
         ----------
-        other: Block
-            Instance of `Block` to be merged into `self`
+        other: BlockABC
+            Instance of `BlockABC` to be merged into `self`
 
         Returns
         -------
-        Block
-            New instance of `Block` with attributes of `self` and `other`.
+        BlockABC
+            New instance of `BlockABC` with attributes of `self` and `other`.
 
         """
         new_block = self.__class__.model_validate(
@@ -332,7 +332,7 @@ class BlockABC(BaseModel, ABC):
         ----------
         name : str
         """
-        raise AttributeError("*Block.name* is a read-only property!")
+        raise AttributeError("*BlockABC.name* is a read-only property!")
 
     @field_validator("*", mode="before")
     @classmethod
