@@ -118,12 +118,15 @@ class BlockABC(BaseModel, ABC):
         Returns
         -------
         str | None
-            The class-level block name, or None if the class does not define one.
+            The class-level block name, or None if the class does not define one, or defines one
+            that is empty once normalized.
         """
         name = getattr(cls.__private_attributes__.get("_name"), "default", None)
-        if isinstance(name, str) and name.strip():
-            return BlockABC.normalize_name(name)
-        return None
+        if not isinstance(name, str):
+            return None
+        # > Normalize before testing for emptiness: a name such as "%" is non-empty as written,
+        # > but `normalize_name()` strips it down to "".
+        return BlockABC.normalize_name(name) or None
 
     @classmethod
     def get_block_class(cls, name: str) -> type["BlockABC"] | None:
