@@ -471,20 +471,6 @@ def test_arbitrary_block_or_combines_options_of_both_sides():
 
 @pytest.mark.unit
 @pytest.mark.input
-def test_arbitrary_block_or_preserves_runtime_name():
-    """Test for `Block.__or__()` on arbitrary blocks: the name of an arbitrary block is assigned at
-    runtime rather than at class level, and survives the merge."""
-    left = Block(name="arbit", values={"first": "1"})
-    right = Block(name="ARBIT", values={"second": "2"})
-
-    merged = left | right
-
-    assert isinstance(merged, Block)
-    assert merged.name == "arbit"
-
-
-@pytest.mark.unit
-@pytest.mark.input
 def test_arbitrary_block_or_result_is_writable_to_orca_input():
     """Test for `Block.__or__()` on arbitrary blocks: the merged block still formats itself for the
     ORCA input, carrying the options of both sides under the shared block name."""

@@ -287,6 +287,9 @@ class BlockABC(BaseModel, ABC):
         arbitrary option exists in both `self` and `other`, the value in `other` will be given
         precedence. Neither operand is modified.
 
+        Note that the `aftercoord` value will also be overridden, even if the `self` block explicitly sets aftercoord to True,
+        the `other` block will override it to False as that is the default option.
+
         Parameters
         ----------
         other: BlockABC
