@@ -842,23 +842,26 @@ class Input:
     # > ARBITRARY STRINGS
     # ----------------------------------------------------------------------
     def add_arbitrary_string(
-        self, string: str, /, *, pos: ArbitraryStringPos | str | None = None
+        self, string: str | ArbitraryString, /, *, pos: ArbitraryStringPos | str | None = None
     ) -> None:
         """
         Add an arbitrary string.
 
         Parameters
         ----------
-        string : str
+        string : str | ArbitraryString
             Arbitrary string to be added
         pos : ArbitraryStringPos | str | None, default: None
             Coordinates of the arbitrary string within the input file.
             For details look into the `ArbitraryStringPos` class.
         """
+        if isinstance(string, ArbitraryString):
+            arb_string = string
+        else:
+            arb_string = ArbitraryString(string=string)
+            if pos is not None:
+                arb_string.pos = ArbitraryStringPos(pos)
 
-        arb_string = ArbitraryString(string=string)
-        if pos is not None:
-            arb_string.pos = ArbitraryStringPos(pos)
         self._arbitrary_strings.append(arb_string)
 
     def remove_arbitrary_string(
@@ -907,3 +910,72 @@ class Input:
                 raise ValueError("No arbitrary strings added.")
         else:
             self._arbitrary_strings.clear()
+
+    # ----------------------------------------------------------------------
+    # > INPUT MERGE LOGIC
+    # ----------------------------------------------------------------------
+
+    def __or__(self, other: "Input") -> "Input":
+        """
+        Merges two instances of `Input` into a new `Input`. Neither operand is modified.
+
+        Every component of the input is merged on its own terms:
+            - Simple keywords are combined, dropping duplicates. Their order is not preserved.
+            - Blocks are merged per ORCA block they model, through `Input.add_blocks()`. The values of `other` take precedence.
+              Every block is copied on the way in, so that the merged input shares no block
+              instance with either operand.
+            - Arbitrary strings are concatenated, those of `self` first, keeping duplicates.
+            - `ncores`, `memory` and `moinp` are taken from `other` if set, otherwise from `self`.
+              An `ncores` or `memory` of `0` counts as unset here.
+
+        If `other` is not an `Input`, `NotImplemented` is returned, so that Python fails the `|`
+        operation with a `TypeError`.
+
+        Parameters
+        ----------
+        other : Input
+            Instance of `Input` to be merged into `self`
+
+        Returns
+        -------
+        Input
+            New instance of `Input` with the simple keywords, blocks, arbitrary strings and
+            special input variables of `self` and `other`.
+        """
+        if not isinstance(other, Input):
+            return NotImplemented
+
+        # > Systematically handle all components of an Input object.
+        new_input = Input()
+
+        # > First simple keywords will be handled by merging the two lists of simple keywords, dropping duplicates
+        new_keyword_list = list(
+            set(
+                (self.simple_keywords if self.simple_keywords else [])
+                + (other.simple_keywords if other.simple_keywords else [])
+            )
+        )
+        new_input.add_simple_keywords(*new_keyword_list)
+
+        # > Next the blocks will be handled, since the Block already implements merge logic, the blocks will be iteratively merged based on name of block
+        # > Since add_blocks() already handles the merge case, we need only to iteratively add all the blocks in self followed by those in other
+        for blocks in (self.blocks, other.blocks):
+            for block in (blocks or {}).values():
+                new_input.add_blocks(block.model_copy(deep=True))
+
+        # > Next the arbitrary strings will be handled, here the list of strings will simply be merged.
+        new_arbit_strings_list = (self.arbitrary_strings if self.arbitrary_strings else []) + (
+            other.arbitrary_strings if other.arbitrary_strings else []
+        )
+        for arbit_string in new_arbit_strings_list:
+            new_input.add_arbitrary_string(arbit_string)
+
+        # > Finally the various special variables will be handled by giving precedence to the other Input object
+
+        new_input.ncores = other.ncores if other.ncores else self.ncores
+
+        new_input.memory = other.memory if other.memory else self.memory
+
+        new_input.moinp = other.moinp if other.moinp else self.moinp
+
+        return new_input
