@@ -181,3 +181,7 @@ _version.py
 # Documentation
 docs/contents/api
 docs/contents/scripts/*.sha256
+
+# Site-specific SLURM configuration (copy from notebook_tests.env.example).
+# The `.env` entry above matches only a file named exactly `.env`, not this one.
+scripts/slurm/notebook_tests.env
