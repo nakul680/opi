@@ -36,7 +36,10 @@
 - `Structure.from_ase()` now falls back to the `charge` and `spin` entries of `Atoms.info` if ASE's per-atom `initial_charges` / `initial_magnetic_moments` arrays are unset (#273)
 - Add `Block` to allow for creation of arbitrary blocks. (#276)
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
+- Added `GbwResults.get_structure()`, `GbwResults.from_gbw_file()`, and `Output.get_structure_from_gbw()` to obtain a `Structure` from a gbw file or gbw JSON (#280).
+- Added `Output.get_timings()` to access the timings of the calculation steps (#284).
 - Add merge logic for two blocks that model the same ORCA block, via `BlockABC.__or__()`: fields and arbitrary options of both blocks are combined, with the right-hand block taking precedence. Merging two blocks that model different ORCA blocks raises a `ValueError`. (#274)
+
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
@@ -53,6 +56,7 @@
 - Fixed a typo in the badge for the OPI paper (#222).
 - Fixed `Structure.nelectrons` for structures containing ghost atoms (#268).
 - Fixed `_orca_environment()` which now makes changes to `os.environ` in-place without breaking any reference to that dict (#279).
+- Negative calculation timings occasionally reported by ORCA are now clamped to zero instead of raising a `ValidationError` (#284).
 
 ## [2.0.0] - 2026-02-10
 
