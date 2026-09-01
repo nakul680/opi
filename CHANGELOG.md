@@ -38,6 +38,7 @@
 - Add functionality to fetch, search or remove a block using the ORCA name of the block. (#276)
 - Added `GbwResults.get_structure()`, `GbwResults.from_gbw_file()`, and `Output.get_structure_from_gbw()` to obtain a `Structure` from a gbw file or gbw JSON (#280).
 - Added `Output.get_timings()` to access the timings of the calculation steps (#284).
+- Added `Output.neb_converged()` and `mode="neb"` for `Properties` to check NEB convergence and read the MEP energies (#285)
 - Add merge logic for two blocks that model the same ORCA block, via `BlockABC.__or__()`: fields and arbitrary options of both blocks are combined, with the right-hand block taking precedence. Merging two blocks that model different ORCA blocks raises a `ValueError`. (#274)
 - Add merge logic for two `Input` objects, via `Input.__or__()`: simple keywords are concatenated without duplicates, keeping their order with those of the left-hand input first, blocks that model the same ORCA block are merged, arbitrary strings are concatenated, and `ncores`, `memory` and `moinp` are taken from the right-hand input if set. The right-hand input takes precedence throughout, blocks are copied into the result, and neither operand is modified. (#288)
 
