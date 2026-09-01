@@ -24,8 +24,8 @@ covering each component that is merged:
 @pytest.mark.unit
 @pytest.mark.input
 def test_input_or_combines_simple_keywords_of_both_sides():
-    """Test for `Input.__or__()`: keywords added to only one side are all present in the merge.
-    The keywords are compared as a set, as `Input.__or__()` does not preserve their order."""
+    """Test for `Input.__or__()`: keywords added to only one side are all present in the merge,
+    in order, with those of the left-hand input first."""
     left = Input()
     left.add_simple_keywords(Dft.B3LYP)
     right = Input()
@@ -33,7 +33,7 @@ def test_input_or_combines_simple_keywords_of_both_sides():
 
     merged = left | right
 
-    assert set(merged.simple_keywords) == {Dft.B3LYP, BasisSet.DEF2_TZVP, Task.SP}
+    assert merged.simple_keywords == [Dft.B3LYP, BasisSet.DEF2_TZVP, Task.SP]
 
 
 @pytest.mark.unit
@@ -49,6 +49,27 @@ def test_input_or_drops_duplicate_simple_keywords():
 
     assert len(merged.simple_keywords) == 3
     assert set(merged.simple_keywords) == {Dft.B3LYP, Scf.TIGHTSCF, BasisSet.DEF2_TZVP}
+
+
+@pytest.mark.unit
+@pytest.mark.input
+def test_input_or_preserves_simple_keyword_order():
+    """Test for `Input.__or__()`: the keywords keep the order in which they were added, those of
+    the left-hand input first. A duplicate keeps the position of its first occurrence, so a
+    keyword held by both sides stays at its left-hand position."""
+    left = Input()
+    left.add_simple_keywords(Task.SP, Dft.B3LYP)
+    right = Input()
+    right.add_simple_keywords(Scf.TIGHTSCF, Dft.B3LYP, BasisSet.DEF2_TZVP)
+
+    merged = left | right
+
+    assert merged.simple_keywords == [
+        Task.SP,
+        Dft.B3LYP,
+        Scf.TIGHTSCF,
+        BasisSet.DEF2_TZVP,
+    ]
 
 
 # ---------------------------------------------------------------------------

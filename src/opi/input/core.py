@@ -320,6 +320,9 @@ class Input:
 
         The keywords are stored in the class attribute `_simple_keywords`.
 
+        Keywords are compared case-insensitively, so a keyword that only differs in case from an
+        already added one counts as a duplicate. The spelling of the first occurrence is kept.
+
         Parameters
         ----------
         *keywords : str | SimpleKeyword
@@ -388,7 +391,7 @@ class Input:
         for keyword in keywords:
             # > Convert string to simple keyword.
             if isinstance(keyword, str):
-                simple_keyword = SimpleKeyword(keyword.lower())
+                simple_keyword = SimpleKeyword(keyword)
             else:
                 simple_keyword = keyword
 
@@ -417,7 +420,7 @@ class Input:
         if not self._simple_keywords:
             return False
         if isinstance(keyword, str):
-            return SimpleKeyword(keyword.lower()) in self._simple_keywords
+            return SimpleKeyword(keyword) in self._simple_keywords
         else:
             return keyword in self._simple_keywords
 
@@ -458,7 +461,7 @@ class Input:
             If the simple keyword exists, or it was created, it is returned, else None is returned.
         """
         if isinstance(keyword, str):
-            simple_keyword: SimpleKeyword = SimpleKeyword(keyword.lower())
+            simple_keyword: SimpleKeyword = SimpleKeyword(keyword)
         else:
             simple_keyword = keyword
 
@@ -920,7 +923,8 @@ class Input:
         Merges two instances of `Input` into a new `Input`. Neither operand is modified.
 
         Every component of the input is merged on its own terms:
-            - Simple keywords are combined, dropping duplicates. Their order is not preserved.
+            - Simple keywords are concatenated, those of `self` first, dropping duplicates. The
+              order is preserved: the first occurrence of a keyword determines its position.
             - Blocks are merged per ORCA block they model, through `Input.add_blocks()`. The values of `other` take precedence.
               Every block is copied on the way in, so that the merged input shares no block
               instance with either operand.
@@ -948,14 +952,13 @@ class Input:
         # > Systematically handle all components of an Input object.
         new_input = Input()
 
-        # > First simple keywords will be handled by merging the two lists of simple keywords, dropping duplicates
-        new_keyword_list = list(
-            set(
-                (self.simple_keywords if self.simple_keywords else [])
-                + (other.simple_keywords if other.simple_keywords else [])
-            )
+        # > First simple keywords will be handled by concatenating the two lists of simple keywords,
+        # > those of `self` first. `add_simple_keywords()` drops duplicates, so the first occurrence
+        # > of a keyword determines its position.
+        new_input.add_simple_keywords(
+            *(self.simple_keywords if self.simple_keywords else []),
+            *(other.simple_keywords if other.simple_keywords else []),
         )
-        new_input.add_simple_keywords(*new_keyword_list)
 
         # > Next the blocks will be handled, since the Block already implements merge logic, the blocks will be iteratively merged based on name of block
         # > Since add_blocks() already handles the merge case, we need only to iteratively add all the blocks in self followed by those in other
