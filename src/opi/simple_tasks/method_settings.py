@@ -160,7 +160,7 @@ class DftSettings(MethodSettings):
     _name: str = "dft"
     method: typing.Annotated[SimpleKeyword, Dft] | None = None
     grid: typing.Annotated[SimpleKeyword, Grid] | None = None
-    scf_maxiter: typing.Annotated[int, "BlockScf", "maxiter"] | None = None
+    scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
     scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
     scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
     scf_stab: bool = False
@@ -220,10 +220,6 @@ class DftSettings(MethodSettings):
         If the method keyword contains '3c', the `basis_set` attribute will be set to `None`.
 
         The `DftSettings` object is then returned.
-        Parameters
-        ----------
-        data: DFTSettings
-            `DFTSettings` object given as input.
 
         Returns
         -------
@@ -237,24 +233,19 @@ class DftSettings(MethodSettings):
 
         return self
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Extend the base mapping with SCF stability analysis.
 
         Calls the parent ``map_to_input`` for all annotated fields, then
         appends ``SCFSTAB`` when ``scf_stab=True``.
 
-        Parameters
-        ----------
-        input_object : Input
-            ``Input`` object to populate.
-
         Returns
         -------
         Input
             Modified ``Input`` object.
         """
-        input_object = super().map_to_input(input_object)
+        input_object = super().map_to_input()
 
         if self.scf_stab:
             input_object.add_simple_keywords(Scf.SCFSTAB)
@@ -316,27 +307,22 @@ class SqmSettings(MethodSettings):
     )
     _name: str = "sqm"
     method: typing.Annotated[SimpleKeyword, Sqm]
-    scf_maxiter: typing.Annotated[int, "BlockScf", "maxiter"] | None = None
+    scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
     scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
     scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
     scf_stab: bool = False
     scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Extend the base mapping with SCF stability analysis.
-
-        Parameters
-        ----------
-        input_object : Input
-            ``Input`` object to populate.
 
         Returns
         -------
         Input
             Modified ``Input`` object.
         """
-        input_object = super().map_to_input(input_object)
+        input_object = super().map_to_input()
 
         if self.scf_stab:
             input_object.add_simple_keywords(Scf.SCFSTAB)
@@ -430,15 +416,15 @@ class DlpnoCcSettings(MethodSettings):
     aux_basis: typing.Annotated[SimpleKeyword, AuxBasisSet] | None = None
     pno_thresh: typing.Annotated[SimpleKeyword, PNOThresh] | None = None
     dlpno_led: bool | None = None
-    dlpno_t_cut_do: typing.Annotated[float, "BlockMdci", "tcutdo"] | None = None
-    dlono_t_cut_pno: typing.Annotated[float, "BlockMdci", "tcutpno"] | None = None
-    scf_maxiter: typing.Annotated[int, "BlockScf", "maxiter"] | None = None
+    dlpno_t_cut_do: typing.Annotated[float, "mdci", "tcutdo"] | None = None
+    dlpno_t_cut_pno: typing.Annotated[float, "mdci", "tcutpno"] | None = None
+    scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
     scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
     scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
     scf_stab: bool = False
     scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Extend the base mapping with DLPNO-specific keywords.
 
@@ -446,17 +432,12 @@ class DlpnoCcSettings(MethodSettings):
         ``dlpno_led=True``, in addition to the standard field-annotation
         mapping performed by the parent.
 
-        Parameters
-        ----------
-        input_object : Input
-            ``Input`` object to populate.
-
         Returns
         -------
         Input
             Modified ``Input`` object.
         """
-        input_object = super().map_to_input(input_object)
+        input_object = super().map_to_input()
 
         if self.scf_stab:
             input_object.add_simple_keywords(Scf.SCFSTAB)

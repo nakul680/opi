@@ -65,6 +65,7 @@ class SimpleTask(ABC, typing.Generic[_RT]):
     _task_settings: TaskSettings | None = None
     _method_settings: MethodSettings | None = None
     _input_object: Input
+    _expert_mode: bool
 
     def __init__(
         self,
@@ -86,6 +87,13 @@ class SimpleTask(ABC, typing.Generic[_RT]):
         will forego any validation of input and simply execute the task using the user-given input data. This is recommended for more experienced
         users that want to add certain simple keywords or block options that are not provided by default.
 
+        Passing `input` puts the task into expert mode: the given input takes precedence over
+        everything the settings map to, and no default settings are filled in. Settings are still
+        built from any `method`, `basis_set`, `solvation_model`, `solvent`, `task_settings` or
+        `method_settings` that are passed alongside `input`, they just lose to it wherever both
+        set the same thing. Without `input` the settings take precedence instead, so that they
+        are re-applied over any manual edit of `SimpleTask.input`.
+
         Parameters
         ----------
         method : str or SimpleKeyword, optional
@@ -105,77 +113,86 @@ class SimpleTask(ABC, typing.Generic[_RT]):
             Pre-built method settings object.  When ``method`` is also given,
             values from the shorthand parameters take precedence over fields
             already present in ``method_settings``.
+        input : Input or str, optional
+            Ready-made input, either as an ``Input`` object or as a raw ORCA
+            keyword string.  Enables expert mode: the input is not validated
+            and always takes precedence over the settings.
 
         Raises
         ------
         ValueError
             If neither ``method`` nor a ``method_settings`` object with a
-            method is provided.
+            method is provided, unless ``input`` is given.
         """
-        if input:
+        # > An input passed at init marks expert mode, in which the user is in charge: the given
+        # > input wins over the settings and no default settings are filled in.
+        self._expert_mode = input is not None
+
+        if isinstance(input, Input):
+            self._input_object = input
+        elif input is not None:
             # Raw input bypasses the typed settings system entirely — no validation.
-            if not isinstance(input, Input):
-                self._input_object: Input = Input()
-                self._input_object.add_arbitrary_string(input, pos="top")
-            else:
-                self._input_object: Input = input
-
-            self._task_settings = None
-            self._method_settings = None
-
+            self._input_object = Input()
+            self._input_object.add_arbitrary_string(input, pos="top")
         else:
-            # Get the intended TaskSettings type from type hints
-            task_settings_type = self._get_task_settings_type()
-            if isinstance(task_settings, dict):
-                self._task_settings = task_settings_type.model_validate(task_settings)
-            else:
-                # None falls back to a default instance so there's always a settings object.
-                # In the case that a TaskSettings object is passed, it will be merged with the default initializaition
-                # of the TaskSettings object. This is simply to ensure there is always a TaskSettings object.
-                self._task_settings = task_settings or task_settings_type()
+            self._input_object = Input()
 
-            resolved_method_settings: MethodSettings | None = (
-                MethodSettings(**method_settings)
-                if isinstance(method_settings, dict)
-                else method_settings
-            )
+        if isinstance(task_settings, dict):
+            # The intended TaskSettings type is taken from the type hints of the concrete task.
+            self._task_settings = self._get_task_settings_type().model_validate(task_settings)
+        elif task_settings is not None:
+            # A ready-made TaskSettings object is used as it is.
+            self._task_settings = task_settings
+        elif not self._expert_mode:
+            # None falls back to a default instance so there's always a settings object.
+            self._task_settings = self._get_task_settings_type()()
+        else:
+            # In expert mode the given input carries the task keyword, so no default is added.
+            self._task_settings = None
 
-            if method is not None:
-                # Here the type of MethodSettings class will be resolved depending on which method was selected.
-                resolved_type = MethodSettings.resolve_method_settings_type(method)
-                # MethodSettings object is created with the basic essential input parameters.
-                base_data: dict[str, typing.Any] = {
-                    k: v
-                    for k, v in {
-                        "method": method,
-                        "basis_set": basis_set,
-                        "solvation_model": solvation_model,
-                        "solvent": solvent,
-                    }.items()
-                    if v is not None
+        resolved_method_settings: MethodSettings | None = (
+            MethodSettings(**method_settings)
+            if isinstance(method_settings, dict)
+            else method_settings
+        )
+
+        if method is not None:
+            # Here the type of MethodSettings class will be resolved depending on which method was selected.
+            resolved_type = MethodSettings.resolve_method_settings_type(method)
+            # MethodSettings object is created with the basic essential input parameters.
+            base_data: dict[str, typing.Any] = {
+                k: v
+                for k, v in {
+                    "method": method,
+                    "basis_set": basis_set,
+                    "solvation_model": solvation_model,
+                    "solvent": solvent,
+                }.items()
+                if v is not None
+            }
+            if resolved_method_settings is not None:
+                # If there are other options defined over method_settings argument, they will be merged with the existing
+                # MethodSettings object here.
+                # model_extra captures plugin-defined fields absent from model_fields.
+                extra: dict[str, typing.Any] = {
+                    **resolved_method_settings.model_dump(exclude_unset=True),
+                    **(resolved_method_settings.model_extra or {}),
                 }
-                if resolved_method_settings is not None:
-                    # If there are other options defined over method_settings argument, they will be merged with the existing
-                    # MethodSettings object here.
-                    # model_extra captures plugin-defined fields absent from model_fields.
-                    extra: dict[str, typing.Any] = {
-                        **resolved_method_settings.model_dump(exclude_unset=True),
-                        **(resolved_method_settings.model_extra or {}),
-                    }
-                    # base_data last so shorthand args override method_settings fields.
-                    self._method_settings = resolved_type(**{**extra, **base_data})
-                else:
-                    # if method_settings argument is None, simple the methodSettings class with the base input parameters will be defined.
-                    self._method_settings = resolved_type(**base_data)
+                # base_data last so shorthand args override method_settings fields.
+                self._method_settings = resolved_type(**{**extra, **base_data})
             else:
-                # raise error if no method is given
-                if resolved_method_settings is None:
-                    raise ValueError(
-                        "Either 'method' or a 'method_settings' object with a method must be provided"
-                    )
-                self._method_settings = resolved_method_settings
-
-            self._input_object: Input = Input()
+                # if method_settings argument is None, simple the methodSettings class with the base input parameters will be defined.
+                self._method_settings = resolved_type(**base_data)
+        elif resolved_method_settings is not None:
+            self._method_settings = resolved_method_settings
+        elif self._expert_mode:
+            # In expert mode the given input carries the method, so none has to be provided.
+            self._method_settings = None
+        else:
+            # raise error if no method is given
+            raise ValueError(
+                "Either 'method' or a 'method_settings' object with a method must be provided"
+            )
 
     @classmethod
     def _get_task_settings_type(cls) -> type[TaskSettings]:
@@ -198,13 +215,17 @@ class SimpleTask(ABC, typing.Generic[_RT]):
     @property
     def input(self) -> Input:
         """
-        Returns the ``Input`` object for this task, with ``task_settings`` and
-        ``method_settings`` applied on top of any user modifications.
+        Returns the ``Input`` object for this task, merged from ``task_settings``,
+        ``method_settings`` and the input held by the task.
 
-        Settings are re-applied on every access so they always take precedence
-        over manual edits to the same fields.  Additions that settings do not
-        control (extra keywords, ``ncores``, arbitrary strings, …) are
-        preserved across accesses because the same ``Input`` instance is reused.
+        The merge is re-done on every access, and which side wins depends on how the
+        task was built. In expert mode — an ``input`` was passed to the constructor —
+        the task's own input is merged last and hence takes precedence over the
+        settings. Otherwise the settings are merged last, so that they are re-applied
+        over any manual edit of the fields they control.
+
+        Either way, everything the settings do not control (extra keywords, ``ncores``,
+        arbitrary strings, …) is preserved across accesses.
 
         Returns
         -------
@@ -212,9 +233,19 @@ class SimpleTask(ABC, typing.Generic[_RT]):
             The task's ``Input`` object, ready for inspection or further
             user customisation before calling ``run()``.
         """
-        if self._method_settings and self._task_settings:
-            self._task_settings.map_to_input(self._input_object)
-            self._method_settings.map_to_input(self._input_object)
+        if self._task_settings is None and self._method_settings is None:
+            # > Nothing to merge: the input is used as it is.
+            return self._input_object
+
+        settings_input = Input()
+        for setting in (self._task_settings, self._method_settings):
+            if setting:
+                settings_input = settings_input | setting.map_to_input()
+
+        if self._expert_mode:
+            self._input_object = settings_input | self._input_object
+        else:
+            self._input_object = self._input_object | settings_input
 
         return self._input_object
 

@@ -369,7 +369,7 @@ class BlockABC(BaseModel, ABC):
             return inp
 
     @classmethod
-    def get_subclass_by_name(cls, name: str) -> type["Block"]:
+    def get_subclass_by_name(cls, name: str) -> type["BlockABC"]:
         """
         Look up a ``Block`` subclass by its class name or ORCA block name.
 
@@ -384,7 +384,7 @@ class BlockABC(BaseModel, ABC):
 
         Returns
         -------
-        type[Block]
+        type[BlockABC]
             The matching subclass.
 
         Raises
@@ -392,10 +392,10 @@ class BlockABC(BaseModel, ABC):
         ValueError
             If no subclass matches ``name``.
         """
-        # Search for `Block` class by OPI name
+        # Search for `BlockABC` class by OPI name
         opi_block_name_matches = {sub.__name__.lower(): sub for sub in cls.__subclasses__()}
-        # Search for `Block` class by ORCA block name
-        orca_block_name_matches = {sub().name.lower(): sub for sub in cls.__subclasses__()}
+        # Search for `BlockABC` class by ORCA block name
+        orca_block_name_matches = {sub.name.lower(): sub for sub in cls.__subclasses__()}
         # Collect matches across both criteria
         all_matches = opi_block_name_matches.get(name.lower()) or orca_block_name_matches.get(
             name.lower()

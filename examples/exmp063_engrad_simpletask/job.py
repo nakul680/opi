@@ -6,7 +6,7 @@ from opi.input.structures import Structure
 from opi.simple_tasks import EngradResults, EngradTask
 
 
-def run_exmp058(
+def run_exmp063(
     structure: Structure | None = None, working_dir: Path = Path("RUN")
 ) -> EngradResults:
     # > if no structure is given read structure from inp.xyz
@@ -29,4 +29,4 @@ def run_exmp058(
 
 
 if __name__ == "__main__":
-    run_exmp058()
+    run_exmp063()

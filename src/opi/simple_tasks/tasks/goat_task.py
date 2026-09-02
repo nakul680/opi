@@ -17,29 +17,24 @@ class GoatSettings(TaskSettings):
 
     _name: str = "goat"
     task_keyword: typing.Annotated[SimpleKeyword, Goat] = Goat.GOAT
-    goat_maxiter: typing.Annotated[int, "BlockGoat", "maxiter"] | None = None
+    goat_maxiter: typing.Annotated[int, "goat", "maxiter"] | None = None
     goat_react: bool | None = None
     goat_diversity: bool | None = None
     goat_explore: bool | None = None
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Extend the base mapping with GOAT-specific keywords.
 
         Appends ``GOAT_REACT``, ``GOAT_DIVERSITY``, or ``GOAT_EXPLORE`` when
         the corresponding flag is ``True``.
 
-        Parameters
-        ----------
-        input_object : Input
-            ``Input`` object to populate.
-
         Returns
         -------
         Input
             Modified ``Input`` object.
         """
-        input_object = super().map_to_input(input_object)
+        input_object = super().map_to_input()
 
         if self.goat_react:
             input_object.add_simple_keywords(Goat.GOAT_REACT)

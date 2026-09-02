@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from opi.input import Input
 from opi.input.blocks import BlockScf
 from opi.input.simple_keywords import BasisSet, Dft
 from opi.input.simple_keywords.scf import Scf
@@ -150,7 +149,7 @@ def test_forcefield_drops_basis_set_with_warning() -> None:
 def test_dft_scf_stab_adds_scfstab_keyword() -> None:
     """DftSettings with scf_stab=True adds the SCFSTAB keyword to the input."""
     s = DftSettings(method="pbe", scf_stab=True)
-    inp = s.map_to_input(Input())
+    inp = s.map_to_input()
     assert inp.has_simple_keywords(Scf.SCFSTAB) == (True,)
 
 
@@ -159,7 +158,7 @@ def test_dft_scf_stab_adds_scfstab_keyword() -> None:
 def test_dft_scf_stab_false_no_scfstab_keyword() -> None:
     """DftSettings with scf_stab=False (default) does not add SCFSTAB."""
     s = DftSettings(method="pbe")
-    inp = s.map_to_input(Input())
+    inp = s.map_to_input()
     assert inp.has_simple_keywords(Scf.SCFSTAB) == (False,)
 
 
@@ -232,9 +231,9 @@ def test_block_option_stored_and_mapped(
     s = settings_cls(**settings_kwargs)
     assert getattr(s, field) == value
 
-    inp = s.map_to_input(Input())
+    inp = s.map_to_input()
     assert inp.has_blocks(BlockScf()) == (True,)
-    assert getattr(inp.blocks[BlockScf], block_attr) == value
+    assert getattr(inp.blocks["scf"], block_attr) == value
 
 
 @pytest.mark.unit

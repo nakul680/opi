@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from opi.input import Input
-from opi.input.blocks import Block
+from opi.input.blocks import BlockABC
 from opi.input.simple_keywords import SimpleKeyword, SimpleKeywordBox, SolvationModel, Solvent
 from opi.input.simple_keywords.solvation_model import SolvationModelAndSolvent
 
@@ -48,7 +48,7 @@ class Settings(BaseModel):
         combined_data = {**self.model_dump(), **other.model_dump(exclude_unset=True)}
         return self.__class__(**combined_data)
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Function to map all information held in `Settings` class to an `Input` class object. The function receives an
         `Input` object , which may or may not be already populated, after which the function uses the type hints of
@@ -58,16 +58,15 @@ class Settings(BaseModel):
 
         The modified `Input` object is then returned.
 
-        Parameters
-        ----------
-        input_object: Input
-            `Input` object to be modified
 
         Returns
         -------
         Input
             Modified `Input` object.
         """
+        # initialize an empty input object which will reflect the input options selected by the user
+        input_object = Input()
+
         # include_extras=True preserves Annotated metadata, which encodes how each field maps to ORCA input
         hints = typing.get_type_hints(self.__class__, include_extras=True)
 
@@ -91,15 +90,15 @@ class Settings(BaseModel):
 
                 case (validator, key):
                     # Two-element metadata: field maps to an attribute on a block
-                    block_type = Block.get_subclass_by_name(validator)
+                    block_type = self._get_block_class(field_name, validator)
                     block_instant = block_type(**{key: value})
 
-                    block_exists, *_ = input_object.has_blocks(block_type)  # type:ignore
-                    if not block_exists:
+                    # `get_block()` returns None for a block that has not been added yet.
+                    existing_block = input_object.get_block(block_type)
+                    if existing_block is None:
                         input_object.add_blocks(block_instant)
                     else:
                         # Merge with any existing block of this type so no other attributes are lost
-                        existing_block = input_object.get_blocks(block_type)[block_type]
                         new_block = block_instant | existing_block
                         input_object.add_blocks(new_block, overwrite=True)
 
@@ -119,6 +118,37 @@ class Settings(BaseModel):
         for field_name, value in self.model_dump().items():
             lines.append(f"  {field_name}: {value}")
         return "\n".join(lines)
+
+    @staticmethod
+    def _get_block_class(field_name: str, block_name: Any) -> type["BlockABC"]:
+        """
+        Resolve the ORCA block name a field is annotated with into its `BlockABC` subclass.
+
+        Parameters
+        ----------
+        field_name: str
+            Name of the field, used for the error message only.
+        block_name: Any
+            Name of the ORCA block, as taken from the metadata of the field annotation.
+
+        Returns
+        -------
+        type[BlockABC]
+            The `BlockABC` subclass that implements the block.
+
+        Raises
+        ------
+        ValueError
+            If `block_name` is not the name of an ORCA block that OPI implements.
+        """
+        block_class = BlockABC.get_block_class(block_name) if isinstance(block_name, str) else None
+        if block_class is None:
+            raise ValueError(
+                f"'{field_name}' is annotated with {block_name!r}, "
+                "which is not the name of an ORCA block implemented by OPI."
+            )
+
+        return block_class
 
     @staticmethod
     def _get_field_metadata(hint: Any) -> tuple[Any, ...]:
@@ -149,7 +179,7 @@ class Settings(BaseModel):
 
     @staticmethod
     def _resolve_field_value(
-        value: Any, metadata: tuple[type["SimpleKeywordBox"]] | tuple[str, str]
+        field_name: str, value: Any, metadata: tuple[type["SimpleKeywordBox"]] | tuple[str, str]
     ) -> Any:
         """
         Function to translate user input into OPI compatible types. This is done using the metadata of the type
@@ -177,14 +207,16 @@ class Settings(BaseModel):
 
         Example
         =======
-        block_option: typing.Annotated[int, BlockScf, "maxiter"]
+        block_option: typing.Annotated[int, "scf", "maxiter"]
 
-        In this case the metadata is (BlockScf, "maxiter"). The first value indicates which OPI Block class the value belongs to,
+        In this case the metadata is ("scf", "maxiter"). The first value indicates the ORCA block the value belongs to,
         while the second value indicates which field from the Block class correlates to this block option.
 
 
         Parameters
         ----------
+        field_name: str
+            Name of the field, used for error messages only.
         value: Any
             User input value.
         metadata: tuple
@@ -212,7 +244,7 @@ class Settings(BaseModel):
                 if not isinstance(key, str):
                     raise TypeError(f"Expected str key, got {type(key)}")
 
-                block_cls = Block.get_subclass_by_name(str(validator))
+                block_cls = Settings._get_block_class(field_name, validator)
                 instance = block_cls.model_validate({key: value})
                 return getattr(instance, str(key))
 
@@ -309,7 +341,7 @@ class Settings(BaseModel):
 
         hint = hints[info.field_name]
         metadata = cls._get_field_metadata(hint)
-        return cls._resolve_field_value(value, metadata)
+        return cls._resolve_field_value(info.field_name, value, metadata)
 
     @model_validator(mode="after")
     def cross_validate(self) -> "Settings":

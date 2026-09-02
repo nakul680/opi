@@ -23,9 +23,9 @@ class OptSettings(TaskSettings):
     optrigid: bool = False
     opt_h: bool = False
     lopt: bool = False
-    opt_maxiter: typing.Annotated[int, "BlockGeom", "maxiter"] | None = None
+    opt_maxiter: typing.Annotated[int, "geom", "maxiter"] | None = None
 
-    def map_to_input(self, input_object: Input) -> Input:
+    def map_to_input(self) -> Input:
         """
         Extend the base mapping with optimisation-mode keywords.
 
@@ -33,17 +33,12 @@ class OptSettings(TaskSettings):
         ``OPT_H`` / ``L_OPT`` / ``L_OPT_H`` based on the ``opt_h`` and
         ``lopt`` flags.
 
-        Parameters
-        ----------
-        input_object : Input
-            ``Input`` object to populate.
-
         Returns
         -------
         Input
             Modified ``Input`` object.
         """
-        input_object = super().map_to_input(input_object)
+        input_object = super().map_to_input()
 
         if self.optrigid:
             input_object.add_simple_keywords(Opt.RIGIDBODYOPT)

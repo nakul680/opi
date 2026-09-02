@@ -84,9 +84,3 @@ python3 job.py
 - exmp061_freq_simpletask: TPSS/def2-SVP frequency calculation using the `FreqTask` functionality
 - exmp062_opt_simpletask: B3LYP/def2-SVP geometry optimization with CPCM(water) using the `OptTask` functionality
 - exmp063_engrad_simpletask: r²SCAN-3c energy & gradient calculation using the `EngradTask` functionality
-- exmp063_opencosmors: Run OpenCOSMO-RS task
-- exmp064_singlepoint_simpletask: B3LYP/def2-SVP single-point with CPCM(water) using the `SinglePointTask` functionality
-- exmp065_engrad_simpletask: r²SCAN-3c energy & gradient calculation using the `EngradTask` functionality
-- exmp066_opt_simpletask: B3LYP/def2-SVP geometry optimization with CPCM(water) using the `OptTask` functionality
-- exmp067_freq_simpletask: TPSS/def2-SVP frequency calculation using the `FreqTask` functionality
-- exmp068_goat_simpletask: GFN2-xTB GOAT conformer search using the `GoatTask` functionality

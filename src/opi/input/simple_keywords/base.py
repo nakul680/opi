@@ -17,6 +17,16 @@ class SimpleKeywordBox:
         Matching is case-insensitive and checks the keyword value, the
         attribute name, and the optional alias — in that order.
 
+        Parameters
+        ----------
+        s : str
+
+
+        Returns
+        -------
+        SimpleKeyword
+            Simple keyword from string
+
         Raises
         ------
         ValueError
@@ -55,6 +65,17 @@ class SimpleKeywordBox:
 
         Accepts a bare string or an existing ``SimpleKeyword`` (whose ``.keyword``
         string is used for the lookup).
+
+
+        Parameters
+        ----------
+        inp: SimpleKeyword | str
+
+
+        Returns
+        -------
+        SimpleKeyword
+            Found simple keyword
 
         Raises
         ------
@@ -103,7 +124,7 @@ class SimpleKeyword:
         keyword : str
             Keyword string for the ORCA input line. Leading/trailing whitespace
             is stripped; an empty string raises ``ValueError``.
-        alias : str, optional
+        alias : str | list[str], optional
             Alternative lookup name for ``SimpleKeywordBox.from_string``.
         """
         self.keyword = keyword
