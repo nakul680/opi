@@ -245,6 +245,25 @@ class Solvent(StrEnum):
 
     @classmethod
     def find_keyword(cls, key: str) -> str:
+        """
+        Function to find member of this class using a key as argument.
+
+        Parameters
+        ----------
+        key: str
+            String used to find keyword
+
+        Returns
+        -------
+        str
+            Found keyword
+
+        Raises
+        ------
+        ValueError
+            If the given key is not found in this class
+
+        """
         norm = key.lower()
         for member in cls:
             if member.value.lower() == norm or member.name.lower() == norm:

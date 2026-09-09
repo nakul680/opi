@@ -375,7 +375,7 @@ class BlockABC(BaseModel, ABC):
 
         Matching is case-insensitive and checks both the Python class name
         (e.g. ``"BlockScf"``) and the ORCA block name returned by the
-        subclass's ``name`` property (e.g. ``"scf"``).
+        subclass's ``get_block_name()`` (e.g. ``"scf"``).
 
         Parameters
         ----------
@@ -395,7 +395,13 @@ class BlockABC(BaseModel, ABC):
         # Search for `BlockABC` class by OPI name
         opi_block_name_matches = {sub.__name__.lower(): sub for sub in cls.__subclasses__()}
         # Search for `BlockABC` class by ORCA block name
-        orca_block_name_matches = {sub.name.lower(): sub for sub in cls.__subclasses__()}
+        # > `get_block_name()` returns an already-normalized name, or None for a subclass that
+        # > defines no class-level `_name` — those cannot be looked up by ORCA block name.
+        orca_block_name_matches = {
+            block_name: sub
+            for sub in cls.__subclasses__()
+            if (block_name := sub.get_block_name()) is not None
+        }
         # Collect matches across both criteria
         all_matches = opi_block_name_matches.get(name.lower()) or orca_block_name_matches.get(
             name.lower()

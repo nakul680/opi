@@ -20,7 +20,7 @@ class SimpleKeywordBox:
         Parameters
         ----------
         s : str
-
+            String used to create SimpleKeyword object
 
         Returns
         -------
@@ -66,11 +66,10 @@ class SimpleKeywordBox:
         Accepts a bare string or an existing ``SimpleKeyword`` (whose ``.keyword``
         string is used for the lookup).
 
-
         Parameters
         ----------
-        inp: SimpleKeyword | str
-
+        inp : SimpleKeyword | str
+            Input that is resolved into SimpleKeyword.
 
         Returns
         -------
