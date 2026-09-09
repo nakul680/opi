@@ -1,5 +1,5 @@
 import typing
-from functools import partial
+from functools import partialmethod
 from pathlib import Path
 
 import pytest
@@ -16,9 +16,8 @@ from opi.simple_tasks import (
     SinglePointResults,
     SinglePointTask,
     SqmSettings,
-    simple_task,
 )
-from opi.simple_tasks.simple_task import TaskResults
+from opi.simple_tasks.simple_task import SimpleTask, TaskResults
 
 """
 Unit tests for the method-specific job-completion checks wired up in
@@ -191,13 +190,17 @@ def structure() -> Structure:
 def no_orca(monkeypatch: pytest.MonkeyPatch) -> None:
     """Skip contacting the ORCA binary.
 
-    `SimpleTask.run()` builds its own `Calculator` internally without exposing
-    `version_check`, so the `version_check=False` convention used elsewhere in
-    this suite (e.g. `test_input_blocks.py`) is applied by patching the name
-    `simple_task` resolves at call time; `write_and_run` is stubbed separately
-    since it always executes ORCA regardless of `version_check`.
+    `SimpleTask.run()` does not expose the `version_check` of the `Calculator` that
+    `SimpleTask.make_calculator()` builds, so the `version_check=False` convention used
+    elsewhere in this suite (e.g. `test_input_blocks.py`) is applied by binding it onto
+    `make_calculator`; `write_and_run` is stubbed separately since it always executes
+    ORCA regardless of `version_check`.
     """
-    monkeypatch.setattr(simple_task, "Calculator", partial(Calculator, version_check=False))
+    monkeypatch.setattr(
+        SimpleTask,
+        "make_calculator",
+        partialmethod(SimpleTask.make_calculator, version_check=False),
+    )
     monkeypatch.setattr(Calculator, "write_and_run", lambda self: True)
 
 

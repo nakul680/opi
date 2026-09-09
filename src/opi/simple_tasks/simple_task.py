@@ -407,48 +407,36 @@ class SimpleTask(ABC, typing.Generic[_RT]):
 
         return cls(input=inp)
 
-    def run(
+    def prepare_working_dir(
         self,
-        basename: str,
-        structure: Structure | BaseStructureFile,
         working_dir: Path | str | os.PathLike[str] = Path("RUN"),
-        ncores: int | None = None,
-        memory: int | None = None,
-        moinp: Path | None = None,
         strict: bool = False,
-    ) -> _RT:
+    ) -> Path:
         """
-        Execute the computational task with the given structure and settings.
+        Prepare the directory in which the calculation will be executed.
 
-        This method prepares the working directory, configures the calculation
-        input parameters, and runs the calculation using an external calculator.
-        The results are returned as an instance of the configured results type.
+        Without ``strict``, the directory is deleted and recreated, so that ORCA always starts
+        from an empty directory. This is destructive: any existing content of ``working_dir``
+        is lost. With ``strict``, nothing is written and the directory is only checked, so that
+        the output of an earlier calculation cannot be overwritten by accident.
 
         Parameters
         ----------
-        basename : str
-            Base name for the calculation.
-        structure : Structure or BaseStructureFile
-            The input structure for the calculation.
-        working_dir : pathlib.Path, optional
-            Directory in which the calculation will be executed.
-            If it exists, it will be removed and recreated. Defaults to "RUN".
-        ncores : int, optional
-            Number of CPU cores to use for the calculation. Overrides the default
-            value in the input object if provided.
-        memory : int, optional
-            Amount of memory to allocate for the calculation. Overrides the default
-            value in the input object if provided.
-        moinp : pathlib.Path, optional
-            Path to a molecular orbital input file. Overrides the default if provided.
+        working_dir : pathlib.Path or str or os.PathLike, optional
+            Directory in which the calculation will be executed. Defaults to "RUN".
         strict : bool, optional
-            Controls whether working directory will be created/overwritten. Defaults to False.
+            If True, ``working_dir`` must already exist and be empty. If False (the default),
+            ``working_dir`` is deleted and recreated. Defaults to False.
 
         Returns
         -------
-        TaskResults
-            An instance of the configured results type containing the results
-            of the calculation.
+        Path
+            The prepared working directory.
+
+        Raises
+        ------
+        ValueError
+            If ``strict`` is True and ``working_dir`` does not exist or is not empty.
         """
         working_dir = Path(working_dir)
 
@@ -471,25 +459,203 @@ class SimpleTask(ABC, typing.Generic[_RT]):
                 shutil.rmtree(working_dir)
             working_dir.mkdir()
 
-        inp = self.input
+        return working_dir
 
+    def make_input(
+        self,
+        ncores: int | None = None,
+        memory: int | None = None,
+        moinp: Path | None = None,
+    ) -> Input:
+        """
+        Build the ``Input`` for a single run of this task.
+
+        Returns a detached copy of ``SimpleTask.input`` with the per-run resource overrides
+        applied. The task's own input is left untouched, so that ``ncores``, ``memory`` and
+        ``moinp`` do not stick to the task and leak into later runs. Nothing is written to
+        disk.
+
+        Parameters
+        ----------
+        ncores : int, optional
+            Number of CPU cores to use. Overrides the value held by the task's input.
+        memory : int, optional
+            Amount of memory to allocate. Overrides the value held by the task's input.
+        moinp : pathlib.Path, optional
+            Path to a molecular orbital input file. Overrides the value held by the task's
+            input.
+
+        Returns
+        -------
+        Input
+            A new ``Input`` object, ready to be handed to a ``Calculator``.
+        """
+        # > Merging with an empty input yields a copy that shares no block with the task's own
+        # > input, so that the overrides below cannot leak back into the task.
+        input_object = self.input | Input()
+
+        # > These are assigned instead of merged in, because `Input.__or__()` counts an
+        # > `ncores` or `memory` of 0 as unset, whereas an explicit 0 is passed on here.
         if ncores is not None:
-            inp.ncores = ncores
+            input_object.ncores = ncores
 
         if memory is not None:
-            inp.memory = memory
+            input_object.memory = memory
 
         if moinp is not None:
-            inp.moinp = moinp
+            input_object.moinp = moinp
 
-        calc = Calculator(basename, working_dir=working_dir)
-        calc.structure = structure
-        calc.input = inp
+        return input_object
 
-        calc.write_and_run()
+    def make_calculator(
+        self,
+        basename: str,
+        structure: Structure | BaseStructureFile,
+        working_dir: Path | str | os.PathLike[str] = Path("RUN"),
+        ncores: int | None = None,
+        memory: int | None = None,
+        moinp: Path | None = None,
+        *,
+        version_check: bool = True,
+    ) -> Calculator:
+        """
+        Assemble the ``Calculator`` for a single run of this task, without executing it.
 
+        ``working_dir`` must already exist, since ``Calculator`` rejects a directory that does
+        not; use ``SimpleTask.prepare_working_dir()`` to create it. Neither the ORCA input file
+        nor any other file is written here, so that the calculation can be inspected or
+        modified before it is started::
+
+            working_dir = task.prepare_working_dir("RUN")
+            calculator = task.make_calculator("job", structure, working_dir)
+            calculator.write_input()
+            # > inspect or edit RUN/job.inp, then:
+            calculator.run()
+
+        Parameters
+        ----------
+        basename : str
+            Base name for the calculation.
+        structure : Structure or BaseStructureFile
+            The input structure for the calculation.
+        working_dir : pathlib.Path or str or os.PathLike, optional
+            Directory in which the calculation will be executed. Must already exist.
+            Defaults to "RUN".
+        ncores : int, optional
+            Number of CPU cores to use. Overrides the value held by the task's input.
+        memory : int, optional
+            Amount of memory to allocate. Overrides the value held by the task's input.
+        moinp : pathlib.Path, optional
+            Path to a molecular orbital input file. Overrides the value held by the task's
+            input.
+        version_check : bool, optional
+            Whether the ``Calculator`` checks the version of the ORCA binary on construction.
+            Defaults to True.
+
+        Returns
+        -------
+        Calculator
+            A ``Calculator`` with the structure and the input of this task attached.
+        """
+        calculator = Calculator(basename, working_dir=working_dir, version_check=version_check)
+        calculator.structure = structure
+        calculator.input = self.make_input(ncores=ncores, memory=memory, moinp=moinp)
+
+        return calculator
+
+    def execute(self, calculator: Calculator) -> bool:
+        """
+        Write the ORCA input file and run ORCA.
+
+        This is the single point at which ORCA is invoked, so that subclasses can change how a
+        calculation is carried out — running more than one ORCA job, or handing the job to a
+        queue — without reimplementing the rest of ``SimpleTask.run()``.
+
+        Parameters
+        ----------
+        calculator : Calculator
+            The calculator to execute, as built by ``SimpleTask.make_calculator()``.
+
+        Returns
+        -------
+        bool
+            Whether ORCA terminated normally.
+        """
+        return calculator.write_and_run()
+
+    def make_results(self, calculator: Calculator) -> _RT:
+        """
+        Wrap a finished calculation in the results type of this task.
+
+        Parameters
+        ----------
+        calculator : Calculator
+            The calculator that ran the calculation.
+
+        Returns
+        -------
+        TaskResults
+            An instance of the configured results type containing the results of the
+            calculation.
+        """
         method_family = type(self.method_settings) if self.method_settings else MethodSettings
-        return self._results_type(calculator=calc, _method_family=method_family)
+
+        return self._results_type(calculator=calculator, _method_family=method_family)
+
+    def run(
+        self,
+        basename: str,
+        structure: Structure | BaseStructureFile,
+        working_dir: Path | str | os.PathLike[str] = Path("RUN"),
+        ncores: int | None = None,
+        memory: int | None = None,
+        moinp: Path | None = None,
+        strict: bool = False,
+    ) -> _RT:
+        """
+        Execute the computational task with the given structure and settings.
+
+        This method prepares the working directory, configures the calculation
+        input parameters, and runs the calculation using an external calculator.
+        The results are returned as an instance of the configured results type.
+
+        The work is delegated to four steps, each of which can be overridden on its own:
+        ``SimpleTask.prepare_working_dir()`` prepares the working directory,
+        ``SimpleTask.make_calculator()`` assembles the ``Calculator`` and builds its input
+        through ``SimpleTask.make_input()``, ``SimpleTask.execute()`` runs ORCA, and
+        ``SimpleTask.make_results()`` wraps the finished calculation.
+
+        Parameters
+        ----------
+        basename : str
+            Base name for the calculation.
+        structure : Structure or BaseStructureFile
+            The input structure for the calculation.
+        working_dir : pathlib.Path or str or os.PathLike, optional
+            Directory in which the calculation will be executed. Defaults to "RUN".
+        ncores : int, optional
+            Number of CPU cores to use for the calculation. Overrides the default
+            value in the input object if provided.
+        memory : int, optional
+            Amount of memory to allocate for the calculation. Overrides the default
+            value in the input object if provided.
+        moinp : pathlib.Path, optional
+            Path to a molecular orbital input file. Overrides the default if provided.
+        strict : bool, optional
+            If True, ``working_dir`` must already exist and be empty. If False (the default),
+            ``working_dir`` is deleted and recreated, so any existing content is lost.
+
+        Returns
+        -------
+        TaskResults
+            An instance of the configured results type containing the results
+            of the calculation.
+        """
+        working_dir = self.prepare_working_dir(working_dir, strict=strict)
+        calculator = self.make_calculator(basename, structure, working_dir, ncores, memory, moinp)
+        self.execute(calculator)
+
+        return self.make_results(calculator)
 
     def restart(
         self,
@@ -574,7 +740,14 @@ class SimpleTask(ABC, typing.Generic[_RT]):
         else:
             moinp = moinp if moinp else prev_calc.input.moinp
 
-        return self.run(basename, struct, working_dir, ncores, memory, moinp)
+        return self.run(
+            basename,
+            struct,
+            working_dir=working_dir,
+            ncores=ncores,
+            memory=memory,
+            moinp=moinp,
+        )
 
 
 class TaskResults(ABC):
