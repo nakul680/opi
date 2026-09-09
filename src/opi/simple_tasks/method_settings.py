@@ -493,5 +493,5 @@ class DlpnoCcSettings(MethodSettings):
 
     @classmethod
     def check_convergence(cls, output: Output) -> bool:
-        """``True`` if the SCF converged."""
+        """``True`` if the SCF and the coupled-cluster iterations both converged."""
         return output.scf_converged() and output.cc_converged()

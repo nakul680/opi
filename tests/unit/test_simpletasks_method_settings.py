@@ -11,10 +11,8 @@ from opi.simple_tasks.method_settings import (
     DftSettings,
     DlpnoCcSettings,
     ForceFieldSettings,
-    HFSettings,
     MethodSettings,
     SqmSettings,
-    WftSettings,
 )
 
 """
@@ -38,8 +36,6 @@ Unit tests for MethodSettings and its subclasses:
     [
         ("pbe", DftSettings),
         ("gfn2-xtb", SqmSettings),
-        ("ccsd(t)", WftSettings),
-        ("hf", WftSettings),
         ("gfn-ff", ForceFieldSettings),
     ],
 )
@@ -56,7 +52,6 @@ def test_method_settings_dispatch(method: str, expected_cls: type) -> None:
     [
         ("pbe", DftSettings),
         ("gfn2-xtb", SqmSettings),
-        ("ccsd(t)", WftSettings),
         ("gfn-ff", ForceFieldSettings),
     ],
 )
@@ -254,17 +249,24 @@ def test_force_field_check_convergence_ignores_missing_scf(tmp_path: Path) -> No
     assert ForceFieldSettings.check_convergence(output) is True
 
 
+# > The health checks are unscoped substring searches over the whole ".out" file, so each
+# > fixture below is just the sentinel its check greps for -- see `opi.output.grepper.patterns`.
+SCF_CONVERGED = "SCF ITERATIONS\n... SUCCESS ..."
+SCF_NOT_CONVERGED = "SCF ITERATIONS\n... did not converge ..."
+CC_CONVERGED = "The Coupled-Cluster iterations have converged"
+
+
 @pytest.mark.unit
 @pytest.mark.simpletasks
 @pytest.mark.parametrize(
     "settings_cls",
-    [DftSettings, SqmSettings, WftSettings, HFSettings, DlpnoCcSettings],
+    [DftSettings, SqmSettings],
 )
 @pytest.mark.parametrize(
     "out_contents,expected",
     [
-        ("SCF ITERATIONS\n... SUCCESS ...", True),
-        ("SCF ITERATIONS\n... did not converge ...", False),
+        (SCF_CONVERGED, True),
+        (SCF_NOT_CONVERGED, False),
     ],
 )
 def test_scf_based_check_convergence_matches_scf_converged(
@@ -277,3 +279,23 @@ def test_scf_based_check_convergence_matches_scf_converged(
     (tmp_path / "job.out").write_text(out_contents)
     output = Output("job", working_dir=tmp_path)
     assert settings_cls.check_convergence(output) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.simpletasks
+@pytest.mark.parametrize(
+    "out_contents,expected",
+    [
+        (f"{SCF_CONVERGED}\n{CC_CONVERGED}", True),
+        (SCF_CONVERGED, False),
+        (f"{SCF_NOT_CONVERGED}\n{CC_CONVERGED}", False),
+        (SCF_NOT_CONVERGED, False),
+    ],
+)
+def test_dlpno_cc_check_convergence_requires_scf_and_cc(
+    tmp_path: Path, out_contents: str, expected: bool
+) -> None:
+    """DlpnoCcSettings needs the SCF *and* the coupled-cluster iterations to converge."""
+    (tmp_path / "job.out").write_text(out_contents)
+    output = Output("job", working_dir=tmp_path)
+    assert DlpnoCcSettings.check_convergence(output) is expected

@@ -24,8 +24,8 @@ Unit tests for the method-specific job-completion checks wired up in
 `TaskResults.status` / `OptResults.status`:
 - TaskResults.status combines Output.terminated_normally() with
   MethodSettings.check_convergence()
-- OptResults.status combines Output.geometry_optimization_converged() with
-  MethodSettings.check_convergence() instead of terminated_normally()
+- OptResults.status adds Output.geometry_optimization_converged() on top of
+  TaskResults.status, so it keeps the terminated_normally() requirement
 - SimpleTask.run() picks the method family (or falls back to the base
   MethodSettings when raw `input=` bypassed the typed settings system) and
   threads it through to the returned TaskResults
@@ -166,14 +166,14 @@ def test_opt_status_true_for_forcefield_without_scf(
 
 @pytest.mark.unit
 @pytest.mark.simpletasks
-def test_opt_status_does_not_use_terminated_normally(
+def test_opt_status_requires_terminated_normally(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """OptResults.status ignores terminated_normally(): 'HURRAY' alone is enough."""
+    """OptResults.status keeps the terminated_normally() requirement of TaskResults.status."""
     _patch_output(monkeypatch, tmp_path, OPT_CONVERGED)
     results = _make_results(OptResults, MethodSettings)
     assert results.output.terminated_normally() is False
-    assert results.status is True
+    assert results.status is False
 
 
 # ---------------------------------------------------------------------------

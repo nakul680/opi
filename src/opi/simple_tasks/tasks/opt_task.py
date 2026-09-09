@@ -82,11 +82,8 @@ class OptResults(TaskResults):
 
     @property
     def status(self) -> bool:
-        return (
-            super().status
-            and self.output.geometry_optimization_converged()
-            and self._method_family.check_convergence(self.output)
-        )
+        """``True`` if the job passes ``TaskResults.status`` and the geometry converged."""
+        return super().status and self.output.geometry_optimization_converged()
 
 
 class OptTask(SimpleTask[OptResults]):
