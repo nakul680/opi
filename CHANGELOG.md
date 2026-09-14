@@ -19,12 +19,10 @@
 - Add the keyword `dumpactints` to `BlockOutput` (#245).
 - Added fallback keyword argument for `get_final_energy`, `get_gradient`, and `get_structure` that allows to parse these properties from the `.out` file if no JSON output is available (#237).
 - Added `get_frequencies`, `get_imaginary_frequencies`, `is_pes_minimum`, and `is_pes_transition_state` to the `Output` class (#247).
-- Added a `notebooks` dependency group and a `notebook_tests` nox session, so the documentation notebooks can be executed as tests.
-- Added `--notebook-summary` and `--notebook-artifacts-dir` pytest options, which write a machine-readable summary of a notebook run and retain the working directory of failed notebooks.
-- Added `scripts/slurm/` with a cron-triggered SLURM job for running the documentation notebooks weekly.
+- Added `scripts/run_notebooks.py`, which executes the documentation notebooks locally or as a SLURM job array and writes a machine-readable summary of the run.
+- Added a `notebooks` dependency group and a `notebooks` nox session for the above.
 
 ### Changed
-- The notebook test is now parametrized over the individual notebooks, reporting one test result per notebook instead of a single aggregated one.
 - Refactored methods from Runner into BaseRunner (#193)
 
 ### Deprecated

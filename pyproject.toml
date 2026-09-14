@@ -107,7 +107,6 @@ docs = [
 notebooks = [
     "ipykernel>=6.29,<8",
     "nbclient>=0.10,<1",
-    "nbconvert>=7.16.6,<8",
     "nbformat>=5.10.4,<6",
     # > The notebooks themselves run `!{sys.executable} -m pip install ...`.
     # > uv-created environments have no pip, so it has to be an explicit dependency.
@@ -138,7 +137,6 @@ markers = [
     "unit: unit tests",
     "json_files: Export JSON files with --update-json-files",
     "out_files: Export .out fixture files with --update-out-files",
-    "notebooks: tests that run Jupyter notebooks",
 ]
 
 
@@ -161,7 +159,7 @@ include = [
     "src/**/*.py",
     "tests/**/*.py",
     "examples/**/*.py",
-    "scripts/**/*.py"
+    "scripts/**/*.py",
 ]
 # > Default max line-length: 100 chars
 line-length = 100
