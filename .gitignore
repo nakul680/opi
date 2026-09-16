@@ -182,5 +182,3 @@ _version.py
 docs/contents/api
 docs/contents/scripts/*.sha256
 
-# Notebook test runs (scripts/run_notebooks.py)
-notebook-runs/

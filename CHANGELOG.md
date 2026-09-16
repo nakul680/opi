@@ -19,8 +19,6 @@
 - Add the keyword `dumpactints` to `BlockOutput` (#245).
 - Added fallback keyword argument for `get_final_energy`, `get_gradient`, and `get_structure` that allows to parse these properties from the `.out` file if no JSON output is available (#237).
 - Added `get_frequencies`, `get_imaginary_frequencies`, `is_pes_minimum`, and `is_pes_transition_state` to the `Output` class (#247).
-- Added `scripts/run_notebooks.py`, which executes the documentation notebooks locally or as a SLURM job array and writes a machine-readable summary of the run.
-- Added a `notebooks` dependency group and a `notebooks` nox session for the above.
 
 ### Changed
 - Refactored methods from Runner into BaseRunner (#193)
