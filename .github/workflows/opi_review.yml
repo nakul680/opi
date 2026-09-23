@@ -1,0 +1,102 @@
+name: PR convention review (opi-review)
+
+# > Runs the `.claude/skills/opi-review` skill on every PR to main and posts its report as a
+# > single PR comment that is updated on each push. The review is read-only: Claude may only run
+# > `nox -t pr_check` and git plumbing; posting the comment is done by a separate step.
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+concurrency:
+  group: opi-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  opi-review:
+    # > Fork PRs cannot read repository secrets, and draft PRs are not reviewed yet.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    env:
+      CLAUDE_JOB_DIR: ${{ github.workspace }}/../claude-job
+
+    steps:
+      - name: Check out PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          # > Full history so the skill can find the merge base with main.
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch --no-tags origin "${{ github.base_ref }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Prepare nox environment
+        run: |
+          # > The skill calls `.venv/bin/nox`; only the dev group (nox) is needed there.
+          uv sync --only-group dev
+          # > Build the pr_check session venvs up front so the review does not spend turns on it.
+          .venv/bin/nox -t pr_check --install-only --no-stop-on-first-error
+          mkdir -p "$CLAUDE_JOB_DIR/tmp"
+
+      - name: Run opi-review
+        id: review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            /opi-review origin/${{ github.base_ref }}
+
+            You are running non-interactively in CI for PR #${{ github.event.pull_request.number }}
+            of ${{ github.repository }}. The PR head is checked out; review exactly the changes in
+            `git diff origin/${{ github.base_ref }}...HEAD`. Do not post anything to GitHub
+            yourself — your final message is posted verbatim as the PR comment, so make it the
+            complete report in GitHub-flavored markdown and nothing else.
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Skill,Task,Agent,Read,Grep,Glob,Bash(.venv/bin/nox -t pr_check:*),Bash(git diff:*),Bash(git show:*),Bash(git log:*),Bash(git status:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(git rev-parse:*)"
+
+      - name: Post review comment
+        if: always() && steps.review.outputs.execution_file != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # > The execution file is a JSON array of SDK messages (or one message per line); the
+          # > final `result` message carries the report.
+          report=$(jq -rs '[.[] | if type == "array" then .[] else . end | select(.type == "result")]
+            | last | .result // empty' "$EXECUTION_FILE")
+          if [ -z "$report" ]; then
+            report="_opi-review did not produce a report — see the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})._"
+          fi
+          {
+            echo "## opi-review — convention review"
+            echo
+            echo "<sub>Commit ${SHA:0:7} · automated, read-only · does not review logic</sub>"
+            echo
+            echo "$report"
+          } > "$RUNNER_TEMP/review.md"
+          # > Keep one comment per PR: edit the bot's last comment, or create it on the first run.
+          gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/review.md" --edit-last \
+            || gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/review.md"
