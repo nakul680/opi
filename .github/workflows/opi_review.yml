@@ -1,13 +1,15 @@
 name: PR convention review (opi-review)
 
-# > Runs the `.claude/skills/opi-review` skill on every PR to main and posts its report as a
-# > single PR comment that is updated on each push. The review is read-only: Claude may only run
+# > Runs the `.claude/skills/opi-review` skill once per review round — whenever a review is
+# > requested (or re-requested) on a PR to main — and posts its report as a single PR comment
+# > that is updated each round. The review is read-only: Claude may only run
 # > `nox -t pr_check` and git plumbing; posting the comment is done by a separate step.
 
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, synchronize, reopened, ready_for_review ]
+    # > One event per requested reviewer; the concurrency group collapses them into one run.
+    types: [ review_requested ]
 
 concurrency:
   group: opi-review-${{ github.event.pull_request.number }}
