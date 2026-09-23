@@ -1,7 +1,9 @@
 name: PR convention review (opi-review)
 
 # > Runs the `.claude/skills/opi-review` skill once per review round — whenever a review is
-# > requested (or re-requested) on a PR to main — and keeps its report in a single PR comment.
+# > requested (or re-requested) on a PR to main, or the `opi-review` label is added to it — and
+# > keeps its report in a single PR comment. The label is removed again after the run, so adding
+# > it once more starts the next round.
 # > The first round is a fresh review. Later rounds run `--recheck` against the findings the
 # > previous round left open; once none are left, the next round is a fresh review again.
 # > Open findings are carried between rounds in a hidden state block inside that comment.
@@ -12,7 +14,7 @@ on:
   pull_request:
     branches: [ "main" ]
     # > One event per requested reviewer; the concurrency group collapses them into one run.
-    types: [ review_requested ]
+    types: [ review_requested, labeled ]
 
 concurrency:
   group: opi-review-${{ github.event.pull_request.number }}
@@ -22,6 +24,7 @@ jobs:
   opi-review:
     # > Fork PRs cannot read repository secrets, and draft PRs are not reviewed yet.
     if: >-
+      (github.event.action == 'review_requested' || github.event.label.name == 'opi-review') &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       !github.event.pull_request.draft
     runs-on: ubuntu-latest
@@ -180,3 +183,7 @@ jobs:
           else
             gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file "$body_file"
           fi
+
+      - name: Remove trigger label
+        if: always() && github.event.action == 'labeled'
+        run: gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label opi-review
