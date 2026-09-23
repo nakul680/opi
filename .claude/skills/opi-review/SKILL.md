@@ -156,7 +156,8 @@ Two quirks worth knowing:
 No `pr_check` session reads `CHANGELOG.md`, `docs/**`, `README.md`, or any `.md` prose.
 `tests/` gets ruff but **no mypy and no codespell**. Docstring *examples* are never executed by
 any session, so a sample that would now raise is invisible to CI. This is where the reading pass
-earns its keep, and why a green nox run is not a clean review — say both things explicitly.
+earns its keep, and why a green nox run alone is not a clean review — do the reading pass before
+calling it clean.
 
 ### Attributing nox findings
 
@@ -275,6 +276,7 @@ unused imports, typing, spelling in `src/opi`, dead code.
 6. **Naming** — ambiguity between related names, names that contradict their type, shadowed
    builtins, consistency with the established spelling elsewhere in the repo.
 7. **Spelling outside `src/opi`** — CHANGELOG, docs, tests, since codespell never reads them.
+   Real misspellings only; British vs American variants are not findings.
 
 ## Output format
 
@@ -310,29 +312,39 @@ this change.
   `### Changed` entry.
 
 ### Nits
-- `src/opi/input/core.py:636` — comment is 101 chars; `E501` is off and `ruff format` does not
-  rewrap comments, so nothing fails.
-
-**Clean:** <one line, naming only the review's own categories that came back clean — CHANGELOG,
-docstrings, `__all__`, docs, `# >` comments, naming, spelling — and, if nox passed, that a green
-run does not cover CHANGELOG, docs, or docstring examples.>
+- `src/opi/input/core.py:636` — comment is 101 chars; nothing fails (`E501` off).
 ```
 
 Render every nox finding as `path:line` — **rule code** — what is wrong → what to do, then the
 session. The rule code and the quoted text come from real output; the "what to do" is yours.
 
-The report has exactly these sections. **There is no section for logic observations** — if you
-find yourself opening one, or appending a stray "worth noting" line about behaviour, delete it
-instead.
+The report has exactly these sections, and an empty section is left out, not written as "none".
+**There is no section for logic observations** — if you find yourself opening one, or appending a
+stray "worth noting" line about behaviour, delete it instead. There is no *Clean* line either: a
+category with no finding is clean by omission, and listing clean categories is filler.
 
-The **Clean** line is a closed list, not free text: it may name only the seven reading categories
-above, plus the nox caveat. It is not a place to hedge — no "logic looks fine", no "behaviour
-unchanged as far as I can tell", no "nothing alarming in the algorithm". You did not review those,
-so you cannot call them clean, and naming them at all is the leak this format exists to prevent.
-Never claim a category is clean that you did not actually look at.
+**When nothing is found**, the whole report is the heading plus one line:
 
-If nothing is found, say so in two lines. Do not pad the report to look thorough — a short review
-of a small diff is the correct output. Do not restate what the diff does; the user wrote it.
+```markdown
+## opi-review — <base>..HEAD (<N> files)
+✅ nox -t pr_check 6/6 passed; nothing to flag in CHANGELOG, docstrings, docs or naming.
+```
+
+No session table, no caveats, no summary of what was checked. The code is fine — say so and stop.
+
+**Word budget.** Every word must carry a finding.
+
+- One finding = one line (two if the quote is long), **≤ 30 words** plus the quote.
+- The whole report stays **under ~200 words** outside quotes and the session table. More findings
+  than that fits means the nits go first — cut them.
+- Show the session table only when a session failed.
+- No intros, no closing summary, no restating what the diff does (the user wrote it), no
+  explanation of why a convention exists.
+
+**Ignore small stuff.** British vs American spelling (`behaviour`/`behavior`,
+`initialise`/`initialize`) is never a finding — both are correct. Nor are punctuation,
+capitalisation, or unpolished-but-clear grammar in comments. If a nit would not change what a
+reader understands or what CI does, drop it.
 
 ### Recheck output format
 
@@ -357,6 +369,8 @@ on screen.
 5. ✅ **Fixed** — `src/opi/input/core.py:44` — `blk` renamed to `block`.
 ```
 
-Say what is left, not what was done: if everything is ✅, that is two lines and no table. Do not
+Say what is left, not what was done: if everything is ✅, that is the heading plus one line
+(`✅ All N prior findings fixed; nox 6/6 passed.`) and no table. Each verdict ≤ 30 words plus
+the quote. Do not
 re-explain a finding the user has already read — the verdict plus the current quote is the whole
 job.

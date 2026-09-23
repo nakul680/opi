@@ -161,8 +161,10 @@ Two limits to respect. Codespell's dictionary is narrow: a green `spell_check` d
 print as *should fix*, never as a CI failure. And check that the misspelling is really on the
 line before reporting it: quote the word from the file.
 
-- **American English** (`codespell` expects it): `initialize` not `initialise`, `behavior` not
-  `behaviour`, `color` not `colour`.
+- **British vs American spelling is not a finding.** `initialise`/`initialize`,
+  `behaviour`/`behavior`, `colour`/`color` — both are correct; never report either. The same goes
+  for other trivial prose slips with no reader consequence: a comma, capitalisation, a minor
+  grammar wobble in a comment. Report a typo only when it is an actual misspelling.
 - Typos in **error messages** and **docstrings** are the ones users actually see — weight them
   higher than a typo in a comment.
 - **Misspelled identifiers** are worse than misspelled prose: they are load-bearing and expensive
@@ -173,7 +175,8 @@ line before reporting it: quote the word from the file.
   symbol or ORCA keyword that collides with an English typo), flag that `.codespellignore` needs
   the term — and conversely, flag an addition to `.codespellignore` that is just papering over a
   genuine typo.
-- Also read for grammar in user-facing prose: the changelog and docstrings are published.
+- Grammar in user-facing prose (changelog, docstrings) is worth a line only when it misleads or
+  reads as broken, not when it is merely unpolished.
 
 ## 6. Typing — `mypy --strict` (`type_check`)
 
