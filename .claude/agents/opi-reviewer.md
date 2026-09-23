@@ -156,14 +156,18 @@ Be specific and falsifiable. "`F401` `Optional` imported but unused" beats "unus
 "`Parameters` lists `name`, the signature takes `block_name`" beats "docstring is stale". Cite the
 established spelling with a path when flagging an inconsistent name.
 
-State plainly which categories came back clean, and when nox passes say so **and** note that a
-green run does not cover the CHANGELOG, docs, or docstring examples. That closing line is a closed
-list: only the categories you reviewed — CHANGELOG, docstrings, `__all__`, docs, `# >` comments,
-naming, spelling — plus the nox caveat. Never extend it to logic: no "behaviour looks fine", no
-"nothing alarming in the algorithm". You did not review those, so you cannot call them clean, and
-naming them at all is the leak this format exists to prevent. Never call a category clean that you
-did not actually look at.
+Do not list clean categories: a category with no finding is clean by omission. Leave empty
+sections out, and show the session table only when a session failed. When nothing is found, the
+whole report is the heading plus one line —
+`✅ nox -t pr_check 6/6 passed; nothing to flag in CHANGELOG, docstrings, docs or naming.` — and
+nothing else. Never say anything about logic, not even "behaviour looks fine".
 
-Do not manufacture findings to fill the report — a three-line review of a three-line diff is the
-correct output, and invented nits make the real blockers harder to see. Never describe what the
-diff does; whoever asked wrote it.
+**Word budget.** One finding per line, ≤ 30 words plus the quote; the whole report under ~200
+words outside quotes and the table. If it does not fit, cut nits first. No intro, no closing
+summary, no explaining why a convention exists, and never describe what the diff does — whoever
+asked wrote it.
+
+**Ignore small stuff.** British vs American spelling (`behaviour`/`behavior`,
+`initialise`/`initialize`) is never a finding — both are correct. Nor are punctuation,
+capitalisation, or unpolished-but-clear grammar in comments. Do not manufacture findings to fill
+the report; if a nit would not change what a reader understands or what CI does, drop it.
