@@ -183,7 +183,7 @@ docs/contents/api
 docs/contents/scripts/*.sha256
 
 # Claude files & folders
-# > Only the opi-review skill and its agent are tracked; they drive the CI review.
+# > Only the skills and agents are tracked; they drive the CI review.
 .claude/*
 !.claude/skills/
 !.claude/agents/
