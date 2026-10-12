@@ -78,8 +78,11 @@ python3 job.py
 - exmp055_gfnff_fallback: Perform a GFN-FF optimization and retrieve the energy, gradient, and structure.
 - exmp056_optts_freq: Perform a GFN2-xTB transition-state optimisation and frequency calculation, retrieve imaginary frequencies.
 - exmp057_to_ase: Convert an optimized Structure into an ASE Atoms object
+- exmp058_write_gbw: Write a gbw file from parsed output data and reuse it as SCF guess
 - exmp059_singlepoint_simpletask: B3LYP/def2-SVP single-point with CPCM(water) using the `SinglePointTask` functionality
 - exmp060_goat_simpletask: GFN2-xTB GOAT conformer search using the `GoatTask` functionality
 - exmp061_freq_simpletask: TPSS/def2-SVP frequency calculation using the `FreqTask` functionality
 - exmp062_opt_simpletask: B3LYP/def2-SVP geometry optimization with CPCM(water) using the `OptTask` functionality
 - exmp063_engrad_simpletask: r²SCAN-3c energy & gradient calculation using the `EngradTask` functionality
+
+
