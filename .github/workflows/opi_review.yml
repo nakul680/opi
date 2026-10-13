@@ -1,7 +1,8 @@
 name: PR convention review (opi-review)
 
 # > Runs the `.claude/skills/opi-review` skill once per review round — whenever a review is
-# > requested (or re-requested) on a PR to main — and keeps its report in a single PR comment.
+# > requested (or re-requested) on a PR to main or to a branch whose name starts with `feat` —
+# > and keeps its report in a single PR comment.
 # > The first round is a fresh review. Later rounds run `--recheck` against the findings the
 # > previous round left open; once none are left, the next round is a fresh review again.
 # > Open findings are carried between rounds in a hidden state block inside that comment.
@@ -10,7 +11,8 @@ name: PR convention review (opi-review)
 
 on:
   pull_request:
-    branches: [ "main" ]
+    # > `**` also matches `/`, so this covers `feat/...` as well as `feat-...`.
+    branches: [ "main", "feat**" ]
     # > One event per requested reviewer; the concurrency group collapses them into one run.
     types: [ review_requested ]
 
