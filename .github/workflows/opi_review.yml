@@ -12,7 +12,7 @@ name: PR convention review (opi-review)
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "opi-review-test-base" ]
     # > One event per requested reviewer; the concurrency group collapses them into one run.
     types: [ review_requested, labeled ]
 
