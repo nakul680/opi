@@ -240,6 +240,7 @@ def test_basis_set_getter_and_setter() -> None:
 # input caching
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 @pytest.mark.simpletasks
 def test_user_added_keyword_persists() -> None:
