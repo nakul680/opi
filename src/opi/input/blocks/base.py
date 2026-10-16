@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from opi.input.blocks.util import InputFilePath, NoCaseDict
-from opi.input.simple_keywords import SimpleKeyword, Solvent
+from opi.input.simple_keywords import ORCAKeyword, Solvent
 
 __all__ = ["BlockABC"]
 
@@ -273,8 +273,8 @@ class BlockABC(BaseModel, ABC):
             if value is not None:
                 if key == "aftercoord":  # skip aftercoord
                     continue
-                elif isinstance(value, SimpleKeyword | Solvent):
-                    s += f'    {key} "{str(value).lower()}"\n'  # add quotations if value is of type SimpleKeyword
+                elif isinstance(value, ORCAKeyword | Solvent):
+                    s += f'    {key} "{str(value).lower()}"\n'  # add quotations if value is of type ORCAKeyword
                 else:
                     s += f"    {key} {value}\n"  # print key value pairs as they are
         s += "end"
@@ -319,7 +319,7 @@ class BlockABC(BaseModel, ABC):
         # > `model_dump()` does not include.
         new_block = self.model_copy(deep=True)
         # > `__dict__` holds the field values as they are, so nested blocks and arbitrary types
-        # > (e.g. `SimpleKeyword`) are carried over untouched instead of being serialized.
+        # > (e.g. `ORCAKeyword`) are carried over untouched instead of being serialized.
         for key, value in other.__dict__.items():
             if value is not None:
                 setattr(new_block, key, value)

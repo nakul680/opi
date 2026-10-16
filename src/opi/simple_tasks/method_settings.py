@@ -13,7 +13,7 @@ from opi.input.simple_keywords import (
     ForceField,
     Grid,
     Method,
-    SimpleKeyword,
+    ORCAKeyword,
     SolvationModel,
     Solvent,
     Sqm,
@@ -37,9 +37,9 @@ class MethodSettings(Settings):
 
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True, extra="allow")
 
-    method: typing.Annotated[SimpleKeyword, Method] | None = None
-    basis_set: typing.Annotated[SimpleKeyword, BasisSet] | None = None
-    solvation_model: typing.Annotated[SimpleKeyword, SolvationModel] | None = None
+    method: typing.Annotated[ORCAKeyword, Method] | None = None
+    basis_set: typing.Annotated[ORCAKeyword, BasisSet] | None = None
+    solvation_model: typing.Annotated[ORCAKeyword, SolvationModel] | None = None
     solvent: typing.Annotated[str, Solvent] | None = None
 
     def __new__(cls, /, **data: Any) -> "MethodSettings":
@@ -80,7 +80,7 @@ class MethodSettings(Settings):
 
     @classmethod
     def resolve_method_settings_type(
-        cls, method: str | SimpleKeyword
+        cls, method: str | ORCAKeyword
     ) -> typing.Type["MethodSettings"]:
         """
         Return the ``MethodSettings`` subclass that handles ``method``.
@@ -90,7 +90,7 @@ class MethodSettings(Settings):
 
         Parameters
         ----------
-        method : str or SimpleKeyword
+        method : str or ORCAKeyword
             Method keyword to look up (e.g. ``"PBE"``, ``"XTB2"``).
 
         Returns
@@ -181,14 +181,14 @@ class DftSettings(MethodSettings):
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
     _name: str = "dft"
-    method: typing.Annotated[SimpleKeyword, Dft] | None = None
-    grid: typing.Annotated[SimpleKeyword, Grid] | None = None
+    method: typing.Annotated[ORCAKeyword, Dft] | None = None
+    grid: typing.Annotated[ORCAKeyword, Grid] | None = None
     scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
-    scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
-    scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
+    scf_threshold: typing.Annotated[ORCAKeyword, ScfThreshold] | None = None
+    scf_solver: typing.Annotated[ORCAKeyword, ScfSolver] | None = None
     scf_stab: bool = False
-    scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
-    disp_correction: typing.Annotated[SimpleKeyword, DispersionCorrection] | None = None
+    scf_conv: typing.Annotated[ORCAKeyword, ScfConvergence] | None = None
+    disp_correction: typing.Annotated[ORCAKeyword, DispersionCorrection] | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -210,7 +210,7 @@ class DftSettings(MethodSettings):
         if method is None:
             return data
 
-        method_str = method.keyword if isinstance(method, SimpleKeyword) else method
+        method_str = method.keyword if isinstance(method, ORCAKeyword) else method
         if not isinstance(method_str, str):
             return data
 
@@ -281,7 +281,7 @@ class DftSettings(MethodSettings):
         return output.scf_converged()
 
     @classmethod
-    def _split_dft_disp_keyword(cls, value: str | SimpleKeyword) -> tuple[str, str] | None:
+    def _split_dft_disp_keyword(cls, value: str | ORCAKeyword) -> tuple[str, str] | None:
         """
         Split a compound ``"Functional-Dispersion"`` string into its parts.
 
@@ -290,7 +290,7 @@ class DftSettings(MethodSettings):
 
         Parameters
         ----------
-        value: str | SimpleKeyword
+        value: str | ORCAKeyword
             The value to search for.
 
         Returns
@@ -300,7 +300,7 @@ class DftSettings(MethodSettings):
             ``Dft`` keyword and a ``DispersionCorrection`` keyword, ``None``
             otherwise.
         """
-        if isinstance(value, SimpleKeyword):
+        if isinstance(value, ORCAKeyword):
             value = value.keyword
 
         if "-" not in value:
@@ -350,12 +350,12 @@ class SqmSettings(MethodSettings):
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
     _name: str = "sqm"
-    method: typing.Annotated[SimpleKeyword, Sqm]
+    method: typing.Annotated[ORCAKeyword, Sqm]
     scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
-    scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
-    scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
+    scf_threshold: typing.Annotated[ORCAKeyword, ScfThreshold] | None = None
+    scf_solver: typing.Annotated[ORCAKeyword, ScfSolver] | None = None
     scf_stab: bool = False
-    scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
+    scf_conv: typing.Annotated[ORCAKeyword, ScfConvergence] | None = None
 
     def map_to_input(self) -> Input:
         """
@@ -399,7 +399,7 @@ class ForceFieldSettings(MethodSettings):
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
     _name: str = "forcefield"
-    method: typing.Annotated[SimpleKeyword, ForceField]
+    method: typing.Annotated[ORCAKeyword, ForceField]
 
     @model_validator(mode="after")
     def cross_validate(self) -> "ForceFieldSettings":
@@ -456,17 +456,17 @@ class DlpnoCcSettings(MethodSettings):
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
     _name: str = "dlpnocc"
-    method: typing.Annotated[SimpleKeyword, DLPNOcc] | None = None
-    aux_basis: typing.Annotated[SimpleKeyword, AuxBasisSet] | None = None
-    pno_thresh: typing.Annotated[SimpleKeyword, PNOThresh] | None = None
+    method: typing.Annotated[ORCAKeyword, DLPNOcc] | None = None
+    aux_basis: typing.Annotated[ORCAKeyword, AuxBasisSet] | None = None
+    pno_thresh: typing.Annotated[ORCAKeyword, PNOThresh] | None = None
     dlpno_led: bool | None = None
     dlpno_t_cut_do: typing.Annotated[float, "mdci", "tcutdo"] | None = None
     dlpno_t_cut_pno: typing.Annotated[float, "mdci", "tcutpno"] | None = None
     scf_maxiter: typing.Annotated[int, "scf", "maxiter"] | None = None
-    scf_threshold: typing.Annotated[SimpleKeyword, ScfThreshold] | None = None
-    scf_solver: typing.Annotated[SimpleKeyword, ScfSolver] | None = None
+    scf_threshold: typing.Annotated[ORCAKeyword, ScfThreshold] | None = None
+    scf_solver: typing.Annotated[ORCAKeyword, ScfSolver] | None = None
     scf_stab: bool = False
-    scf_conv: typing.Annotated[SimpleKeyword, ScfConvergence] | None = None
+    scf_conv: typing.Annotated[ORCAKeyword, ScfConvergence] | None = None
 
     def map_to_input(self) -> Input:
         """

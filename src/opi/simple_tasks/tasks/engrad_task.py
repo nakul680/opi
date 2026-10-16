@@ -1,6 +1,6 @@
 import typing
 
-from opi.input.simple_keywords import SimpleKeyword, Task
+from opi.input.simple_keywords import ORCAKeyword, Task
 from opi.simple_tasks.simple_task import SimpleTask, TaskResults, TaskSettings
 
 
@@ -8,7 +8,7 @@ class EngradSettings(TaskSettings):
     """Task settings for energy + gradient calculations (``! ENGRAD``)."""
 
     _name: str = "engrad"
-    task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.ENGRAD
+    task_keyword: typing.Annotated[ORCAKeyword, Task] = Task.ENGRAD
 
 
 class EngradResults(TaskResults):

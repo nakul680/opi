@@ -1,7 +1,7 @@
 import typing
 
 from opi.input import Input
-from opi.input.simple_keywords import Goat, SimpleKeyword
+from opi.input.simple_keywords import Goat, ORCAKeyword
 from opi.input.structures import Properties, Structure
 from opi.simple_tasks.simple_task import SimpleTask, TaskResults, TaskSettings
 
@@ -16,7 +16,7 @@ class GoatSettings(TaskSettings):
     """
 
     _name: str = "goat"
-    task_keyword: typing.Annotated[SimpleKeyword, Goat] = Goat.GOAT
+    task_keyword: typing.Annotated[ORCAKeyword, Goat] = Goat.GOAT
     goat_maxiter: typing.Annotated[int, "goat", "maxiter"] | None = None
     goat_react: bool | None = None
     goat_diversity: bool | None = None

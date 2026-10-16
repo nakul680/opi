@@ -7,7 +7,7 @@ from pydantic_core.core_schema import ValidationInfo
 
 from opi.input import Input
 from opi.input.blocks import BlockABC
-from opi.input.simple_keywords import SimpleKeyword, SimpleKeywordBox, SolvationModel, Solvent
+from opi.input.simple_keywords import ORCAKeyword, SimpleKeywordBox, SolvationModel, Solvent
 from opi.input.simple_keywords.solvation_model import SolvationModelAndSolvent
 
 
@@ -52,7 +52,7 @@ class Settings(BaseModel):
         """
         Function to map all information held in `Settings` class to an `Input` class object. The function receives an
         `Input` object , which may or may not be already populated, after which the function uses the type hints of
-        every field defined in the class to either fetch a `SimpleKeyword` from the appropriate Enum, and adds it to
+        every field defined in the class to either fetch a `ORCAKeyword` from the appropriate Enum, and adds it to
         `Input.simple_keywords`, or initializes the appropriate block with the attribute set to user defined value, and
         adds it to `Input.blocks`.
 
@@ -193,7 +193,7 @@ class Settings(BaseModel):
 
         Example
         =======
-        simple_keyword_attribute: typing.Annotated[SimpleKeyword, Dft]
+        simple_keyword_attribute: typing.Annotated[ORCAKeyword, Dft]
 
         In this case the metadata is the class Dft, which signifies that the expected simple keyword must be from the
         Dft enum.
@@ -255,10 +255,10 @@ class Settings(BaseModel):
     def _get_simple_keyword(
         self,
         validator: type[SimpleKeywordBox],
-        value: str | SimpleKeyword | SolvationModelAndSolvent,
-    ) -> SimpleKeyword:
+        value: str | ORCAKeyword | SolvationModelAndSolvent,
+    ) -> ORCAKeyword:
         """
-        Resolve a field value to a ``SimpleKeyword``.
+        Resolve a field value to a ``ORCAKeyword``.
 
         For ``SolvationModel`` fields the current ``solvent`` attribute is
         combined with the model to produce a ``SolvationModelAndSolvent``
@@ -268,12 +268,12 @@ class Settings(BaseModel):
         ----------
         validator : type[SimpleKeywordBox]
             The enum class that owns the keyword (e.g. ``Dft``, ``BasisSet``).
-        value : str or SimpleKeyword or SolvationModelAndSolvent
+        value : str or ORCAKeyword or SolvationModelAndSolvent
             Raw user-supplied value.
 
         Returns
         -------
-        SimpleKeyword
+        ORCAKeyword
             Resolved keyword ready to pass to ``Input.add_simple_keywords``.
 
         Raises
@@ -294,13 +294,13 @@ class Settings(BaseModel):
 
             # value is a SolvationModelAndSolvent callable; calling it with solvent produces the keyword
             new_keyword = value(solvent)
-        elif isinstance(value, SimpleKeyword):
-            # Field validation already resolved this to a SimpleKeyword; avoid re-deriving it,
+        elif isinstance(value, ORCAKeyword):
+            # Field validation already resolved this to a ORCAKeyword; avoid re-deriving it,
             # since re-running find_keyword() bypasses subclass fallbacks (e.g. DftSettings'
             # dispersion-correction handling) and can reject an already-valid value.
             new_keyword = value
         else:
-            # Fallback for values that were never resolved to a SimpleKeyword
+            # Fallback for values that were never resolved to a ORCAKeyword
             new_keyword = validator.find_keyword(value)
 
         return new_keyword

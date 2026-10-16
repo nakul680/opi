@@ -1,38 +1,43 @@
-__all__ = ("SimpleKeyword", "SimpleKeywordBox")
+__all__ = ("ORCAKeyword", "SimpleKeywordBox")
 
 
 class SimpleKeywordBox:
     """
-    Base class for groups of related ``SimpleKeyword`` constants.
+    Base class for groups of related ``ORCAKeyword`` constants.
 
     Each concrete subclass (e.g. ``Task``, ``Dft``, ``BasisSet``) declares its
-    members as class-level ``SimpleKeyword`` attributes.
+    members as class-level ``ORCAKeyword`` attributes.
     """
 
     @classmethod
-    def from_string(cls, s: str) -> "SimpleKeyword":
+    def from_string(cls, s: str) -> "ORCAKeyword":
         """
-        Look up a ``SimpleKeyword`` by string across all attributes.
+        Look up an ``ORCAKeyword`` by string across all attributes.
 
         Matching is case-insensitive and checks the keyword value, the
-        attribute name, and the optional alias — in that order.
+        attribute name, and the optional alias — in that order. A match on the
+        keyword value or attribute name is returned immediately; an alias is
+        only accepted if it resolves to exactly one keyword.
 
         Parameters
         ----------
         s : str
-            String used to create SimpleKeyword object
+            String used to create ORCAKeyword object
 
         Returns
         -------
-        SimpleKeyword
+        ORCAKeyword
             Simple keyword from string
 
         Raises
         ------
         ValueError
-            If no matching keyword is found in the registry.
+            If no matching keyword is found in the registry, or if an alias
+            matches more than one keyword.
         """
         norm = s.lower()
+        # Keywords matched through an alias; resolved after the loop since aliases may be shared
+        alias_matches: dict[str, ORCAKeyword] = {}
 
         # Here the function will loop over all attributes both existing and inherited by the current class.
         # The simple keywords are structured such that, for example, the larger `Scf` grouping is a child class of the semantically smaller groupings,
@@ -42,7 +47,7 @@ class SimpleKeywordBox:
             # Get the value associated with attribute
             candidate_attr = getattr(cls, attr_name)
             if attr_name.startswith("_") or not isinstance(
-                candidate_attr, SimpleKeyword
+                candidate_attr, ORCAKeyword
             ):  # Skip private/magic attributes or non-Simple Keyword attributes
                 continue
             # Case 1: if the user searches for keyword through how it would appear in ORCA input
@@ -53,48 +58,57 @@ class SimpleKeywordBox:
                 return candidate_attr
             # Case 3: if the user searches for keyword through a known alias
             if candidate_attr.alias and any(a.lower() == norm for a in candidate_attr.alias):
-                return candidate_attr
+                alias_matches[attr_name] = candidate_attr
+
+        # An alias may be shared between groups (e.g. "tight" for `Scf` and `Opt`), so only
+        # accept it if it points to a single keyword
+        if len(set(alias_matches.values())) == 1:
+            return next(iter(alias_matches.values()))
+        if alias_matches:
+            raise ValueError(
+                f"Keyword {s} is ambiguous in class {cls.__name__}, it matches: {list(alias_matches)}"
+            )
 
         # In the case that no matches are found, raise ValueError
         raise ValueError(f"Keyword {s} not found in class {cls.__name__}")
 
     @classmethod
-    def find_keyword(cls, inp: "SimpleKeyword | str") -> "SimpleKeyword":
+    def find_keyword(cls, inp: "ORCAKeyword | str") -> "ORCAKeyword":
         """
-        Resolve a string or ``SimpleKeyword`` to a valid ``SimpleKeyword``.
+        Resolve a string or ``ORCAKeyword`` to a valid ``ORCAKeyword``.
 
-        Accepts a bare string or an existing ``SimpleKeyword`` (whose ``.keyword``
+        Accepts a bare string or an existing ``ORCAKeyword`` (whose ``.keyword``
         string is used for the lookup).
 
         Parameters
         ----------
-        inp : SimpleKeyword | str
-            Input that is resolved into SimpleKeyword.
+        inp : ORCAKeyword | str
+            Input that is resolved into ORCAKeyword.
 
         Returns
         -------
-        SimpleKeyword
+        ORCAKeyword
             Found simple keyword
 
         Raises
         ------
         ValueError
-            If ``inp`` is not a str or SimpleKeyword, or if the string is not
+            If ``inp`` is not a str or ORCAKeyword, or if the string is not
             found.
         """
-        # If input is SimpleKeyword, convert to string representation
-        if isinstance(inp, SimpleKeyword):
+        # If input is ORCAKeyword, convert to string representation
+        if isinstance(inp, ORCAKeyword):
             inp = inp.keyword
 
         if not isinstance(inp, str):
             raise ValueError(
-                f"{cls.__name__} expects a str or SimpleKeyword, got {type(inp).__name__}: {inp!r}"
+                f"{cls.__name__} expects a str or ORCAKeyword, got {type(inp).__name__}: {inp!r}"
             )
 
         return cls.from_string(inp)
 
 
-class SimpleKeyword:
+class ORCAKeyword:
     """
     A single ORCA simple keyword (e.g. ``SP``, ``PBE``, ``def2-SVP``).
 
@@ -168,6 +182,6 @@ class SimpleKeyword:
         return self.format_orca()
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SimpleKeyword):
+        if not isinstance(other, ORCAKeyword):
             return False
         return self.keyword.lower() == other.keyword.lower()

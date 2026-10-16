@@ -1,6 +1,6 @@
 import typing
 
-from opi.input.simple_keywords import SimpleKeyword, Task
+from opi.input.simple_keywords import ORCAKeyword, Task
 from opi.simple_tasks.simple_task import SimpleTask, TaskResults, TaskSettings
 
 
@@ -8,7 +8,7 @@ class FreqSettings(TaskSettings):
     """Task settings for frequency calculations (``! FREQ``)."""
 
     _name: str = "freq"
-    task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.FREQ
+    task_keyword: typing.Annotated[ORCAKeyword, Task] = Task.FREQ
 
 
 class FreqResults(TaskResults):

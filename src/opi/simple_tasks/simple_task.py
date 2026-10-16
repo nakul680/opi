@@ -11,7 +11,7 @@ from pydantic import ConfigDict
 from opi.core import Calculator
 from opi.input import Input
 from opi.input.simple_keywords import (
-    SimpleKeyword,
+    ORCAKeyword,
     SimpleKeywordBox,
     Solvent,
 )
@@ -34,7 +34,7 @@ class TaskSettings(Settings):
     model_config = ConfigDict(
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
-    task_keyword: typing.Annotated[SimpleKeyword, SimpleKeywordBox] | None = None
+    task_keyword: typing.Annotated[ORCAKeyword, SimpleKeywordBox] | None = None
 
 
 _RT = typing.TypeVar("_RT", bound="TaskResults")
@@ -69,9 +69,9 @@ class SimpleTask(ABC, typing.Generic[_RT]):
 
     def __init__(
         self,
-        method: str | SimpleKeyword | None = None,
-        basis_set: str | SimpleKeyword | None = None,
-        solvation_model: str | SimpleKeyword | None = None,
+        method: str | ORCAKeyword | None = None,
+        basis_set: str | ORCAKeyword | None = None,
+        solvation_model: str | ORCAKeyword | None = None,
         solvent: str | Solvent | None = None,
         task_settings: "TaskSettings | dict[str, typing.Any] | None" = None,
         method_settings: "MethodSettings | dict[str, typing.Any] | None" = None,
@@ -96,13 +96,13 @@ class SimpleTask(ABC, typing.Generic[_RT]):
 
         Parameters
         ----------
-        method : str or SimpleKeyword, optional
+        method : str or ORCAKeyword, optional
             Shorthand for setting ``method_settings.method``.  Mutually
             exclusive with passing a fully configured ``method_settings``
             object that already has a method.
-        basis_set : str or SimpleKeyword, optional
+        basis_set : str or ORCAKeyword, optional
             Shorthand for ``method_settings.basis_set``.
-        solvation_model : str or SimpleKeyword, optional
+        solvation_model : str or ORCAKeyword, optional
             Shorthand for ``method_settings.solvation_model``.
         solvent : str or Solvent, optional
             Shorthand for ``method_settings.solvent``.
@@ -254,19 +254,19 @@ class SimpleTask(ABC, typing.Generic[_RT]):
         self._input_object = value
 
     @property
-    def keyword(self) -> SimpleKeyword | None:
+    def keyword(self) -> ORCAKeyword | None:
         """The primary task keyword (e.g. ``Task.SP``, ``Task.OPT``)."""
         return self._task_settings.task_keyword if self._task_settings else None
 
     @property
-    def method(self) -> SimpleKeyword | None:
+    def method(self) -> ORCAKeyword | None:
         """Active method keyword, or ``None`` if the settings type has no method field."""
         if self._method_settings and hasattr(self._method_settings, "method"):
             return self._method_settings.method
         return None
 
     @method.setter
-    def method(self, new_value: str | SimpleKeyword | None) -> None:
+    def method(self, new_value: str | ORCAKeyword | None) -> None:
         """
         Change the method, migrating to a different settings type when needed.
 
@@ -291,7 +291,7 @@ class SimpleTask(ABC, typing.Generic[_RT]):
             return
         resolved_type = MethodSettings.resolve_method_settings_type(new_value)
         if isinstance(self._method_settings, resolved_type):
-            # Add type:ignore since the resolving of string to SimpleKeyword happens in validation of Settings.
+            # Add type:ignore since the resolving of string to ORCAKeyword happens in validation of Settings.
             self._method_settings.method = new_value  # type:ignore
         else:
             common_fields: dict[str, Any] = {"method": new_value}
@@ -314,14 +314,14 @@ class SimpleTask(ABC, typing.Generic[_RT]):
             self._method_settings = resolved_type(**common_fields)
 
     @property
-    def basis_set(self) -> SimpleKeyword | None:
+    def basis_set(self) -> ORCAKeyword | None:
         """Active basis-set keyword, or ``None`` if the settings type has no basis_set field."""
         if self._method_settings and hasattr(self._method_settings, "basis_set"):
             return self._method_settings.basis_set
         return None
 
     @basis_set.setter
-    def basis_set(self, new_value: str | SimpleKeyword | None) -> None:
+    def basis_set(self, new_value: str | ORCAKeyword | None) -> None:
         """
         Raises
         ------
@@ -356,14 +356,14 @@ class SimpleTask(ABC, typing.Generic[_RT]):
         self._method_settings.solvent = new_value
 
     @property
-    def solvation_model(self) -> SimpleKeyword | None:
+    def solvation_model(self) -> ORCAKeyword | None:
         """Solvation-model keyword, or ``None`` if the settings type has no solvation_model field."""
         if self._method_settings and hasattr(self._method_settings, "solvation_model"):
             return self._method_settings.solvation_model
         return None
 
     @solvation_model.setter
-    def solvation_model(self, new_value: str | SimpleKeyword | None) -> None:
+    def solvation_model(self, new_value: str | ORCAKeyword | None) -> None:
         """
         Raises
         ------
@@ -403,7 +403,7 @@ class SimpleTask(ABC, typing.Generic[_RT]):
         keywords = string.split()
         for keyword in keywords:
             keyword = keyword.strip("!")
-            inp.add_simple_keywords(SimpleKeyword(keyword))
+            inp.add_simple_keywords(ORCAKeyword(keyword))
 
         return cls(input=inp)
 

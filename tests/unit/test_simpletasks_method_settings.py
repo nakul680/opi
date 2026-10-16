@@ -201,7 +201,7 @@ def test_dft_invalid_field_raises_validation_error() -> None:
 def test_string_fields_converted_to_simple_keyword(
     field: str, text_value: str, expected_kw: object
 ) -> None:
-    """String field values are validated and converted to the matching SimpleKeyword (case-insensitively)."""
+    """String field values are validated and converted to the matching ORCAKeyword (case-insensitively)."""
     s = DftSettings(**{field: text_value})  # type: ignore[arg-type]
     assert getattr(s, field) == expected_kw
 

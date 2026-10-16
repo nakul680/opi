@@ -1,7 +1,7 @@
 import typing
 
 from opi.input import Input
-from opi.input.simple_keywords import SimpleKeyword, Task
+from opi.input.simple_keywords import ORCAKeyword, Task
 from opi.input.simple_keywords.opt import Opt, OptThreshold
 from opi.input.structures import Structure
 from opi.simple_tasks.simple_task import SimpleTask, TaskResults, TaskSettings
@@ -18,8 +18,8 @@ class OptSettings(TaskSettings):
     """
 
     _name: str = "opt"
-    task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.OPT
-    opt_threshold: typing.Annotated[SimpleKeyword, OptThreshold] | None = None
+    task_keyword: typing.Annotated[ORCAKeyword, Task] = Task.OPT
+    opt_threshold: typing.Annotated[ORCAKeyword, OptThreshold] | None = None
     optrigid: bool = False
     opt_h: bool = False
     lopt: bool = False
@@ -100,12 +100,12 @@ class OptTask(SimpleTask[OptResults]):
     _results_type = OptResults
 
     @property
-    def opt_threshold(self) -> SimpleKeyword | None:
+    def opt_threshold(self) -> ORCAKeyword | None:
         """Convergence threshold keyword (e.g. ``OptThreshold.TIGHTOPT``)."""
         return self._task_settings.opt_threshold
 
     @opt_threshold.setter
-    def opt_threshold(self, new_value: SimpleKeyword | str) -> None:
+    def opt_threshold(self, new_value: ORCAKeyword | str) -> None:
         self._task_settings.opt_threshold = new_value  # type:ignore
 
     @property

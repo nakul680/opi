@@ -3,7 +3,7 @@ import pytest
 from opi.input import Input
 from opi.input.arbitrary_string import ArbitraryStringPos
 from opi.input.blocks import BlockGeom, BlockScf
-from opi.input.simple_keywords import BasisSet, Dft, Goat, SimpleKeyword, Task
+from opi.input.simple_keywords import BasisSet, Dft, Goat, ORCAKeyword, Task
 from opi.input.simple_keywords.opt import Opt
 from opi.simple_tasks import (
     EngradTask,
@@ -89,7 +89,7 @@ def test_simple_task_dict_task_settings() -> None:
         (GoatTask, Goat.GOAT),
     ],
 )
-def test_input_has_task_keyword(task_cls: type, expected_kw: SimpleKeyword) -> None:
+def test_input_has_task_keyword(task_cls: type, expected_kw: ORCAKeyword) -> None:
     """input contains the primary task keyword for each task type."""
     inp = task_cls(method="pbe").input
     assert inp.has_simple_keywords(expected_kw) == (True,)
@@ -118,7 +118,7 @@ def test_input_has_method_and_basis_set() -> None:
         (True, True, Opt.L_OPTH),
     ],
 )
-def test_opt_mode_keywords(opt_h: bool, lopt: bool, expected_kw: SimpleKeyword) -> None:
+def test_opt_mode_keywords(opt_h: bool, lopt: bool, expected_kw: ORCAKeyword) -> None:
     """OptSettings flag combinations map to the correct ORCA optimisation-mode keyword."""
     inp = OptSettings(opt_h=opt_h, lopt=lopt).map_to_input()
     assert inp.has_simple_keywords(expected_kw) == (True,)
@@ -165,7 +165,7 @@ def test_opt_maxiter_creates_geom_block() -> None:
         ("goat_explore", Goat.GOAT_EXPLORE),
     ],
 )
-def test_goat_flag_keywords(flag: str, expected_kw: SimpleKeyword) -> None:
+def test_goat_flag_keywords(flag: str, expected_kw: ORCAKeyword) -> None:
     """GoatSettings boolean flags produce the correct ORCA GOAT-variant keyword."""
     inp = GoatSettings(**{flag: True}).map_to_input()
     assert inp.has_simple_keywords(expected_kw) == (True,)
@@ -254,7 +254,7 @@ def test_basis_set_getter_and_setter() -> None:
 def test_user_added_keyword_persists() -> None:
     """A keyword added directly to input is visible on every subsequent access."""
     task = SinglePointTask(method="pbe")
-    kw = SimpleKeyword("NORI")
+    kw = ORCAKeyword("NORI")
     task.input.add_simple_keywords(kw)
     assert task.input.has_simple_keywords(kw) == (True,)
     assert task.input.has_simple_keywords(kw) == (True,)
@@ -322,7 +322,7 @@ def test_user_added_arbitrary_string_persists() -> None:
 def test_multiple_user_modifications_all_persist() -> None:
     """Multiple independent modifications to input all survive repeated accesses."""
     task = SinglePointTask(method="pbe")
-    kw = SimpleKeyword("RIJCOSX")
+    kw = ORCAKeyword("RIJCOSX")
     block = BlockScf(maxiter=300)
 
     task.input.add_simple_keywords(kw)
@@ -346,7 +346,7 @@ def test_multiple_user_modifications_all_persist() -> None:
 def test_expert_mode_adds_no_default_settings() -> None:
     """An input passed on its own bypasses the typed settings system entirely."""
     inp = Input()
-    inp.add_simple_keywords(SimpleKeyword("B3LYP"))
+    inp.add_simple_keywords(ORCAKeyword("B3LYP"))
     task = SinglePointTask(input=inp)
 
     assert task.task_settings is None

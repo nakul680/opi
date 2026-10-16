@@ -6,7 +6,7 @@ import pytest
 from opi.core import Calculator
 from opi.input import Input
 from opi.input.blocks import BlockScf
-from opi.input.simple_keywords import BasisSet, Dft, SimpleKeyword, Task
+from opi.input.simple_keywords import BasisSet, Dft, ORCAKeyword, Task
 from opi.input.structures import Structure
 from opi.simple_tasks import SinglePointTask
 from opi.simple_tasks.simple_task import SimpleTask
@@ -281,7 +281,7 @@ def test_run_honours_overridden_steps(tmp_path: Path, structure: Structure, no_o
             moinp: Path | None = None,
         ) -> Input:
             input_object = super().make_input(ncores=ncores, memory=memory, moinp=moinp)
-            input_object.add_simple_keywords(SimpleKeyword("NORI"))
+            input_object.add_simple_keywords(ORCAKeyword("NORI"))
             return input_object
 
         def execute(self, calculator: Calculator) -> bool:
@@ -292,7 +292,7 @@ def test_run_honours_overridden_steps(tmp_path: Path, structure: Structure, no_o
     results = task.run("job", structure, working_dir=tmp_path / "RUN")
 
     assert len(executed) == 1
-    assert executed[0].input.has_simple_keywords(SimpleKeyword("NORI")) == (True,)
+    assert executed[0].input.has_simple_keywords(ORCAKeyword("NORI")) == (True,)
     assert results.calculator is executed[0]
     # > The overridden execute() never runs ORCA, so nothing was written.
     assert not any((tmp_path / "RUN").iterdir())

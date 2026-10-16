@@ -1,6 +1,6 @@
 import typing
 
-from opi.input.simple_keywords import SimpleKeyword, Task
+from opi.input.simple_keywords import ORCAKeyword, Task
 from opi.simple_tasks.simple_task import SimpleTask, TaskResults, TaskSettings
 
 
@@ -8,7 +8,7 @@ class SinglePointSettings(TaskSettings):
     """Task settings for a single-point energy calculation (``! SP``)."""
 
     _name: str = "singlepoint"
-    task_keyword: typing.Annotated[SimpleKeyword, Task] = Task.SP
+    task_keyword: typing.Annotated[ORCAKeyword, Task] = Task.SP
 
 
 class SinglePointResults(TaskResults):

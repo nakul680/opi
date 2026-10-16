@@ -1,6 +1,6 @@
 import pytest
 
-from opi.input.simple_keywords import SimpleKeyword
+from opi.input.simple_keywords import ORCAKeyword
 from opi.simple_tasks import FreqTask, SinglePointTask
 
 """
@@ -47,7 +47,7 @@ def test_from_string_leaves_settings_unset() -> None:
 def test_from_string_keywords_without_exclamation() -> None:
     """Keywords without ! are parsed and added to the input correctly."""
     result = SinglePointTask.from_string("B3LYP def2-SVP")
-    assert result.input.has_simple_keywords(SimpleKeyword("B3LYP"), SimpleKeyword("def2-SVP")) == (
+    assert result.input.has_simple_keywords(ORCAKeyword("B3LYP"), ORCAKeyword("def2-SVP")) == (
         True,
         True,
     )
@@ -58,7 +58,7 @@ def test_from_string_keywords_without_exclamation() -> None:
 def test_from_string_strips_exclamation_prefix() -> None:
     """Leading ! attached directly to a keyword is stripped before adding it."""
     result = SinglePointTask.from_string("!B3LYP !def2-SVP")
-    assert result.input.has_simple_keywords(SimpleKeyword("B3LYP"), SimpleKeyword("def2-SVP")) == (
+    assert result.input.has_simple_keywords(ORCAKeyword("B3LYP"), ORCAKeyword("def2-SVP")) == (
         True,
         True,
     )
@@ -70,5 +70,5 @@ def test_from_string_splits_on_arbitrary_whitespace() -> None:
     """Keywords separated by repeated or mixed whitespace are still parsed individually."""
     result = SinglePointTask.from_string("B3LYP   def2-SVP\tSP")
     assert result.input.has_simple_keywords(
-        SimpleKeyword("B3LYP"), SimpleKeyword("def2-SVP"), SimpleKeyword("SP")
+        ORCAKeyword("B3LYP"), ORCAKeyword("def2-SVP"), ORCAKeyword("SP")
     ) == (True, True, True)
