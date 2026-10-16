@@ -44,7 +44,12 @@
 - Add merge logic for two `Input` objects, via `Input.__or__()`: simple keywords are concatenated without duplicates, keeping their order with those of the left-hand input first, blocks that model the same ORCA block are merged, arbitrary strings are concatenated, and `ncores`, `memory` and `moinp` are taken from the right-hand input if set. The right-hand input takes precedence throughout, blocks are copied into the result, and neither operand is modified. (#288)
 - Added `SimpleKeyword`, which inherits all simple keyword groups except `LibXC`, so that every implemented keyword can be accessed as an attribute (e.g. `SimpleKeyword.TIGHTSCF`) or looked up with `SimpleKeyword.find_keyword()`.
 - Added `GbwResults.to_gbw_file()` which writes a gbw file from the parsed data by converting it with `orca_2json <json-file> -gbw` (#289).
-- Added `SimpleTask`, which allows users to define a simple ORCA workflow, with validation of all options set.
+- Added `SimpleTask`, which allows users to define a simple ORCA workflow, with validation of all options set. `SimpleTask` comes with the following predefined tasks.
+1. Single point energy calculation
+2. Energy and gradient calculation
+3. Geometry Optimization
+4. Frequency calculation
+5. GOAT conformer search
 - Addition of `SimpleKeywordBox.validate_keyword()`, which allows user to validate whether a string or keyword belongs to specific subgroup of simple keywords.
 
 ### Changed
