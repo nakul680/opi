@@ -1,8 +1,17 @@
 import pytest
 
 from opi.core import Calculator
-from opi.input.simple_keywords import BasisSet, LibXC, Method, Opt, ORCAKeyword, Scf, SimpleKeyword
-from opi.input.simple_keywords.scf import ScfThreshold
+from opi.input.simple_keywords import (
+    BasisSet,
+    Dft,
+    LibXC,
+    Method,
+    Opt,
+    ORCAKeyword,
+    Scf,
+    SimpleKeyword,
+)
+from opi.input.simple_keywords.scf import ScfSolver, ScfThreshold
 
 """
 This module contains tests for simple keyword related operations such as:
@@ -240,3 +249,27 @@ def test_find_keyword_ambiguous_alias():
 
     assert ScfThreshold.find_keyword("tight") is Scf.TIGHTSCF
     assert Opt.find_keyword("tight") is Opt.TIGHTOPT
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize(
+    "group, query",
+    [(ScfThreshold, "tight"), (ScfThreshold, Scf.TIGHTSCF), (Scf, "TIGHTSCF")],
+)
+def test_validate_keyword(group, query):
+    """Test that `SimpleKeywordBox.validate_keyword()` returns the matching keyword of the group."""
+    assert group.validate_keyword(query) is Scf.TIGHTSCF
+
+
+@pytest.mark.unit
+@pytest.mark.input
+@pytest.mark.parametrize(
+    "group, query",
+    [(ScfSolver, Scf.TIGHTSCF), (Opt, "tightscf"), (Dft, "foo"), (ScfThreshold, 3)],
+)
+def test_validate_keyword_raises(group, query):
+    """Test that `SimpleKeywordBox.validate_keyword()` raises a `ValueError` for keywords that are
+    not part of the group and for inputs that are neither a str nor an `ORCAKeyword`."""
+    with pytest.raises(ValueError):
+        group.validate_keyword(query)

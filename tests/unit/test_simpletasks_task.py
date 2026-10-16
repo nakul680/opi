@@ -240,15 +240,6 @@ def test_basis_set_getter_and_setter() -> None:
 # input caching
 # ---------------------------------------------------------------------------
 
-
-# @pytest.mark.unit
-# @pytest.mark.simpletasks
-# def test_input_is_cached() -> None:
-#     """Accessing input twice returns the same object instance."""
-#     task = SinglePointTask(method="pbe")
-#     assert task.input is task.input
-
-
 @pytest.mark.unit
 @pytest.mark.simpletasks
 def test_user_added_keyword_persists() -> None:

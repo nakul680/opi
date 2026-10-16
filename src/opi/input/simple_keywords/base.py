@@ -107,6 +107,33 @@ class SimpleKeywordBox:
 
         return cls.from_string(inp)
 
+    @classmethod
+    def validate_keyword(cls, inp: "ORCAKeyword | str") -> "ORCAKeyword":
+        """
+        Validate that a string or ``ORCAKeyword`` belongs to this keyword group.
+
+        Behaves like ``find_keyword()``: the input is resolved within this class,
+        including inherited groups (e.g. ``Scf`` contains ``ScfThreshold``), and the
+        matching keyword is returned.
+
+        Parameters
+        ----------
+        inp : ORCAKeyword | str
+            Keyword or string to validate.
+
+        Returns
+        -------
+        ORCAKeyword
+            The matching keyword of this class.
+
+        Raises
+        ------
+        ValueError
+            If ``inp`` is not a str or ORCAKeyword, if it is not found in this
+            class, or if it only matches an alias shared by several keywords.
+        """
+        return cls.find_keyword(inp)
+
 
 class ORCAKeyword:
     """
